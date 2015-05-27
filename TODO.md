@@ -18,6 +18,7 @@ cd regtools/tests
 wget https://xfer.genome.wustl.edu/gxfer1/project/gms/testdata/bams/brain_vs_uhr_w_ercc/downsampled_5pc_chr22/chr22.fa.gz
 wget https://xfer.genome.wustl.edu/gxfer1/project/gms/testdata/bams/brain_vs_uhr_w_ercc/downsampled_5pc_chr22/genes_chr22.gtf.gz
 gunzip *.gz
+mkdir /tmp/junction_summary/
 gmt transcriptome splice-junction-summary --output-directory='/tmp/junction_summary/' --observed-junctions-bed12-file='junctions.chr22.bed' --reference-fasta-file='chr22.fa' --annotation-gtf-file='genes_chr22.gtf' --annotation-name='Ensembl'
 ```
 
