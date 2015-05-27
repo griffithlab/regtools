@@ -1,6 +1,8 @@
 ###Task 1
-- Implement a tools that starts with an RNA-seq BAM and produces an annotated junctions file
+- Implement a tool that starts with an RNA-seq BAM and produces an annotated junctions file
+ 
 - Start with an RNA-seq BAM and produce a junctions.bed file (use code from TopHat)
+
 - Then reimplement the functionality of this GMT in the GMS:
 
 genome/lib/perl/Genome/Model/Tools/Transcriptome/SpliceJunctionSummary.pm
