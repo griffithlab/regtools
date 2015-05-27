@@ -10,6 +10,11 @@
 - As a starting point, lets create a tool: 'regtools annotate-junctions' that creates an file with no diffs to that output file
 - Other input files will be the reference genome fasta, and the ensembl GTF file (same version)
 
-- Test case to be reproduced:
-gmt transcriptome splice-junction-summary --output-directory='/gscuser/mgriffit/tmp/' --observed-junctions-bed12-file='/gscmnt/gc12001/info/model_data/2887640332/build127105782/alignments/junctions.bed' --reference-fasta-file='/gscmnt/sata420/info/model_data/2857786885/build102671028/all_sequences.fa' --annotation-gtf-file='/gscmnt/gc12001/info/model_data/2772828715/buildd00a39c84382427fa0efdec3229e8f5f/annotation_data/rna_annotation/106942997-all_sequences.gtf' --annotation-name='Ensembl'
+- Test case to be reproduced (from within a TGI system where the GMS is installed):
+git clone git@github.com:griffithlab/regtools.git
+cd regtools/tests
+wget https://xfer.genome.wustl.edu/gxfer1/project/gms/testdata/bams/brain_vs_uhr_w_ercc/downsampled_5pc_chr22/chr22.fa.gz
+wget https://xfer.genome.wustl.edu/gxfer1/project/gms/testdata/bams/brain_vs_uhr_w_ercc/downsampled_5pc_chr22/genes_chr22.gtf.gz
+gunzip *
+gmt transcriptome splice-junction-summary --output-directory='/tmp/junction_summary/' --observed-junctions-bed12-file='junctions.chr22.bed' --reference-fasta-file='chr22.fa' --annotation-gtf-file='genes_chr22.gtf' --annotation-name='Ensembl'
 
