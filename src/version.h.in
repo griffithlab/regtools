@@ -1,0 +1,5 @@
+//Version numbers
+#define regtools_VERSION_MAJOR @regtools_VERSION_MAJOR@
+#define regtools_VERSION_MINOR @regtools_VERSION_MINOR@
+#define regtools_VERSION_PATCH @regtools_VERSION_PATCH@
+
