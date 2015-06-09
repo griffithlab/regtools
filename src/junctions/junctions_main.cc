@@ -23,9 +23,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
 #include <iostream>
+#include <getopt.h>
+#include "junctions_annotator.h"
 
 using namespace std;
 
+//Usage for junctions subcommands
 int junctions_usage() {
     cout << "\nUsage:\t\t" << "regtools junctions <command> [options]";
     cout << "\nCommand:\t" << "annotate\tAnnotate the junctions.";
@@ -33,13 +36,22 @@ int junctions_usage() {
     return 0;
 }
 
-int junctions_main(int argc, char* argv[]) {
-    cout << "in junctions";
+//Run 'junctions annotate' subcommand
+int annotate_junctions(int argc, char *argv[]) {
+    JunctionsAnnotator anno;
+    anno.parse_options(argc, argv);
+    cout << endl << anno.get_reference_sequence("22:12000000-12000400");
+    return 0;
+}
+
+//Parse out subcommands under junctions
+int junctions_main(int argc, char *argv[]) {
     if(argc > 1) {
         string subcmd(argv[1]);
         if(subcmd == "annotate") {
-            return junctions_main(argc - 1, argv + 1);
+            return annotate_junctions(argc - 1, argv + 1);
         }
     }
     return junctions_usage();
 }
+

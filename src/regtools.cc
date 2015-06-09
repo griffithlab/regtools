@@ -29,18 +29,26 @@ int junctions_main(int argc, char* argv[]);
 
 using namespace std;
 
-int usage() {
-    cout << "\nProgram:\tregtools";
-    cout << "\nVersion:\t" << regtools_VERSION_MAJOR
+//version info
+int version() {
+    cerr << "\nProgram:\tregtools";
+    cerr << "\nVersion:\t" << regtools_VERSION_MAJOR
          << "." << regtools_VERSION_MINOR << "." << regtools_VERSION_PATCH;
-    cout << "\nUsage:\t\t" << "regtools <command> [options]";
-    cout << "\nCommand:\t" << "junctions\tTools that operate on feature junctions."
+}
+
+//Regtools usage
+int usage() {
+    version();
+    cerr << "\nUsage:\t\t" << "regtools <command> [options]";
+    cerr << "\nCommand:\t" << "junctions\tTools that operate on feature junctions."
          << "\n\t\t\t\t(eg. exon-exon junctions from RNA-seq.)";
-    cout << "\n";
+    cerr << "\n";
     return 0;
 }
 
+//Everything starts here
 int main(int argc, char* argv[]) {
+    version();
     if(argc > 1) {
         string subcmd(argv[1]);
         if(subcmd == "junctions") {
@@ -49,3 +57,4 @@ int main(int argc, char* argv[]) {
     }
     return usage();
 }
+
