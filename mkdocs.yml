@@ -1,1 +1,4 @@
 site_name: regtools
+pages:
+- Home: 'index.md'
+theme: readthedocs
