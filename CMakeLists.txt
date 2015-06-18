@@ -16,5 +16,6 @@ include_directories("${PROJECT_BINARY_DIR}")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/utils/bedtools/")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/utils/samtools/")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/junctions/")
-target_link_libraries (regtools junctions bedtools samtools)
+add_subdirectory ("${PROJECT_SOURCE_DIR}/src/gtf/")
+target_link_libraries (regtools junctions bedtools samtools gtf)
 

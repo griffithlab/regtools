@@ -1,4 +1,4 @@
-/*  junctions_main.cc -- handle the 'junction' commands
+/*  common.h -- misc utilities
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -22,44 +22,49 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
+#ifndef COMMON_H_
+#define COMMON_H_
+
 #include <iostream>
-#include <getopt.h>
-#include "gtf_parser.h"
-#include "junctions_annotator.h"
+#include <sstream>
+#include <map>
 
 using namespace std;
 
-//Usage for junctions subcommands
-int junctions_usage() {
-    cout << "\nUsage:\t\t" << "regtools junctions <command> [options]";
-    cout << "\nCommand:\t" << "annotate\tAnnotate the junctions.";
-    cout << "\n";
-    return 0;
+//Convert a number to a string
+template <typename T>
+string num_to_str(T num) {
+    stringstream oss;
+    oss << num;
+    return oss.str();
 }
 
-
-//Run 'junctions annotate' subcommand
-int junctions_annotate(int argc, char *argv[]) {
-    JunctionsAnnotator anno;
-    BED line;
-    anno.parse_options(argc, argv);
-    anno.read_gtf();
-    anno.open_junctions();
-    anno.get_single_junction(line);
-    anno.annotate_single_line(line);
-    anno.annotate_junction_with_gtf(line);
-    anno.close_junctions();
-    return 0;
-}
-
-//Parse out subcommands under junctions
-int junctions_main(int argc, char *argv[]) {
-    if(argc > 1) {
-        string subcmd(argv[1]);
-        if(subcmd == "annotate") {
-            return junctions_annotate(argc - 1, argv + 1);
+//Reverse complement short DNA seqs
+inline string rev_comp(string s1) {
+    string rc;
+    for(int i = s1.length() - 1; i >= 0; i--) {
+        char rc_char;
+        switch(s1[i]) {
+            case 'A':
+                rc_char = 'T';
+                break;
+            case 'C':
+                rc_char = 'G';
+                break;
+            case 'G':
+                rc_char = 'C';
+                break;
+            case 'T':
+                rc_char = 'A';
+                break;
+            default:
+                rc_char = 'N';
+                break;
         }
+        rc.insert(rc.end(), rc_char);
     }
-    return junctions_usage();
+    return rc;
 }
+
+#endif
 

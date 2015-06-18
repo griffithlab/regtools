@@ -1,4 +1,6 @@
-include_directories(../utils/bedtools/bedFile/
+include_directories(../gtf/
+                    ../utils/
+                    ../utils/bedtools/bedFile/
                     ../utils/bedtools/lineFileUtilities/
                     ../utils/bedtools/gzstream/
                     ../utils/bedtools/fileType/

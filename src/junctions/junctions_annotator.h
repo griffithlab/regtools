@@ -1,4 +1,4 @@
-/*  junctions_annotator.h -- JunctionsAnnotator class
+/*  junctions_annotator.h -- class definitions for `junctions annotate`
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -27,27 +27,55 @@ DEALINGS IN THE SOFTWARE.  */
 
 #include <iostream>
 #include "bedFile.h"
+#include "gtf_parser.h"
 
 using namespace std;
+
+struct AnnotatedJunctions : BED {
+    int n_exons_skipped;
+    int n_acceptors_skipped;
+    int n_donors_skipped;
+    string five_prime_seq;
+    string three_prime_seq;
+};
 
 class JunctionsAnnotator {
     private:
         //Junctions file to be annotated
-        BedFile junctions;
+        BedFile junctions_;
         //Reference FASTA file
         string ref_;
-        //Annotation GTF file
-        string gtf_;
+        //GTF file object
+        GtfParser gtf_;
+        //Get the anchor bases
+        bool get_anchor_bases(const BED & line);
     public:
         //Default constructor
         JunctionsAnnotator() {};
         //Destructor
         ~JunctionsAnnotator() {};
-        //Parse command line options for this tool
+        //Get the GTF file
+        string gtf_file();
+        //Parse command-line options for this tool
         int parse_options(int argc, char *argv[]);
         //Print default usage
         int usage();
+        //Get the reference bases at a position
         string get_reference_sequence(string position);
+        //Annotate a single line
+        bool annotate_single_line(BED & line);
+        //Get a single line from the junctions file
+        void get_single_junction(BED & line);
+        //Open junctions file
+        void open_junctions();
+        //Close junctions file
+        void close_junctions();
+        //Extract gtf info
+        bool read_gtf();
+        //Annotate with gtf
+        void annotate_junction_with_gtf(BED j1);
+        //Adjust the start and end of the junction
+        void adjust_junction_ends(BED & line);
 };
 
 #endif
