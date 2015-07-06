@@ -15,9 +15,12 @@ in a regulatory and splicing context.
 
 ##Installation
 
-Install regtools by running:
+Clone and install regtools by running:
 ```
+    git clone https://github.com/griffithlab/regtools
+    cd regtools/
     mkdir build
+    cd build/
     cmake ..
     make
 ```
