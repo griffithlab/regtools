@@ -51,11 +51,8 @@ typedef map<int, TranscriptVector> BinToTranscripts;
 //Jump from a chromosome and bin to transcript
 typedef map<string, BinToTranscripts> ChrBinToTranscripts;
 
-//Vector of Bins
-typedef vector<BIN> BinVector;
-
 //Jump from a transcript ID to all the bins its exons fall in
-typedef map<string, BinVector> TranscriptToBin;
+typedef map<string, BIN> TranscriptToBin;
 
 //Struct to hold each Transcript
 struct Transcript {
@@ -87,6 +84,8 @@ class GtfParser {
         int n_exons_;
         //Are exons within transcripts sorted
         bool transcripts_sorted_;
+        //Jump from transcript-id to gene-id
+        map<string, string> transcript_to_gene_;
         //Store transcripts as a vector of exon BEDs
         //keyed by transcript_id
         map<string, Transcript> transcript_map_;
@@ -96,6 +95,9 @@ class GtfParser {
         ChrBinToTranscripts chrbin_to_transcripts_;
         //Parse an exon line into a gtf struct
         Gtf parse_exon_line(string line);
+        //Parse the required field from attributes column
+        string parse_attribute(vector<string> attributes1,
+                           string field_name);
     public:
         //Default constructor
         GtfParser() {
@@ -132,7 +134,14 @@ class GtfParser {
         vector<string> transcripts_from_bin(string chr, BIN b1);
         //Return the bins that the exon-exon junctions
         //of a transcript fall in
-        vector<BIN> bin_from_transcript(string transcript_id);
+        BIN bin_from_transcript(string transcript_id);
+        //Return the exons corresponding to a transcript
+        //The return value is a vector of BEDs
+        const vector<BED> & get_exons_from_transcript(string transcript_id);
+        //Get the gene ID using the trancript ID
+        string get_gene_from_transcript(string transcript_id);
+        //Set the gene ID for a trancript ID
+        bool set_transcript_gene(string transcript_id, string gene_id);
 };
 
 #endif

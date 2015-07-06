@@ -41,13 +41,20 @@ int junctions_usage() {
 //Run 'junctions annotate' subcommand
 int junctions_annotate(int argc, char *argv[]) {
     JunctionsAnnotator anno;
-    BED line;
+    AnnotatedJunction line;
     anno.parse_options(argc, argv);
     anno.read_gtf();
     anno.open_junctions();
-    anno.get_single_junction(line);
-    anno.annotate_single_line(line);
-    anno.annotate_junction_with_gtf(line);
+    int linec = 0;
+    line.print_header();
+    while(anno.get_single_junction(line)) {
+        anno.get_anchor_seq(line);
+        anno.annotate_junction_with_gtf(line);
+        line.print();
+        line.reset();
+        if(linec++ == 20)
+            break;
+    }
     anno.close_junctions();
     return 0;
 }

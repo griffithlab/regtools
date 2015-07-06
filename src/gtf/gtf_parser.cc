@@ -35,6 +35,18 @@ DEALINGS IN THE SOFTWARE.  */
 
 using namespace std;
 
+//Sort exons by start - positive strand
+bool sort_by_start_ps(const BED & a, const BED & b) {
+    if (a.start < b.start) return true;
+        else return false;
+}
+
+//Sort exons by start - negative strand
+bool sort_by_start_ns(const BED & a, const BED & b) {
+    if (a.start > b.start) return true;
+        else return false;
+}
+
 //Open the GTF file.
 bool GtfParser::open() {
     gtf_fh_.open(gtffile_.c_str());
@@ -74,8 +86,9 @@ Gtf GtfParser::parse_exon_line(string line) {
     return gtf1;
 }
 
-//Parse the transcript name from attributes column
-string parse_transcript_id(vector<string> attributes1) {
+//Parse the required field from attributes column
+string GtfParser::parse_attribute(vector<string> attributes1,
+                           string field_name) {
     for (int i = 0; i < attributes1.size(); i++) {
         vector<string> tokens;
         //some attributes have a leading whitespace
@@ -83,7 +96,7 @@ string parse_transcript_id(vector<string> attributes1) {
             attributes1[i].erase(0, 1);
         }
         Tokenize(attributes1[i], tokens, ' ');
-        if(tokens[0] == "transcript_id") {
+        if(tokens[0] == field_name) {
             return tokens[1];
         }
     }
@@ -94,15 +107,23 @@ string parse_transcript_id(vector<string> attributes1) {
 bool GtfParser::add_exon_to_transcript_map(Gtf gtf1) {
     vector<string> attributes;
     Tokenize(gtf1.attributes, attributes, ';');
-    string transcript_id = parse_transcript_id(attributes);
+    string transcript_id = parse_attribute(attributes, "transcript_id");
+    string gene_name = parse_attribute(attributes, "gene_name");
     //create a BED6 object
     BED exon = BED(gtf1.seqname, gtf1.start,
                    gtf1.end, gtf1.feature,
                    gtf1.score, gtf1.strand);
-    if(transcript_id != "NA") {
+    if(transcript_id != string("NA")) {
         transcript_map_[transcript_id].exons.push_back(exon);
+        set_transcript_gene(transcript_id, gene_name);
     }
     return true;
+}
+
+//Return the exons corresponding to a transcript
+//The return value is a vector of BEDs
+const vector<BED> & GtfParser::get_exons_from_transcript(string transcript_id) {
+    return transcript_map_[transcript_id].exons;
 }
 
 //Return vector of transcripts in a bin
@@ -112,7 +133,7 @@ vector<string> GtfParser::transcripts_from_bin(string chr, BIN bin1) {
 
 //Return the BIN that the transcript falls in
 //This is formed by using the ends of the transcript
-vector<BIN> GtfParser::bin_from_transcript(string transcript_id) {
+BIN GtfParser::bin_from_transcript(string transcript_id) {
     return transcript_to_bin_[transcript_id];
 }
 
@@ -120,8 +141,9 @@ vector<BIN> GtfParser::bin_from_transcript(string transcript_id) {
 //Maintain a map that allows one to jump from chr,bin to a vector of
 //transcript ids
 //Also maintain another hash that allows one to jump from transcriptID
-//to the bins that the exon-exon junctions for that transcript fall in.
+//to the bin that the entire transcript falls in.
 bool GtfParser::annotate_transcript_with_bins() {
+    //make sure exons are sorted
     if(!transcripts_sorted_) {
         sort_exons_within_transcripts();
     }
@@ -129,16 +151,14 @@ bool GtfParser::annotate_transcript_with_bins() {
             it != transcript_map_.end(); it++) {
         string transcript_id = it->first;
         vector<BED> & exons = (it->second).exons;
-        cout << endl << transcript_id << exons.size();
-        for (int i = 0; i< exons.size() - 1; i++) {
-            string chr = exons[i].chrom;
-            CHRPOS start = exons[i].end;
-            CHRPOS end = exons[i + 1].start;
-            BIN bin1 = getBin(start, end);
-            chrbin_to_transcripts_[chr][bin1].push_back(transcript_id);
-            transcript_to_bin_[transcript_id].push_back(bin1);
-            cout << endl << transcript_id << "\t" << start << "\t" << end << bin1;
-        }
+        string chr = exons[0].chrom;
+        //start of first exon
+        CHRPOS start = exons[0].start;
+        //end of last exon
+        CHRPOS end = exons[exons.size() - 1].end;
+        BIN bin1 = getBin(start, end);
+        chrbin_to_transcripts_[chr][bin1].push_back(transcript_id);
+        transcript_to_bin_[transcript_id] = bin1;
     }
 }
 
@@ -165,7 +185,15 @@ bool GtfParser::construct_junctions() {
 bool GtfParser::sort_exons_within_transcripts() {
     for (std::map<string, Transcript>::iterator it = transcript_map_.begin(); \
             it != transcript_map_.end(); it++) {
-        sort(it->second.exons.begin(), it->second.exons.end(), sortByStart);
+        if(it->second.exons[0].strand == "+")
+            sort(it->second.exons.begin(), it->second.exons.end(), sort_by_start_ps);
+        else if(it->second.exons[0].strand == "-")
+            sort(it->second.exons.begin(), it->second.exons.end(), sort_by_start_ns);
+        else {
+            cerr << "Undefined strand for exon ";
+            cerr << it->second.exons[0].start << it->second.exons[0].end;
+            exit(1);
+        }
     }
     transcripts_sorted_ = true;
 }
@@ -210,5 +238,22 @@ bool GtfParser::create_transcript_map() {
 //Set the gtf file
 bool GtfParser::set_gtffile(string filename) {
     gtffile_ = filename;
+}
+
+//Get the gene ID using the trancript ID
+string GtfParser::get_gene_from_transcript(string transcript_id) {
+    if(transcript_to_gene_.count(transcript_id)) {
+        return transcript_to_gene_[transcript_id];
+    } else {
+        return "NA";
+    }
+}
+
+//Set the gene ID for a trancript ID
+bool GtfParser::set_transcript_gene(string transcript_id, string gene_id) {
+    //check if key already exists
+    if(transcript_to_gene_.count(transcript_id) == 0)
+        transcript_to_gene_[transcript_id] = gene_id;
+    return true;
 }
 
