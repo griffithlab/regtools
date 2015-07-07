@@ -38,7 +38,6 @@ int version() {
 
 //Regtools usage
 int usage() {
-    version();
     cerr << "\nUsage:\t\t" << "regtools <command> [options]";
     cerr << "\nCommand:\t" << "junctions\tTools that operate on feature junctions."
          << "\n\t\t\t\t(eg. exon-exon junctions from RNA-seq.)";
