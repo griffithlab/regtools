@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/griffithlab/regtools.svg?branch=master)](https://travis-ci.org/griffithlab/regtools)
+
 #regtools
 
 Tools that integrate DNA-seq and RNA-seq data to help interpret mutations
