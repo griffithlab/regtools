@@ -1,4 +1,6 @@
 site_name: regtools
 pages:
 - Home: 'index.md'
+- About: 'about.md'
+- Examples: 'examples.md'
 theme: readthedocs
