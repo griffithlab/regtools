@@ -34,8 +34,14 @@ Clone and install regtools by running:
 
 ##Support
 
-If you are having issues, please let us know.
+If you have issues using the project, please let us know.
 We have a mailing list located at: regtools@googlegroups.com
+Github issues are another option to contact the project about
+potential bugs.
+
+##Documentation
+The documentation for the project is hosted on
+[Read the Docs.](https://regtools.readthedocs.org/en/latest/)
 
 ##License
 
