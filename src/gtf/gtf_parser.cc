@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <set>
 #include <vector>
 #include <algorithm>
+#include "common.h"
 #include "bedFile.h"
 #include "gtf_parser.h"
 #include "lineFileUtilities.h"
@@ -97,6 +98,7 @@ string GtfParser::parse_attribute(vector<string> attributes1,
         }
         Tokenize(attributes1[i], tokens, ' ');
         if(tokens[0] == field_name) {
+            unquote(tokens[1]);
             return tokens[1];
         }
     }
