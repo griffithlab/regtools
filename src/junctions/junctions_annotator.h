@@ -1,4 +1,4 @@
-/*  junctions_annotator.h -- class definitions for `junctions annotate`
+/*  junctions_annotator.h -- Declarations for `junctions annotate`
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.  */
 
 using namespace std;
 
+//Format of an annotated junction.
 struct AnnotatedJunction : BED {
     //set of transcripts that
     //the junction overlaps
@@ -46,31 +47,37 @@ struct AnnotatedJunction : BED {
     set<CHRPOS> acceptors_skipped;
     //set of donor positions junction overlaps
     set<CHRPOS> donors_skipped;
-    //five prime reference seq
-    string anchor_seq;
     //splice site annotation (D/DA/NA etc)
+    string anchor;
+    //five prime reference seq
     string splice_site;
+    //Is this a known donor
+    bool known_donor;
+    //Is this a known acceptor
+    bool known_acceptor;
+    //Is this a known junction
+    bool known_junction;
+    //Print the header line
     void print_header() {
         cout << "chrom" << "\t" << "start" <<
                 "\t" << "end" << "\t" << "name" <<
                 "\t" << "score" << "\t" << "strand" <<
-                "\t" << "anchor_seq" << "\t" << "acceptors_skipped" <<
+                "\t" << "splice_site" << "\t" << "acceptors_skipped" <<
                 "\t" << "exons_skipped" << "\t" << "donors_skipped" <<
-                "\t" << "splice_site" <<
+                "\t" << "anchor" <<
+                "\t" << "known_donor" << "\t" << "known_acceptor" << "\t" << "known_junction" <<
                 "\t" << "transcripts" << "\t" << "genes";
     }
+    //Print out the junction
     void print() {
-        //remove trailing comma
-        if(!splice_site.empty())
-            splice_site.erase(splice_site.end() - 1);
-        else
-            splice_site = "unknown";
         cout << endl << chrom << "\t" << start <<
                 "\t" << end << "\t" << name <<
                 "\t" << score << "\t" << strand <<
-                "\t" << anchor_seq << "\t" << acceptors_skipped.size()<<
+                "\t" << splice_site << "\t" << acceptors_skipped.size() <<
                 "\t" << exons_skipped.size() << "\t" << donors_skipped.size() <<
-                "\t" << splice_site;
+                "\t" << anchor <<
+                "\t" << known_donor << "\t" << known_acceptor << "\t" << known_junction;
+        //See if any transcripts overlap the junction
         if(transcripts_overlap.size()) {
             cout << "\t";
             for(set<string>::iterator it = transcripts_overlap.begin(); it != transcripts_overlap.end(); ++it) {
@@ -78,7 +85,10 @@ struct AnnotatedJunction : BED {
                     cout << ",";
                 cout << *it;
             }
+        } else {
+            cout << "\t" << "NA";
         }
+        //See if any genes overlap the junction
         if(genes_overlap.size()) {
             cout << "\t";
             for(set<string>::iterator it = genes_overlap.begin(); it != genes_overlap.end(); ++it) {
@@ -86,11 +96,17 @@ struct AnnotatedJunction : BED {
                     cout << ",";
                 cout << *it;
             }
+        } else {
+            cout << "\t" << "NA";
         }
     }
+    //Clear the contents of the junction
     void reset() {
-        anchor_seq = "";
+        anchor = string("N");
         splice_site = "";
+        known_donor = false;
+        known_acceptor = false;
+        known_junction = false;
         exons_skipped.clear();
         acceptors_skipped.clear();
         donors_skipped.clear();
@@ -99,6 +115,8 @@ struct AnnotatedJunction : BED {
     }
 };
 
+//The class that does all the annotation
+//Uses a GTF parser object to annotate a junction.
 class JunctionsAnnotator {
     private:
         //Junctions file to be annotated
@@ -114,11 +132,13 @@ class JunctionsAnnotator {
         void check_for_overlap(string transcript_id,
                                AnnotatedJunction & junction);
         //Find overlap for transcripts on the positive strand
-        bool positive_overlap(const vector<BED> & exons,
+        bool overlap_ps(const vector<BED> & exons,
                               AnnotatedJunction & j1);
         //Find overlap for transcripts on the positive strand
-        bool negative_overlap(const vector<BED> & exons,
+        bool overlap_ns(const vector<BED> & exons,
                               AnnotatedJunction & j1);
+        //Annotate the anchor
+        void annotate_anchor(AnnotatedJunction & junction);
     public:
         //Default constructor
         JunctionsAnnotator() {};
@@ -135,7 +155,7 @@ class JunctionsAnnotator {
         //Get a single line from the junctions file
         bool get_single_junction(BED & line);
         //Get the anchor bases
-        bool get_anchor_seq(AnnotatedJunction & line);
+        bool get_splice_site(AnnotatedJunction & line);
         //Open junctions file
         void open_junctions();
         //Close junctions file
