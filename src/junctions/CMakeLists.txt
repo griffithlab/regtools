@@ -5,7 +5,7 @@ include_directories(../gtf/
                     ../utils/bedtools/gzstream/
                     ../utils/bedtools/fileType/
                     ../utils/bedtools/stringUtilities/
-                    ../utils/samtools/)
+                    ../utils/htslib/htslib/)
 
 add_library(junctions
     junctions_main.cc
