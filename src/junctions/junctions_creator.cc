@@ -160,6 +160,9 @@ int JunctionsCreator::identify_junctions_from_BAM() {
         while(sam_read1(in, header, aln) >= 0) {
             parse_read(header, aln);
         }
+        bam_destroy1(aln);
+        bam_hdr_destroy(header);
+        sam_close(in);
     }
     return 0;
 }
