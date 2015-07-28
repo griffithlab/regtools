@@ -26,17 +26,29 @@ DEALINGS IN THE SOFTWARE.  */
 #include <getopt.h>
 #include "gtf_parser.h"
 #include "junctions_annotator.h"
+#include "junctions_creator.h"
 
 using namespace std;
 
 //Usage for junctions subcommands
 int junctions_usage() {
     cout << "\nUsage:\t\t" << "regtools junctions <command> [options]";
-    cout << "\nCommand:\t" << "annotate\tAnnotate the junctions.";
+    cout << "\nCommand:\t" << "create\t\tIdentify exon-exon junctions from alignments.";
+    cout << "\n\t\tannotate\tAnnotate the junctions.";
     cout << "\n";
     return 0;
 }
 
+
+//Run 'junctions create'
+int junctions_create(int argc, char *argv[]) {
+    cerr << "\nRunning junctions create\n";
+    JunctionsCreator create;
+    create.parse_options(argc, argv);
+    create.identify_junctions_from_BAM();
+    create.print_junctions();
+    return 0;
+}
 
 //Run 'junctions annotate' subcommand
 int junctions_annotate(int argc, char *argv[]) {
@@ -48,13 +60,13 @@ int junctions_annotate(int argc, char *argv[]) {
     int linec = 0;
     line.print_header();
     while(anno.get_single_junction(line)) {
-        anno.get_anchor_seq(line);
+        anno.get_splice_site(line);
         anno.annotate_junction_with_gtf(line);
         line.print();
         line.reset();
-        if(linec++ == 20)
-            break;
+        linec++;
     }
+    cerr << "Annotated " << linec << " lines.";
     anno.close_junctions();
     return 0;
 }
@@ -63,6 +75,9 @@ int junctions_annotate(int argc, char *argv[]) {
 int junctions_main(int argc, char *argv[]) {
     if(argc > 1) {
         string subcmd(argv[1]);
+        if(subcmd == "create") {
+            return junctions_create(argc - 1, argv + 1);
+        }
         if(subcmd == "annotate") {
             return junctions_annotate(argc - 1, argv + 1);
         }
