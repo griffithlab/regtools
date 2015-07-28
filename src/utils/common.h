@@ -66,5 +66,15 @@ inline string rev_comp(string s1) {
     return rc;
 }
 
+//Remove quotes from strings
+inline void unquote(string & s1) {
+    if(s1.empty())
+        return;
+    if(s1[0] == '"' && s1[s1.length() - 1] == '"') {
+        s1.erase(s1.begin());
+        s1.erase(s1.end() - 1);
+    }
+}
+
 #endif
 
