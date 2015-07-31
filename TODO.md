@@ -14,6 +14,7 @@ git clone git@github.com:griffithlab/regtools.git
 cd regtools/tests
 wget https://xfer.genome.wustl.edu/gxfer1/project/gms/testdata/bams/brain_vs_uhr_w_ercc/downsampled_5pc_chr22/chr22.fa.gz
 wget https://xfer.genome.wustl.edu/gxfer1/project/gms/testdata/bams/brain_vs_uhr_w_ercc/downsampled_5pc_chr22/genes_chr22.gtf.gz
+wget https://xfer.genome.wustl.edu/gxfer1/project/gms/testdata/regtools/test.rnaseq.bam*
 gunzip *.gz
 rm -fr /tmp/junction_summary/
 mkdir /tmp/junction_summary/
