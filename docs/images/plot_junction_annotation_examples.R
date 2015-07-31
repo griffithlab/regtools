@@ -20,8 +20,8 @@ p <- p + geom_rect(aes(xmin = 20, ymin = 30, xmax = 30, ymax = 35), fill = "red"
 #Add labels
 p <- p + annotate("text", label = "Transcripts", x = 7, y = 105, size = 5)
 p <- p + annotate("text", label = "Junction", x = 5, y = 42.5, size = 5)
-p <- p + annotate("text", label = "Donors skipped = 1", x = 140, y = 32.5, size = 5)
-p <- p + annotate("text", label = "Acceptors skipped = 1", x = 140, y = 22.5, size = 5)
+p <- p + annotate("text", label = "Donors skipped = 2", x = 140, y = 32.5, size = 5)
+p <- p + annotate("text", label = "Acceptors skipped = 2", x = 140, y = 22.5, size = 5)
 p <- p + annotate("text",
                   label = wrapper("Exons skipped = 1 or 3 depending on if exons are merged or not", width = 40),
                   x = 140, y = 12.5, size = 5)
