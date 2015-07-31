@@ -78,6 +78,7 @@ bool JunctionsAnnotator::get_splice_site(AnnotatedJunction & line) {
     } else {
         line.splice_site = seq1 + "-" + seq2;
     }
+    return true;
 }
 
 //Extract gtf info
@@ -362,6 +363,7 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
     cerr << "\nReference: " << ref_;
     cerr << "\nGTF: " << gtf_.gtffile();
     cerr << "\nJunctions: " << junctions_.bedFile;
+    return 0;
 }
 
 //Usage statement for this tool

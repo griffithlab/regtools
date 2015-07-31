@@ -62,6 +62,7 @@ bool GtfParser::open() {
 bool GtfParser::close() {
     if(gtf_fh_.is_open())
         gtf_fh_.close();
+    return true;
 }
 
 //parse an exon single line into a Gtf struct
@@ -162,6 +163,7 @@ bool GtfParser::annotate_transcript_with_bins() {
         chrbin_to_transcripts_[chr][bin1].push_back(transcript_id);
         transcript_to_bin_[transcript_id] = bin1;
     }
+    return true;
 }
 
 //Construct the junctions using exon information
@@ -181,6 +183,7 @@ bool GtfParser::construct_junctions() {
            transcript_map_[transcript_id].junctions.push_back(j1);
         }
     }
+    return true;
 }
 
 //Sort the exons within transcripts by start position
@@ -198,6 +201,7 @@ bool GtfParser::sort_exons_within_transcripts() {
         }
     }
     transcripts_sorted_ = true;
+    return true;
 }
 
 //Print out transcripts - exons and junctions
@@ -216,6 +220,7 @@ bool GtfParser::print_transcripts() {
                 cout << "\t" << it2->chrom << "\t" << it2-> start << "\t" << it2->end << "\n";
             }
      }
+     return true;
 }
 
 //Create a transcript map from the GTF
@@ -235,11 +240,13 @@ bool GtfParser::create_transcript_map() {
         }
     }
     GtfParser::close();
+    return true;
 }
 
 //Set the gtf file
 bool GtfParser::set_gtffile(string filename) {
     gtffile_ = filename;
+    return true;
 }
 
 //Get the gene ID using the trancript ID

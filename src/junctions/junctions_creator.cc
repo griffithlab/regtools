@@ -57,6 +57,7 @@ int JunctionsCreator::parse_options(int argc, char *argv[]) {
         exit(-1);
     }
     cerr << "\nBAM: " << bam_;
+    return 0;
 }
 
 //Usage statement for this tool
@@ -131,6 +132,7 @@ int JunctionsCreator::parse_cigar_into_junctions(string chr, int read_pos,
                 break;
         }
     }
+    return 0;
 }
 
 //Pull out the cigar string from the read
