@@ -91,7 +91,7 @@ Gtf GtfParser::parse_exon_line(string line) {
 //Parse the required field from attributes column
 string GtfParser::parse_attribute(vector<string> attributes1,
                            string field_name) {
-    for (int i = 0; i < attributes1.size(); i++) {
+    for (std::size_t i = 0; i < attributes1.size(); i++) {
         vector<string> tokens;
         //some attributes have a leading whitespace
         if(attributes1[i][0] == ' ') {
@@ -175,7 +175,7 @@ bool GtfParser::construct_junctions() {
             it != transcript_map_.end(); it++) {
         string transcript_id = it->first;
         vector<BED> exon_vector = it->second.exons;
-        for (int i = 0; i < exon_vector.size() - 1; i++) {
+        for (std::size_t i = 0; i < exon_vector.size() - 1; i++) {
            //Create the junction
            BED j1 =
                BED(exon_vector[i].chrom, exon_vector[i].end,
