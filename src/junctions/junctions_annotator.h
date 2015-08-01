@@ -140,10 +140,6 @@ class JunctionsAnnotator {
         //Annotate the anchor
         void annotate_anchor(AnnotatedJunction & junction);
     public:
-        //Default constructor
-        JunctionsAnnotator() {};
-        //Destructor
-        ~JunctionsAnnotator() {};
         //Get the GTF file
         string gtf_file();
         //Parse command-line options for this tool

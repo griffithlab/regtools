@@ -99,14 +99,14 @@ class GtfParser {
         string parse_attribute(vector<string> attributes1,
                            string field_name);
     public:
-        //Default constructor
-        GtfParser() {
-            n_exons_ = 0;
-            gtffile_ = "";
-            transcripts_sorted_ = false;
-        };
-        //destructor
-        ~GtfParser() {};
+
+        GtfParser()
+            : n_exons_(0)
+            , transcripts_sorted_(false)
+        {}
+
+        ~GtfParser() {}
+
         //Close the gtf filehandle
         bool close();
         //Assemble transcripts into a map

@@ -55,10 +55,6 @@ class JunctionsCreator {
         //Add a junction to the junctions map
         int add_junction(Junction j1);
     public:
-        //Default constructor
-        JunctionsCreator() {};
-        //Destructor
-        ~JunctionsCreator() {};
         //Parse command-line options for this tool
         int parse_options(int argc, char *argv[]);
         //Print default usage
