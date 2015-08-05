@@ -103,7 +103,7 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
     if(exons[0].start > junction.end &&
             exons[exons.size() - 1].end < junction.start)
         return false;
-    for(int i = 0; i < exons.size(); i++) {
+    for(std::size_t i = 0; i < exons.size(); i++) {
         cerr << endl << "exon number " << i << "\t" << exons[i].start
              << "\t" << exons[i].end;
         if(exons[i].start > junction.end) {
@@ -175,7 +175,7 @@ bool JunctionsAnnotator::overlap_ns(const vector<BED> & exons,
         cerr << endl << "transcript outside junction";
         return known_junction;
     }
-    for(int i = 0; i < exons.size(); i++) {
+    for(std::size_t i = 0; i < exons.size(); i++) {
         if(exons[i].end < junction.start) {
             cerr << endl << "-1";
             //No need to look any further
@@ -302,7 +302,7 @@ void JunctionsAnnotator::annotate_junction_with_gtf(AnnotatedJunction & j1) {
         for (BIN b = (start_bin + offset); b <= (end_bin + offset); ++b) {
             vector<string> transcripts = gtf_.transcripts_from_bin(j1.chrom, b);
             if(transcripts.size())
-                for(int i = 0; i < transcripts.size(); i++)
+                for(std::size_t i = 0; i < transcripts.size(); i++)
                     check_for_overlap(transcripts[i], j1);
         }
         start_bin >>= _binNextShift;
