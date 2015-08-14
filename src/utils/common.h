@@ -34,9 +34,20 @@ using namespace std;
 //Convert a number to a string
 template <typename T>
 string num_to_str(T num) {
-    stringstream oss;
-    oss << num;
-    return oss.str();
+    stringstream ss;
+    ss << num;
+    return ss.str();
+}
+
+//Convert a string to a number
+template <typename T>
+string num_to_str(string str) {
+    stringstream ss(str);
+    T num;
+    ss << num;
+    if(!ss.eof())
+        throw "Unable to convert string to number!";
+    return ss.str();
 }
 
 //Reverse complement short DNA seqs
