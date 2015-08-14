@@ -63,7 +63,7 @@ class JunctionsCreator {
         //Minimum anchor length for junctions
         //Junctions need atleast this many bp overlap
         // on both ends.
-        int min_anchor_length;
+        uint32_t min_anchor_length;
         //Map to store the junctions
         //The key is "chr:start-end"
         //The value is an object of type Junction(see above)

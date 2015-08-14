@@ -127,11 +127,12 @@ void JunctionsCreator::print_all_junctions(ostream& out) {
     for(map<string, Junction> :: iterator it = junctions.begin();
         it != junctions.end(); it++) {
         Junction j1 = it->second;
-        if (j1.has_min_anchor)
+        if (j1.has_min_anchor) {
             if(fout.is_open())
                 print_one_junction(j1, fout);
             else
                 print_one_junction(j1, out);
+        }
     }
     if(fout.is_open())
         fout.close();
