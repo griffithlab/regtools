@@ -6,7 +6,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build-common/cmake)
 include(TestHelper)
 
 project(regtools)
-add_executable (regtools src/regtools.cc)
+
 
 #versioning stuff
 set (regtools_VERSION_MAJOR 0)
@@ -21,8 +21,19 @@ include_directories("${PROJECT_BINARY_DIR}")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/utils/bedtools/")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/utils/htslib/")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/utils/gtest-1.7.0/")
+
+# Enable warnings after compiling third party dependencies.
+if(${CMAKE_C_COMPILER_ID} MATCHES "GNU|Clang")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long")
+    # Uncomment when feeling persnickety.
+    #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Werror")
+endif()
+
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/junctions/")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/gtf/")
+
+#The main executable
+add_executable (regtools src/regtools.cc)
 target_link_libraries (regtools junctions bedtools gtf htslib)
 
 #Testing

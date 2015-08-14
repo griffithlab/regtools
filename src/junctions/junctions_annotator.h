@@ -58,7 +58,7 @@ struct AnnotatedJunction : BED {
     //Is this a known junction
     bool known_junction;
     //Print the header line
-    void print_header() {
+    static void print_header() {
         cout << "chrom" << "\t" << "start" <<
                 "\t" << "end" << "\t" << "name" <<
                 "\t" << "score" << "\t" << "strand" <<
@@ -140,10 +140,6 @@ class JunctionsAnnotator {
         //Annotate the anchor
         void annotate_anchor(AnnotatedJunction & junction);
     public:
-        //Default constructor
-        JunctionsAnnotator() {};
-        //Destructor
-        ~JunctionsAnnotator() {};
         //Get the GTF file
         string gtf_file();
         //Parse command-line options for this tool

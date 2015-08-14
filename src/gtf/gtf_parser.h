@@ -99,37 +99,37 @@ class GtfParser {
         string parse_attribute(vector<string> attributes1,
                            string field_name);
     public:
-        //Default constructor
-        GtfParser() {
-            n_exons_ = 0;
-            gtffile_ = "";
-            transcripts_sorted_ = false;
-        };
-        //destructor
-        ~GtfParser() {};
+
+        GtfParser()
+            : n_exons_(0)
+            , transcripts_sorted_(false)
+        {}
+
+        ~GtfParser() {}
+
         //Close the gtf filehandle
-        bool close();
+        void close();
         //Assemble transcripts into a map
         //this is an associative container,
         //key is the transcript name, the value
         //is a vector of BEDs corresponding to exons.
-        bool create_transcript_map();
+        void create_transcript_map();
         //Add an exon to a transcript map
-        bool add_exon_to_transcript_map(Gtf gtf1);
+        void add_exon_to_transcript_map(Gtf gtf1);
         //Open the gtf file
-        bool open();
+        void open();
         //Set the gtf filename
-        bool set_gtffile(string filename);
+        void set_gtffile(string filename);
         //Get the gtf filename
         string gtffile() { return gtffile_; }
         //Sort the exons within transcripts by start position
-        bool sort_exons_within_transcripts();
+        void sort_exons_within_transcripts();
         //Construct junction information using exons
-        bool construct_junctions();
+        void construct_junctions();
         //Annotate each transcript with its bin
-        bool annotate_transcript_with_bins();
+        void annotate_transcript_with_bins();
         //Print out transcripts
-        bool print_transcripts();
+        void print_transcripts();
         //Return vector of transcripts in a bin
         vector<string> transcripts_from_bin(string chr, BIN b1);
         //Return the bins that the exon-exon junctions
@@ -141,7 +141,7 @@ class GtfParser {
         //Get the gene ID using the trancript ID
         string get_gene_from_transcript(string transcript_id);
         //Set the gene ID for a trancript ID
-        bool set_transcript_gene(string transcript_id, string gene_id);
+        void set_transcript_gene(string transcript_id, string gene_id);
 };
 
 #endif

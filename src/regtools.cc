@@ -30,7 +30,7 @@ int junctions_main(int argc, char* argv[]);
 using namespace std;
 
 //version info
-int version() {
+void version() {
     cerr << "\nProgram:\tregtools";
     cerr << "\nVersion:\t" << regtools_VERSION_MAJOR
          << "." << regtools_VERSION_MINOR << "." << regtools_VERSION_PATCH;

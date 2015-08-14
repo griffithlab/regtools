@@ -228,6 +228,19 @@ int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *
             j1.start << "\t" << j1.end << "\t" << j1.thick_start << "\t" << j1.thick_end << endl;
         add_junction(j1);
         j1.added = true;
+    return 0;
+}
+
+//Pull out the cigar string from the read
+int JunctionsCreator::parse_read(bam_hdr_t *header, bam1_t *aln) {
+    const bam1_core_t *c = &aln->core;
+    if (c->n_cigar) { // cigar
+        int chr_id = aln->core.tid;
+        int read_pos = aln->core.pos;
+        string chr(header->target_name[chr_id]);
+        uint32_t *cigar = bam_get_cigar(aln);
+        int n_cigar = c->n_cigar;
+        parse_cigar_into_junctions(chr, read_pos, cigar, n_cigar);
     }
 }
 
