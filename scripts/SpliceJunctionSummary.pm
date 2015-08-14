@@ -106,7 +106,7 @@ EOS
 
 sub execute {
     my $self = shift;
-    
+
     $self->_resolve_output_file_paths();
 
     $self->_load_fasta_reference_index();
@@ -248,7 +248,7 @@ sub _generate_observed_junctions {
         $self->error_message('Failed to convert BED12 file \''. $self->observed_junctions_bed12_file .'\' to junctions BED file \''. $tmp_junctions_bed6_file .'\'');
         die($self->error_message);
     }
-    
+
     # Sort the BED6 file
     $self->debug_message('Sorting merged BED6 junctions to file: '. $self->observed_junctions_bed6_file);
     unless (Genome::Model::Tools::BedTools::Sort->execute(
@@ -279,7 +279,7 @@ sub _generate_observed_junctions {
 
 sub _generate_known_junctions {
     my $self = shift;
-    
+
     # Generate BED12 format genes file
     $self->debug_message('Convert annotation GTF \''. $self->annotation_gtf_file .'\' to BED12 format genes file \''. $self->annotation_genes_bed12_file .'\'');
     unless (Genome::Model::Tools::Gtf::ToBed12->execute(
@@ -289,7 +289,7 @@ sub _generate_known_junctions {
         $self->error_message('Failed to generate BED12 format genes file: '. $self->annotation_genes_bed12_file);
         die($self->error_message);
     }
-    
+
     # Make a BED6 junctions file from the BED12 genes file
     my $tmp_known_junctions_bed_file = Genome::Sys->create_temp_file_path($self->annotation_name.'.junctions.bed');
     $self->debug_message('Convert BED12 genes file \''. $self->annotation_genes_bed12_file .'\' to temporary BED6 format file of known junctions \''. $tmp_known_junctions_bed_file .'\'');
@@ -343,7 +343,7 @@ sub _generate_known_junctions {
         $self->error_message('Failed to sort known junctions BED6 file \''. $tmp_unsorted_known_junctions_bed_file .'\' to \''. $self->known_junctions_bed6_file.'\'');
         die($self->error_message);
     }
-    
+
     # Load the known junctions
     $self->debug_message('Loading the sorted known junctions: '. $self->known_junctions_bed6_file);
     my $sorted_known_junctions_bed6_reader = Genome::Utility::IO::BedReader->create(
@@ -385,7 +385,7 @@ sub _generate_known_junctions {
 
 sub _generate_exon_content {
     my $self = shift;
-    
+
     # Generate BED6 format Exons file
     $self->debug_message('Convert BED12 format gene file \''. $self->annotation_genes_bed12_file .'\' to exon BED6 file \''. $self->annotation_exons_bed6_file);
     # TODO: Add BedTools version
@@ -411,7 +411,7 @@ sub _generate_exon_content {
         die($self->error_message);
     }
     $self->import_exon_content_blocks();
-    
+
     return 1;
 }
 
@@ -429,7 +429,7 @@ sub infer_splice_site {
 
     #Determine the splice site by comparison back to the reference genome...
     $self->debug_message('Determining splice sites from reference for '. $junctions_type);
-    
+
     #Now go through the junctions and look for donor/acceptor splice sites at the coordinates reported
     #SPLICE_SITES = ["GT-AG", "CT-AC", "GC-AG", "CT-GC", "AT-AC", "GT-AT"]
     for my $junc_key (keys %{$junctions_hash_ref}) {
@@ -528,7 +528,7 @@ sub annotate_observed_junctions {
         my $strand = $observed_junctions{$jid}->{strand};
         my $left = $observed_junctions{$jid}->{start};
         my $right = $observed_junctions{$jid}->{end};
-        
+
         $observed_junctions{$jid}->{anchored} = 'N';
         $observed_junctions{$jid}->{transcript_ids} = 'na';
         #First check for an exact match to a known junction (i.e. anchored by both Donor and Acceptor)
@@ -579,7 +579,7 @@ sub annotate_observed_junctions {
     }
     $self->_observed_junctions(\%observed_junctions);
     $self->annotate_skipping();
-    
+
     #Calculate the junction read count per million junction reads mapped (JPM)
     my $grand_count = 0;
     $observed_junctions = $self->_observed_junctions();
@@ -639,7 +639,7 @@ sub annotate_observed_junctions {
 ##############################################################################################################################################
 sub annotate_skipping {
     my $self = shift;
-    
+
     my $observed_junctions = $self->_observed_junctions();
     my $known_ec_blocks = $self->_known_ec_blocks();
     my $known_donors = $self->_known_donors();
@@ -649,20 +649,20 @@ sub annotate_skipping {
     my %known_ec_blocks = %{$known_ec_blocks};
     my %known_donors = %{$known_donors};
     my %known_acceptors = %{$known_acceptors};
-    
+
     $self->debug_message('Annotating skipping of each junction - exons, then acceptors, then donors - Using BEDTools');
 
     #Use BEDTools to determine the exons, acceptors, or donors contained within each exon-exon observed junction (i.e. intron)
     #Do this by writing a temp BED file for each pair of coordinates (of the form: chr, start, end, strand) and then parsing the results file
-    
-    #'intersectBed -a exons.bed -b junctions.bed -f 1.0 -s -wa -wb'  
+
+    #'intersectBed -a exons.bed -b junctions.bed -f 1.0 -s -wa -wb'
     #The '-f 1.0' option should give the exons that are entirely overlapped by junctions
     #The '-s' option should make this overlap between things on the same strand
     #The '-wa -wb' options, write the original coordinates for exons and junctions (as opposed to the merged coordinates).  Each overlaping pair will be reported as a seperate line
     #Then process the output file and count the exon entries associated with each junction entry
-    
+
     #Example BEDTools command
-    #Run BEDTools as follows and 'cut' the column containing the junction ID value.  
+    #Run BEDTools as follows and 'cut' the column containing the junction ID value.
     #The occurence count for each of these IDs, should be the number of exons contained within the corresponding junction (i.e. skipped)
     #Unix sort and uniq can even do this counting for us...
     #Then just parse the counts out
@@ -672,7 +672,7 @@ sub annotate_skipping {
     my $temp_known_donors = Genome::Sys->create_temp_file_path('KnownDonors.tmp.bed');
     my $temp_known_acceptors = Genome::Sys->create_temp_file_path('KnownAcceptors.tmp.bed');
     my $temp_result = Genome::Sys->create_temp_file_path('Result.tmp.txt');
-    
+
     #OBSERVED JUNCTIONS
     $self->debug_message('Looking for entire exons skipped');
     my $temp_obs_junction_writer = Genome::Utility::IO::BedWriter->create(
@@ -737,11 +737,11 @@ sub annotate_skipping {
     )->result) {
         die('Failed to intersect exons and observed junctions.');
     }
-    
+
     # TODO: Can this be made a command or performed with Perl inline
     my $exons_cmd = "cat $temp_exons_intersect_bed | cut -f 10 | sort | uniq -c > $temp_result";
     Genome::Sys->shellcmd(cmd => $exons_cmd);
-    
+
     open (COUNTS, "$temp_result") || die "\n\nCould not open temp results file: $temp_result\n\n";
     while(<COUNTS>){
         chomp($_);
@@ -805,11 +805,11 @@ sub annotate_skipping {
     )->result) {
         die('Failed to intersect donors and observed junctions.');
     }
-    
+
     # TODO: Can this be made a command or performed with Perl inline
     my $donors_cmd = "cat $temp_donors_intersect_bed | cut -f 10 | sort | uniq -c > $temp_result";
     Genome::Sys->shellcmd(cmd => $donors_cmd);
-    
+
     open (COUNTS, "$temp_result") || die "\n\nCould not open temp results file: $temp_result\n\n";
     while(<COUNTS>){
         chomp($_);
@@ -873,7 +873,7 @@ sub annotate_skipping {
     )->result) {
         die('Failed to intersect acceptors and observed junctions.');
     }
-    
+
     # TODO: Can this be made a command or performed with Perl inline
     my $acceptors_cmd = "cat $temp_acceptors_intersect_bed  | cut -f 10 | sort | uniq -c > $temp_result";
     Genome::Sys->shellcmd(cmd => $acceptors_cmd);
@@ -919,7 +919,7 @@ sub calculate_gene_expression {
     my $observed_junctions = $self->_observed_junctions;
     my $transcripts = $self->_transcripts;
     my $genes = $self->_genes;
-    
+
     # Outputs
     my $transcript_expression_file = $self->transcript_expression_tsv_file;
     my $gene_expression_file = $self->gene_expression_tsv_file;
@@ -934,7 +934,7 @@ sub calculate_gene_expression {
     #Also output the number of known exon-exon junctions of the gene
     #Note that one junction can correspond to multiple genes - in this implementation reads for these junctions can be counted multiple times (once for each gene they correspond to)??
     #Create a gene/transcript expression record for every gene/transcript that has at least one exon-exon junction regardless of whether it was detected or not
-    
+
     #1.) Build a map of:
     #-   all genes to gene names and list of transcripts
     #-   all transcripts to gene names and gene ids
@@ -944,7 +944,7 @@ sub calculate_gene_expression {
     my %transcripts = %{$transcripts};
     my %genes = %{$genes};
     my %observed_junctions = %{$observed_junctions};
-    
+
     #2.) Build a map of all known junctions to their: gene_ids, transcript_ids.  i.e.
     #    - Add junctions to transcript hash create above -> also store known junction count
     #$self->debug_message('Importing known junction to transcript mappings from: '. $known_junction_file);
@@ -1007,7 +1007,7 @@ sub calculate_gene_expression {
     $lists{'transcripts'}{outfile} = $transcript_expression_file;
     $lists{'genes'}{features} = $genes_ref;
     $lists{'genes'}{outfile} = $gene_expression_file;
-    
+
     foreach my $feature_type (keys %lists){
         my $features = $lists{$feature_type}{features};
         my $feature_count = keys %{$features};
@@ -1016,7 +1016,7 @@ sub calculate_gene_expression {
         foreach my $fid (keys %{$features}){
             my $junction_list = $features->{$fid}->{junction_list};
             my $known_junction_count = keys %{$junction_list};
-      
+
             #print "\n\tknown_junction count: $known_junction_count";
             if ($known_junction_count > 0){
                 $features->{$fid}->{known_junction_count} = $known_junction_count;
@@ -1057,12 +1057,12 @@ sub calculate_gene_expression {
                 my $junctions_100x_p = sprintf ("%.2f", (($junctions_100x/$known_junction_count)*100));
                 my $junctions_500x_p = sprintf ("%.2f", (($junctions_500x/$known_junction_count)*100));
                 my $junctions_1000x_p = sprintf ("%.2f", (($junctions_1000x/$known_junction_count)*100));
-                
+
                 #calculate expression level
                 #    - Gene/transcript level expression = (sum of exon junction read counts for a gene / number of exon-exon junctions of that gene) => then normalized to per million junction mapped reads (JPJM)
                 my $jpj = ($feature_read_count / $known_junction_count); #Junction count normalized to number of junctions for the feature
                 my $jpjm = $jpj * (1000000 / $grand_read_count); #Further normalized to be per million junction mapping reads
-                
+
                 #Store values for this feature
                 $features->{$fid}->{read_count} = $feature_read_count;
                 $features->{$fid}->{jpj} = $jpj;
@@ -1102,4 +1102,3 @@ sub calculate_gene_expression {
 
     return 1;
 }
-
