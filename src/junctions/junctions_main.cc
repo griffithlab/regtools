@@ -31,11 +31,11 @@ DEALINGS IN THE SOFTWARE.  */
 using namespace std;
 
 //Usage for junctions subcommands
-int junctions_usage() {
-    cout << "\nUsage:\t\t" << "regtools junctions <command> [options]";
-    cout << "\nCommand:\t" << "create\t\tIdentify exon-exon junctions from alignments.";
-    cout << "\n\t\tannotate\tAnnotate the junctions.";
-    cout << "\n";
+int junctions_usage(ostream &out = cout) {
+    out << "\nUsage:\t\t" << "regtools junctions <command> [options]";
+    out << "\nCommand:\t" << "create\t\tIdentify exon-exon junctions from alignments.";
+    out << "\n\t\tannotate\tAnnotate the junctions.";
+    out << "\n";
     return 0;
 }
 
@@ -44,9 +44,15 @@ int junctions_usage() {
 int junctions_create(int argc, char *argv[]) {
     cerr << "\nRunning junctions create\n";
     JunctionsCreator create;
-    create.parse_options(argc, argv);
-    create.identify_junctions_from_BAM();
-    create.print_junctions();
+    if(create.parse_options(argc, argv)) {
+        create.usage();
+        return 1;
+    }
+    if(create.identify_junctions_from_BAM()) {
+        create.usage();
+        return 1;
+    }
+    create.print_all_junctions();
     return 0;
 }
 
