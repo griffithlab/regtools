@@ -28,8 +28,6 @@ DEALINGS IN THE SOFTWARE.  */
 #include <iostream>
 #include "bedFile.h"
 #include "sam.h"
-//#include "faidx.h"
-//#include "kstring.h"
 
 using namespace std;
 
@@ -44,6 +42,8 @@ struct Junction : BED {
     //Atleast one read containing the junction needs to have
     // min anchor on both sides.
     bool has_min_anchor;
+    //Name of the junction
+    string name;
     Junction() {
         start = 0;
         end = 0;
@@ -52,6 +52,7 @@ struct Junction : BED {
         read_count = 0;
         added = false;
         has_min_anchor = false;
+        name = "NA";
     }
 };
 
@@ -70,6 +71,8 @@ class JunctionsCreator {
         map<string, Junction> junctions;
         //File to write output to - optional, write to STDOUT by default
         string output_file;
+        //Region to identify junctions, in "chr:start-end" format
+        string region;
         //Pull out the cigar string from the read
         int parse_read(bam_hdr_t *header, bam1_t *aln);
         //Parse junctions from the read and store in junction map
@@ -84,6 +87,9 @@ class JunctionsCreator {
         JunctionsCreator() {
             min_anchor_length = 8;
         };
+        //Name the junction based on the number of junctions
+        // in the map.
+        string get_new_junction_name();
         //Parse command-line options for this tool
         int parse_options(int argc, char *argv[]);
         //Print default usage

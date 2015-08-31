@@ -24,9 +24,12 @@ DEALINGS IN THE SOFTWARE.  */
 
 #include <getopt.h>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
+#include <stdexcept>
 #include "junctions_creator.h"
 #include "sam.h"
+#include "hts.h"
 #include "faidx.h"
 #include "kstring.h"
 
@@ -36,13 +39,16 @@ using namespace std;
 int JunctionsCreator::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int c;
-    while((c = getopt(argc, argv, "ha:o:")) != -1) {
+    while((c = getopt(argc, argv, "ha:o:r:")) != -1) {
         switch(c) {
             case 'a':
                 min_anchor_length = atoi(optarg);
                 break;
             case 'o':
                 output_file = string(optarg);
+                break;
+            case 'r':
+                region = string(optarg);
                 break;
             case '?':
             case 'h':
@@ -62,7 +68,10 @@ int JunctionsCreator::parse_options(int argc, char *argv[]) {
 
 //Usage statement for this tool
 int JunctionsCreator::usage(ostream& out) {
-    out << "\nUsage:\t\t" << "regtools junctions create [options] alignments.bam";
+    out << "\nUsage:\t\t" << "regtools junctions create [options] indexed_alignments.bam";
+    out << "\nOptions:\t" << "-a INT\tMinimum anchor length on any one side of the junction.";
+    out << "\nOptions:\t" << "-o FILE\tThe file to write output to.";
+    out << "\nOptions:\t" << "-r STR\tThe region to identify junctions in \"chr:start-end\" format.";
     out << "\n";
     return 0;
 }
@@ -72,10 +81,18 @@ string JunctionsCreator::get_bam() {
     return bam_;
 }
 
+//Name the junction based on the number of junctions
+// in the map.
+string JunctionsCreator::get_new_junction_name() {
+    int index = junctions.size() + 1;
+    stringstream name_ss;
+    name_ss << "JUNC" << setfill('0') << setw(8) << index;
+    return name_ss.str();
+}
+
 //Add a junction to the junctions map
 //The read_count field is the number of reads supporting the junction.
 int JunctionsCreator::add_junction(Junction j1) {
-    cerr << endl << "Adding junction\n";
     //cerr << "\nChr " << j1.chrom << "\tStart " << j1.start << "\tEnd " << j1.end;
     stringstream s1;
     string start, end;
@@ -88,11 +105,16 @@ int JunctionsCreator::add_junction(Junction j1) {
     }
     //Check if new junction
     if(!junctions.count(key)) {
-        j1.read_count = 1;
+        if(j1.has_min_anchor) {
+            j1.name = get_new_junction_name();
+            j1.read_count = 1;
+        }
     } else { //existing junction
         Junction j0 = junctions[key];
         //increment read count
         j1.read_count = j0.read_count + 1;
+        //Keep the same name
+        j1.name = j0.name;
         //Check if thick starts are any better
         if(j0.thick_start < j1.thick_start)
             j1.thick_start = j0.thick_start;
@@ -101,13 +123,17 @@ int JunctionsCreator::add_junction(Junction j1) {
         //preserve min anchor information
         if(j0.has_min_anchor)
             j1.has_min_anchor = true;
+        //Check if strand info is amibiguous
         if(j1.strand != j0.strand) {
-            print_one_junction(j1);
-            throw "Strand information doesn't match.";
+            j1.strand = "+/-";
         }
-
     }
-    junctions[key] = j1;
+    //Check for minimum anchor before adding
+    if(j1.has_min_anchor) {
+        junctions[key] = j1;
+        cerr << "Adding junction2\n";
+        print_one_junction(j1, cerr);
+    }
     return 0;
 }
 
@@ -115,8 +141,10 @@ int JunctionsCreator::add_junction(Junction j1) {
 void JunctionsCreator::print_one_junction(const Junction j1, ostream& out) {
     out << j1.chrom <<
         "\t" << j1.thick_start << "\t" << j1.thick_end <<
-        "\t" << j1.start << "\t" << j1.end <<
-        "\t" << j1.strand << "\t" << j1.read_count << endl;
+        "\t" << j1.name << "\t" << j1.read_count << "\t" << j1.strand <<
+        "\t" << j1.thick_start << "\t" << j1.thick_end <<
+        "\t" << j1.start - j1.thick_start << "," << j1.thick_end - j1.end <<
+        endl;
 }
 
 //Print all the junctions - this function needs work
@@ -194,7 +222,11 @@ int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *
                         j1.start << "\t" << j1.end << "\t" <<
                         j1.thick_start << "\t" << j1.thick_end << endl;
                     //Add the previous junction
-                    add_junction(j1);
+                    try {
+                        add_junction(j1);
+                    } catch (const std::logic_error& e) {
+                        cout << e.what() << '\n';
+                    }
                     j1.added = true;
                     //Start the next junction
                     j1.added = false;
@@ -224,10 +256,14 @@ int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *
                 break;
         }
     }
-    if(!j1.added) {
+    if(!j1.added && started_junction) {
         cerr << endl << "DEBUG2 " << read_pos << "\t" <<
             j1.start << "\t" << j1.end << "\t" << j1.thick_start << "\t" << j1.thick_end << endl;
-        add_junction(j1);
+        try {
+            add_junction(j1);
+        } catch (const std::logic_error& e) {
+            cout << e.what() << '\n';
+        }
         j1.added = true;
     }
     return 0;
@@ -242,17 +278,31 @@ int JunctionsCreator::identify_junctions_from_BAM() {
         if(in == NULL) {
             return 1;
         }
+        //Load the index
+        hts_idx_t *idx = sam_index_load(in, bam_.c_str());
+        if(idx == NULL) {
+            cerr << "Unable to load alignment index. Please index with Samtools.";
+            return -1;
+        }
         //Get the header
         bam_hdr_t *header = sam_hdr_read(in);
-        if(header == NULL) {
+        //Initialize iterator
+        hts_itr_t *iter = NULL;
+        //Move the iterator to the region we are interested in
+        if(region.empty())
+            region = "."; //Default = entire file
+        cout << "\nRegion is " << region;
+        iter  = sam_itr_querys(idx, header, region.c_str());
+        if(header == NULL || iter == NULL) {
             sam_close(in);
             return 1;
         }
         //Initiate the alignment record
         bam1_t *aln = bam_init1();
-        while(sam_read1(in, header, aln) >= 0) {
+        while(sam_itr_next(in, iter, aln) >= 0) {
             parse_alignment_into_junctions(header, aln);
         }
+        hts_itr_destroy(iter);
         bam_destroy1(aln);
         bam_hdr_destroy(header);
         sam_close(in);
