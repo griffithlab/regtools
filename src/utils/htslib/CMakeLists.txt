@@ -16,4 +16,3 @@ include_directories(.)
 find_package(Threads)
 add_library(htslib ${SOURCES} ${CRAM})
 target_link_libraries (htslib ${CMAKE_THREAD_LIBS_INIT})
-
