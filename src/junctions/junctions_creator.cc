@@ -143,8 +143,9 @@ void JunctionsCreator::print_one_junction(const Junction j1, ostream& out) {
         "\t" << j1.thick_start << "\t" << j1.thick_end <<
         "\t" << j1.name << "\t" << j1.read_count << "\t" << j1.strand <<
         "\t" << j1.thick_start << "\t" << j1.thick_end <<
+        "\t" << j1.color << "\t" << j1.nblocks <<
         "\t" << j1.start - j1.thick_start << "," << j1.thick_end - j1.end <<
-        endl;
+        "\t" << "0," << j1.thick_end - j1.thick_start << endl;
 }
 
 //Print all the junctions - this function needs work
@@ -291,7 +292,6 @@ int JunctionsCreator::identify_junctions_from_BAM() {
         //Move the iterator to the region we are interested in
         if(region.empty())
             region = "."; //Default = entire file
-        cout << "\nRegion is " << region;
         iter  = sam_itr_querys(idx, header, region.c_str());
         if(header == NULL || iter == NULL) {
             sam_close(in);

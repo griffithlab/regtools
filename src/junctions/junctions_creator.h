@@ -44,6 +44,10 @@ struct Junction : BED {
     bool has_min_anchor;
     //Name of the junction
     string name;
+    //Color for the BED line
+    string color;
+    //Number of blocks
+    int nblocks;
     Junction() {
         start = 0;
         end = 0;
@@ -53,6 +57,8 @@ struct Junction : BED {
         added = false;
         has_min_anchor = false;
         name = "NA";
+        color = "255,0,0";
+        nblocks = 2;
     }
 };
 
