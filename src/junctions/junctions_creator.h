@@ -34,7 +34,9 @@ using namespace std;
 //Format of an junction
 struct Junction : BED {
     unsigned int read_count;
+    //This is the start - max overhang
     CHRPOS thick_start;
+    //This is the end + max overhang
     CHRPOS thick_end;
     //Has the junction been added to the map
     bool added;
