@@ -41,9 +41,10 @@ struct Junction : BED {
     //Has the junction been added to the map
     bool added;
     //Does the junction satisfy the min anchor requirement
-    //Atleast one read containing the junction needs to have
-    // min anchor on both sides.
-    bool has_min_anchor;
+    //Minimum anchor on either side can be supported by different
+    //reads, only junctions anchored on both sides are reported.
+    bool has_left_min_anchor;
+    bool has_right_min_anchor;
     //Name of the junction
     string name;
     //Color for the BED line
@@ -57,7 +58,8 @@ struct Junction : BED {
         thick_end = 0;
         read_count = 0;
         added = false;
-        has_min_anchor = false;
+        has_left_min_anchor = false;
+        has_right_min_anchor = false;
         name = "NA";
         color = "255,0,0";
         nblocks = 2;
@@ -110,10 +112,10 @@ class JunctionsCreator {
         void print_all_junctions(ostream& out = cout);
         //Get the BAM filename
         string get_bam();
-        //Check if a junction satisfies minimum anchor property
-        bool properly_anchored(Junction j1);
         //Parse the alignment into the junctions map
         int parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *aln);
+        //Check if junction satisfies qc
+        bool junction_qc(Junction &j1);
 };
 
 #endif

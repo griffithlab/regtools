@@ -90,25 +90,40 @@ string JunctionsCreator::get_new_junction_name() {
     return name_ss.str();
 }
 
+//Do some basic qc on the junction
+bool JunctionsCreator::junction_qc(Junction &j1) {
+    if(j1.end - j1.start < min_intron_length ||
+       j1.end - j1.start > max_intron_length) {
+        cerr << "Failing qc length: " << j1.end - j1.start << endl;
+        return false;
+    }
+    if(j1.start - j1.thick_start >= min_anchor_length)
+        j1.has_left_min_anchor = true;
+    if(j1.thick_end - j1.end >= min_anchor_length)
+        j1.has_right_min_anchor = true;
+    return true;
+}
+
 //Add a junction to the junctions map
 //The read_count field is the number of reads supporting the junction.
 int JunctionsCreator::add_junction(Junction j1) {
-    //cerr << "\nChr " << j1.chrom << "\tStart " << j1.start << "\tEnd " << j1.end;
+    //Check junction_qc
+    if(!junction_qc(j1)) {
+        cerr << endl << "Failed qc";
+        return 0;
+    }
+
+    //Construct key chr:start-end:strand
     stringstream s1;
     string start, end;
     s1 << j1.start; start = s1.str();
     s1 << j1.end; end = s1.str();
-    string key = j1.chrom + string(":") + start + "-" + end;
-    if((j1.start - j1.thick_start >= min_anchor_length) &&
-           (j1.thick_end - j1.end >= min_anchor_length)) {
-        j1.has_min_anchor = true;
-    }
+    string key = j1.chrom + string(":") + start + "-" + end + ":" + j1.strand;
+
     //Check if new junction
     if(!junctions.count(key)) {
-        if(j1.has_min_anchor) {
-            j1.name = get_new_junction_name();
-            j1.read_count = 1;
-        }
+        j1.name = get_new_junction_name();
+        j1.read_count = 1;
     } else { //existing junction
         Junction j0 = junctions[key];
         //increment read count
@@ -121,19 +136,13 @@ int JunctionsCreator::add_junction(Junction j1) {
         if(j0.thick_end > j1.thick_end)
             j1.thick_end = j0.thick_end;
         //preserve min anchor information
-        if(j0.has_min_anchor)
-            j1.has_min_anchor = true;
-        //Check if strand info is amibiguous
-        if(j1.strand != j0.strand) {
-            j1.strand = "+/-";
-        }
+        j1.has_left_min_anchor = j1.has_left_min_anchor || j0.has_left_min_anchor;
+        j1.has_right_min_anchor = j1.has_right_min_anchor || j0.has_right_min_anchor;
     }
-    //Check for minimum anchor before adding
-    if(j1.has_min_anchor) {
-        junctions[key] = j1;
-        cerr << "Adding junction2\n";
-        print_one_junction(j1, cerr);
-    }
+    //Add junction and check anchor while printing.
+    junctions[key] = j1;
+    cerr << "Inside add_junction\n";
+    print_one_junction(j1, cerr);
     return 0;
 }
 
@@ -156,7 +165,7 @@ void JunctionsCreator::print_all_junctions(ostream& out) {
     for(map<string, Junction> :: iterator it = junctions.begin();
         it != junctions.end(); it++) {
         Junction j1 = it->second;
-        if (j1.has_min_anchor) {
+        if(j1.has_left_min_anchor && j1.has_right_min_anchor) {
             if(fout.is_open())
                 print_one_junction(j1, fout);
             else
