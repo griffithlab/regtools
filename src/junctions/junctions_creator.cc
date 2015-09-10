@@ -39,10 +39,16 @@ using namespace std;
 int JunctionsCreator::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int c;
-    while((c = getopt(argc, argv, "ha:o:r:")) != -1) {
+    while((c = getopt(argc, argv, "ha:i:I:o:r:")) != -1) {
         switch(c) {
             case 'a':
                 min_anchor_length = atoi(optarg);
+                break;
+            case 'i':
+                min_intron_length = atoi(optarg);
+                break;
+            case 'I':
+                max_intron_length = atoi(optarg);
                 break;
             case 'o':
                 output_file = string(optarg);
@@ -62,6 +68,8 @@ int JunctionsCreator::parse_options(int argc, char *argv[]) {
     }
     bam_ = string(argv[optind]);
     cerr << endl << "Minimum junction anchor length: " << min_anchor_length;
+    cerr << endl << "Minimum intron length: " << min_intron_length;
+    cerr << endl << "Maximum intron length: " << max_intron_length;
     cerr << endl << "BAM file: " << bam_;
     return 0;
 }
@@ -190,15 +198,23 @@ void JunctionsCreator::set_junction_strand(bam1_t *aln, Junction& j1) {
 
 //Parse junctions from the read and store in junction map
 int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *aln) {
-    const bam1_core_t *c = &aln->core;
-    if (c->n_cigar <= 1) // max one cigar operation exists(likely all matches)
+    int n_cigar = aln->core.n_cigar;
+    if (n_cigar <= 1) // max one cigar operation exists(likely all matches)
         return 0;
 
     int chr_id = aln->core.tid;
     int read_pos = aln->core.pos;
     string chr(header->target_name[chr_id]);
     uint32_t *cigar = bam_get_cigar(aln);
-    int n_cigar = c->n_cigar;
+
+    /*
+    //Skip duplicates
+    int flag = aln->core.flag;
+    if(flag & 1024) {
+        cerr << "Skipping read_pos " << read_pos << " flag " << flag << endl;
+        return 0;
+    }
+    */
 
     Junction j1;
     j1.chrom = chr;

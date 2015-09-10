@@ -75,6 +75,10 @@ class JunctionsCreator {
         //Junctions need atleast this many bp overlap
         // on both ends.
         uint32_t min_anchor_length;
+        //Minimum length of an intron, i.e min junction width
+        uint32_t min_intron_length;
+        //Maximum length of an intron, i.e max junction width
+        uint32_t max_intron_length;
         //Map to store the junctions
         //The key is "chr:start-end"
         //The value is an object of type Junction(see above)
@@ -96,6 +100,8 @@ class JunctionsCreator {
         //Default constructor
         JunctionsCreator() {
             min_anchor_length = 8;
+            min_intron_length = 70;
+            max_intron_length = 500000;
         };
         //Name the junction based on the number of junctions
         // in the map.
