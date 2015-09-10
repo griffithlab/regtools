@@ -354,6 +354,7 @@ int JunctionsCreator::identify_junctions_from_BAM() {
             parse_alignment_into_junctions(header, aln);
         }
         hts_itr_destroy(iter);
+        hts_idx_destroy(idx);
         bam_destroy1(aln);
         bam_hdr_destroy(header);
         sam_close(in);
