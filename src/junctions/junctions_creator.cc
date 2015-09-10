@@ -230,15 +230,14 @@ int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *
                bam_cigar_oplen(cigar[i]);
         cerr << "\ncigar " << op << " " << len;
         switch(op) {
-            //Add first junction if read overlaps
-            // two junctions
             case 'N':
                 if(!started_junction) {
                     j1.end = j1.start + len;
                     j1.thick_end = j1.end;
+                    //Start the first one and remains started
                     started_junction = true;
                 } else {
-                    cerr << endl << "DEBUG " << read_pos << "\t" <<
+                    cerr << endl << "DEBUG N " << read_pos << "\t" <<
                         j1.start << "\t" << j1.end << "\t" <<
                         j1.thick_start << "\t" << j1.thick_end << endl;
                     //Add the previous junction
@@ -247,28 +246,61 @@ int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *
                     } catch (const std::logic_error& e) {
                         cout << e.what() << '\n';
                     }
-                    j1.added = true;
-                    //Start the next junction
-                    j1.added = false;
                     j1.thick_start = j1.end;
                     j1.start = j1.thick_end;
                     j1.end = j1.start + len;
                     j1.thick_end = j1.end;
+                    //For clarity - the next junction is now open
                     started_junction = true;
                 }
                 break;
-            case 'D':
             case '=':
-            case 'X':
             case 'M':
                 if(!started_junction)
                     j1.start += len;
                 else
                     j1.thick_end += len;
                 break;
-            //SEQ not in reference genome - skip
+            //No mismatches allowed in anchor
+            case 'D':
+            case 'X':
+                if(!started_junction) {
+                    j1.start += len;
+                    j1.thick_start = j1.start;
+                } else {
+                    cerr << endl << "DEBUG DXS " << read_pos << "\t" <<
+                        j1.start << "\t" << j1.end << "\t" <<
+                        j1.thick_start << "\t" << j1.thick_end << endl;
+                    try {
+                        add_junction(j1);
+                    } catch (const std::logic_error& e) {
+                        cout << e.what() << '\n';
+                    }
+                    //Don't include these in the next anchor
+                    j1.start = j1.thick_end + len;
+                    j1.thick_start = j1.start;
+                }
+                started_junction = false;
+                break;
             case 'I':
             case 'S':
+                if(!started_junction)
+                    j1.thick_start = j1.start;
+                else {
+                    cerr << endl << "DEBUG I " << read_pos << "\t" <<
+                        j1.start << "\t" << j1.end << "\t" <<
+                        j1.thick_start << "\t" << j1.thick_end << endl;
+                    try {
+                        add_junction(j1);
+                    } catch (const std::logic_error& e) {
+                        cout << e.what() << '\n';
+                    }
+                    //Don't include these in the next anchor
+                    j1.start = j1.thick_end;
+                    j1.thick_start = j1.start;
+                }
+                started_junction = false;
+                break;
             case 'H':
                 break;
             default:
@@ -276,15 +308,15 @@ int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *
                 break;
         }
     }
-    if(!j1.added && started_junction) {
-        cerr << endl << "DEBUG2 " << read_pos << "\t" <<
-            j1.start << "\t" << j1.end << "\t" << j1.thick_start << "\t" << j1.thick_end << endl;
+    if(started_junction) {
+        cerr << endl << "DEBUG end " << read_pos << "\t" <<
+            j1.start << "\t" << j1.end << "\t" <<
+            j1.thick_start << "\t" << j1.thick_end << endl;
         try {
             add_junction(j1);
         } catch (const std::logic_error& e) {
             cout << e.what() << '\n';
         }
-        j1.added = true;
     }
     return 0;
 }
