@@ -167,12 +167,6 @@ void JunctionsCreator::print_all_junctions(ostream& out) {
         fout.close();
 }
 
-//Check if the junction has the minimum anchor length
-bool JunctionsCreator::properly_anchored(Junction j1) {
-    return((j1.start - j1.thick_start >= min_anchor_length) &&
-           (j1.thick_end - j1.end >= min_anchor_length));
-}
-
 //Get the strand from the XS aux tag
 void JunctionsCreator::set_junction_strand(bam1_t *aln, Junction& j1) {
     uint8_t *p = bam_aux_get(aln, "XS");
