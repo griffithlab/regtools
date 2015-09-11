@@ -1,12 +1,19 @@
 # Examples
-[junction_annotation]: images/junction_annotation_examples.png
-[anchor_annotation]: images/anchor_examples.png
+[junction_annotation]: ../images/junction_annotation_examples.png
+[anchor_annotation]: ../images/anchor_examples.png
 
 ###Annotate
 The `regtools junctions annotate` command is a tool to annotate the observed junctions with respect to a known
 transcript structure. The known transcript structure is in the form of a GTF file obtained from one of the standard
 Gene Annotation databases such as Ensembl/RefSeq/UCSC etc. The goal of the annotation step is to help identify novel/unusual junctions.
 
+###Input
+
+###Options
+
+###Output
+
+###Notes
 ####Annotating observed junctions with known donor/acceptor/junction information
 It is useful to annotate the ends of junction with respect to known acceptors,
 donors and junctions in the transcriptome. The known acceptor, donor and junction

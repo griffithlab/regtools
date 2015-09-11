@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/griffithlab/regtools.svg?branch=master)](https://travis-ci.org/griffithlab/regtools)
+[![Documentation Status](https://readthedocs.org/projects/regtools/badge/?version=latest)](https://readthedocs.org/projects/regtools/?badge=latest)
 
 #regtools
 

@@ -1,6 +1,9 @@
 site_name: regtools
 pages:
 - Home: 'index.md'
+- Commands:
+    - 'Index': 'commands/commands.md'
+    - 'Junctions create': 'commands/junctions-create.md'
+    - 'Junctions annotate': 'commands/junctions-annotate.md'
 - About: 'about.md'
-- Examples: 'examples.md'
 theme: readthedocs
