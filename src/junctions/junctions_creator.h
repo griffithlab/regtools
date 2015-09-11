@@ -127,6 +127,7 @@ class JunctionsCreator {
             min_intron_length = 70;
             max_intron_length = 500000;
             junctions_sorted = false;
+            output_file = "NA";
         };
         //Name the junction based on the number of junctions
         // in the map.

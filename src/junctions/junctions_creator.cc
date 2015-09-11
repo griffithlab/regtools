@@ -72,6 +72,7 @@ int JunctionsCreator::parse_options(int argc, char *argv[]) {
     cerr << endl << "Minimum intron length: " << min_intron_length;
     cerr << endl << "Maximum intron length: " << max_intron_length;
     cerr << endl << "BAM file: " << bam_;
+    cerr << endl << "Output file: " << output_file;
     return 0;
 }
 
@@ -169,8 +170,9 @@ void JunctionsCreator::print_one_junction(const Junction j1, ostream& out) {
 //Print all the junctions - this function needs work
 void JunctionsCreator::print_all_junctions(ostream& out) {
     ofstream fout;
-    if(!output_file.empty())
+    if(output_file != string("NA")) {
         fout.open(output_file.c_str());
+    }
     //Sort junctions by position
     if(!junctions_sorted) {
         create_junctions_vector();
