@@ -25,7 +25,10 @@ TEST_F(JunctionsCreateTest, ParseEmptyInput) {
 
 TEST_F(JunctionsCreateTest, Usage) {
     ostringstream out1, out2;
-    out1 << "\nUsage:\t\t" << "regtools junctions create [options] alignments.bam";
+    out1 << "\nUsage:\t\t" << "regtools junctions create [options] indexed_alignments.bam";
+    out1 << "\nOptions:\t" << "-a INT\tMinimum anchor length on any one side of the junction. [8]";
+    out1 << "\n\t" << "-o FILE\tThe file to write output to.";
+    out1 << "\n\t" << "-r STR\tThe region to identify junctions in \"chr:start-end\" format.";
     out1 << "\n";
     j1.usage(out2);
     ASSERT_EQ(out1.str(), out2.str()) << "Error parsing as expected";
