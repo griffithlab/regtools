@@ -79,9 +79,14 @@ int JunctionsCreator::parse_options(int argc, char *argv[]) {
 //Usage statement for this tool
 int JunctionsCreator::usage(ostream& out) {
     out << "\nUsage:\t\t" << "regtools junctions create [options] indexed_alignments.bam";
-    out << "\nOptions:\t" << "-a INT\tMinimum anchor length on any one side of the junction. [8]";
-    out << "\n\t" << "-o FILE\tThe file to write output to.";
-    out << "\n\t" << "-r STR\tThe region to identify junctions in \"chr:start-end\" format.";
+    out << "\nOptions:";
+    out << "\t" << "-a FILE\tMinimum anchor length. Junctions which satisfy a minimum "
+                     "anchor length on both sides are reported. [8]";
+    out << "\n\t\t" << "-i FILE\tMinimum intron length. [70]";
+    out << "\n\t\t" << "-I FILE\tMaximum intron length. [500000]";
+    out << "\n\t\t" << "-o FILE\tThe file to write output to. [STDOUT]";
+    out << "\n\t\t" << "-r STR\tThe region to identify junctions "
+                     "in \"chr:start-end\" format. Entire BAM by default.";
     out << "\n";
     return 0;
 }
