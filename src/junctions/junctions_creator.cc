@@ -22,6 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
+#include <algorithm>
 #include <getopt.h>
 #include <iostream>
 #include <iomanip>
@@ -170,9 +171,14 @@ void JunctionsCreator::print_all_junctions(ostream& out) {
     ofstream fout;
     if(!output_file.empty())
         fout.open(output_file.c_str());
-    for(map<string, Junction> :: iterator it = junctions.begin();
-        it != junctions.end(); it++) {
-        Junction j1 = it->second;
+    //Sort junctions by position
+    if(!junctions_sorted) {
+        create_junctions_vector();
+        sort_junctions();
+    }
+    for(vector<Junction> :: iterator it = junctions_vector.begin();
+        it != junctions_vector.end(); it++) {
+        Junction j1 = *it;
         if(j1.has_left_min_anchor && j1.has_right_min_anchor) {
             if(fout.is_open())
                 print_one_junction(j1, fout);
@@ -324,7 +330,6 @@ int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *
 //The workhorse - identifies junctions from BAM
 int JunctionsCreator::identify_junctions_from_BAM() {
     if(!bam_.empty()) {
-        cerr << endl << "Opening BAM " << bam_ << endl;
         //open BAM for reading
         samFile *in = sam_open(bam_.c_str(), "r");
         if(in == NULL) {
@@ -362,3 +367,17 @@ int JunctionsCreator::identify_junctions_from_BAM() {
     return 0;
 }
 
+//Create the junctions vector from the map
+void JunctionsCreator::create_junctions_vector() {
+    for(map<string, Junction> :: iterator it = junctions.begin();
+        it != junctions.end(); it++) {
+        Junction j1 = it->second;
+        junctions_vector.push_back(j1);
+    }
+}
+
+//Sort all the junctions by their position
+void JunctionsCreator::sort_junctions() {
+    sort(junctions_vector.begin(), junctions_vector.end(), compare_junctions);
+    junctions_sorted = true;
+}

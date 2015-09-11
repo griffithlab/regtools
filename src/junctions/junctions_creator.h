@@ -66,6 +66,26 @@ struct Junction : BED {
     }
 };
 
+//Compare two junctions
+//Return true if j1.start < j2.start
+//If j1.start == j2.start, return true if j1.end < j2.end
+static inline bool compare_junctions(const Junction &j1,
+                       const Junction &j2) {
+    //Different chromosome
+    if(j1.chrom < j2.chrom)
+        return true;
+    if(j1.chrom > j2.chrom)
+        return false;
+    //Same chromosome
+    if(j1.thick_start == j2.thick_start) {
+        if(j1.thick_end < j2.thick_end)
+            return true;
+        else
+            return false;
+    }
+    return j1.thick_start < j2.thick_start;
+}
+
 //The class that deals with creating the junctions
 class JunctionsCreator {
     private:
@@ -83,6 +103,10 @@ class JunctionsCreator {
         //The key is "chr:start-end"
         //The value is an object of type Junction(see above)
         map<string, Junction> junctions;
+        //Maintain a sorted list of junctions
+        vector<Junction> junctions_vector;
+        //Are the junctions sorted
+        bool junctions_sorted;
         //File to write output to - optional, write to STDOUT by default
         string output_file;
         //Region to identify junctions, in "chr:start-end" format
@@ -102,6 +126,7 @@ class JunctionsCreator {
             min_anchor_length = 8;
             min_intron_length = 70;
             max_intron_length = 500000;
+            junctions_sorted = false;
         };
         //Name the junction based on the number of junctions
         // in the map.
@@ -122,6 +147,10 @@ class JunctionsCreator {
         int parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *aln);
         //Check if junction satisfies qc
         bool junction_qc(Junction &j1);
+        //Sort all the junctions by their position
+        void sort_junctions();
+        //Create the junctions vector from the map
+        void create_junctions_vector();
 };
 
 #endif
