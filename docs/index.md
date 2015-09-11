@@ -23,8 +23,8 @@ Clone and install regtools by running:
 
 ##Contribute
 
-- Issue Tracker: github.com/griffithlab/regtools/issues
-- Source Code: github.com/griffithlab/regtools
+- [Issue Tracker](github.com/griffithlab/regtools/issues)
+- [Source Code](github.com/griffithlab/regtools)
 
 ##Support
 

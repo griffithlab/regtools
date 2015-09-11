@@ -1,6 +1,6 @@
 To get a list of all available regtools run `regtools --help`
 
-As of date, the regtools commands are
+The regtools commands are
 
 - [junctions](#junctions)
 
@@ -10,5 +10,5 @@ The transcriptome structure is often summarized from a RNAseq experiment with a 
 
 Listed below are links to detailed explanations of the `junctions` sub-commands
 
-- [annotate](junctions-annotate.md)
 - [create](junctions-create.md)
+- [annotate](junctions-annotate.md)
