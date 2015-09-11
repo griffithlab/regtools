@@ -13,7 +13,7 @@ class TestCreate(IntegrationTest, unittest.TestCase):
                                             anchor + ".out")[0]
             if anchor != "":
                 anchor = "-a " + anchor
-            params = [ "junctions", "create", bam1, anchor, "-o", output_file]
+            params = [ "junctions", "create", anchor, "-o", output_file, bam1 ]
             rv, err = self.execute(params)
             self.assertEqual(rv, 0)
             #self.assertEqual('', err)
