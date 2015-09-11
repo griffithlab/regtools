@@ -13,7 +13,8 @@ in a regulatory and splicing context.
 
 ##Features
 
--
+- Extract exon-exon junctions from a RNAseq BAM file.
+- Annotate exon-exon junctions with information from a known transcriptome.
 
 ##Installation
 
@@ -43,6 +44,12 @@ potential bugs.
 ##Documentation
 The documentation for the project is hosted on
 [Read the Docs.](https://regtools.readthedocs.org/en/latest/)
+
+##Acknowledgements
+
+Regtools uses several open-source libraries. We would like to thank the
+developers of htslib and bedtools. We would also like to thank Travis Abbott for
+useful comments and code.
 
 ##License
 
