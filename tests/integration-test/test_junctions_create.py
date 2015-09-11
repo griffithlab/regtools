@@ -5,7 +5,7 @@ import unittest
 
 class TestCreate(IntegrationTest, unittest.TestCase):
     def test_junctions_create(self):
-        bam1 = self.inputFiles("test.rnaseq.bam")[0]
+        bam1 = self.inputFiles("test_hcc1395.bam")[0]
         output_file = self.tempFile("create.out")
         print "BAM1 is ", bam1
         for anchor in ["", "30"]:
