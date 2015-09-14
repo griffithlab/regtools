@@ -109,7 +109,6 @@ string JunctionsCreator::get_new_junction_name() {
 bool JunctionsCreator::junction_qc(Junction &j1) {
     if(j1.end - j1.start < min_intron_length ||
        j1.end - j1.start > max_intron_length) {
-        cerr << "Failing qc length: " << j1.end - j1.start << endl;
         return false;
     }
     if(j1.start - j1.thick_start >= min_anchor_length)
@@ -124,7 +123,6 @@ bool JunctionsCreator::junction_qc(Junction &j1) {
 int JunctionsCreator::add_junction(Junction j1) {
     //Check junction_qc
     if(!junction_qc(j1)) {
-        cerr << endl << "Failed qc";
         return 0;
     }
 
@@ -156,8 +154,6 @@ int JunctionsCreator::add_junction(Junction j1) {
     }
     //Add junction and check anchor while printing.
     junctions[key] = j1;
-    cerr << "Inside add_junction\n";
-    print_one_junction(j1, cerr);
     return 0;
 }
 
@@ -235,13 +231,11 @@ int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *
     j1.thick_start = read_pos;
     set_junction_strand(aln, j1);
     bool started_junction = false;
-    cerr << "\nread_pos " << read_pos;
     for (int i = 0; i < n_cigar; ++i) {
         char op =
                bam_cigar_opchr(cigar[i]);
         int len =
                bam_cigar_oplen(cigar[i]);
-        cerr << "\ncigar " << op << " " << len;
         switch(op) {
             case 'N':
                 if(!started_junction) {
@@ -250,9 +244,6 @@ int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *
                     //Start the first one and remains started
                     started_junction = true;
                 } else {
-                    cerr << endl << "DEBUG N " << read_pos << "\t" <<
-                        j1.start << "\t" << j1.end << "\t" <<
-                        j1.thick_start << "\t" << j1.thick_end << endl;
                     //Add the previous junction
                     try {
                         add_junction(j1);
@@ -281,9 +272,6 @@ int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *
                     j1.start += len;
                     j1.thick_start = j1.start;
                 } else {
-                    cerr << endl << "DEBUG DXS " << read_pos << "\t" <<
-                        j1.start << "\t" << j1.end << "\t" <<
-                        j1.thick_start << "\t" << j1.thick_end << endl;
                     try {
                         add_junction(j1);
                     } catch (const std::logic_error& e) {
@@ -300,9 +288,6 @@ int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *
                 if(!started_junction)
                     j1.thick_start = j1.start;
                 else {
-                    cerr << endl << "DEBUG I " << read_pos << "\t" <<
-                        j1.start << "\t" << j1.end << "\t" <<
-                        j1.thick_start << "\t" << j1.thick_end << endl;
                     try {
                         add_junction(j1);
                     } catch (const std::logic_error& e) {
@@ -322,9 +307,6 @@ int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *
         }
     }
     if(started_junction) {
-        cerr << endl << "DEBUG end " << read_pos << "\t" <<
-            j1.start << "\t" << j1.end << "\t" <<
-            j1.thick_start << "\t" << j1.thick_end << endl;
         try {
             add_junction(j1);
         } catch (const std::logic_error& e) {
