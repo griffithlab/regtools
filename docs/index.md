@@ -2,8 +2,6 @@
 
 Regtools is a set of tools that integrate DNA-seq and RNA-seq data to help interpret mutations in a regulatory and splicing context.
 
-For more detailed information about the different regtools commands, please look at the [Commands](commands/commands.md) page.
-
 ##Features
 
 - Extract exon-exon junctions from a RNAseq alignment.
@@ -20,6 +18,10 @@ Clone and install regtools by running:
     cmake ..
     make
 ```
+
+##Usage
+
+For information about the individual regtools commands, please see [the Commands page](commands/commands.md)
 
 ##Contribute
 
