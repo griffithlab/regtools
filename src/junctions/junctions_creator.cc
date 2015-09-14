@@ -73,6 +73,7 @@ int JunctionsCreator::parse_options(int argc, char *argv[]) {
     cerr << endl << "Maximum intron length: " << max_intron_length;
     cerr << endl << "BAM file: " << bam_;
     cerr << endl << "Output file: " << output_file;
+    cerr << endl;
     return 0;
 }
 
