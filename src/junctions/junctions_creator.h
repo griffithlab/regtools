@@ -33,6 +33,7 @@ using namespace std;
 
 //Format of an junction
 struct Junction : BED {
+    //Number of reads supporting the junction
     unsigned int read_count;
     //This is the start - max overhang
     CHRPOS thick_start;
@@ -61,6 +62,23 @@ struct Junction : BED {
         has_left_min_anchor = false;
         has_right_min_anchor = false;
         name = "NA";
+        color = "255,0,0";
+        nblocks = 2;
+    }
+    Junction(string chrom1, CHRPOS start1, CHRPOS end1,
+             CHRPOS thick_start1, CHRPOS thick_end1,
+             string strand1) {
+        chrom = chrom1;
+        start = start1;
+        end = end1;
+        thick_start = thick_start1;
+        thick_end = thick_end1;
+        name = "NA";
+        read_count = 0;
+        strand = strand1;
+        added = false;
+        has_left_min_anchor = false;
+        has_right_min_anchor = false;
         color = "255,0,0";
         nblocks = 2;
     }
