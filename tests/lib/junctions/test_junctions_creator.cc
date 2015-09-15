@@ -68,3 +68,71 @@ TEST_F(JunctionsCreateTest, Usage) {
     jc1.usage(out2);
     ASSERT_EQ(out.str(), out2.str()) << "Error parsing as expected";
 }
+
+TEST_F(JunctionsCreateTest, JunctionName) {
+    string j1_name = jc1.get_new_junction_name();
+    ASSERT_EQ(j1_name, string("JUNC00000001"));
+    Junction j1("chr1", 10000, 10200,
+            9500, 10700, "+");
+    jc1.add_junction(j1);
+    string j2_name = jc1.get_new_junction_name();
+    ASSERT_EQ(string("JUNC00000002"), j2_name);
+}
+
+TEST_F(JunctionsCreateTest, PrintJunction) {
+    stringstream ss1, expected;
+    Junction j1("chr1", 10000, 10200,
+            9500, 10700, "+");
+
+    expected << "chr1" <<
+        "\t" << 9500 << "\t" << 10700 <<
+        "\t" << "NA" << "\t" << 0 << "\t" << "+" <<
+        "\t" << 9500 << "\t" << 10700 <<
+        "\t" << "255,0,0" << "\t" << 2 <<
+        "\t" << 10000 - 9500 << "," << 10700 - 10200 <<
+        "\t" << "0," << 10200 - 9500  << endl;
+
+    jc1.print_one_junction(j1, ss1);
+    ASSERT_EQ(expected.str(), ss1.str());
+}
+
+TEST_F(JunctionsCreateTest, AddJunction) {
+    stringstream ss1, expected;
+    //Add one junction with differing thick start/ends
+    jc1.add_junction(Junction("chr1", 10000, 10200,
+            9900, 10300, "+"));
+    jc1.add_junction(Junction("chr1", 10000, 10200,
+            9500, 10200, "+"));
+    jc1.add_junction(Junction("chr1", 10000, 10200,
+            9950, 10700, "+"));
+    //Add second junction
+    jc1.add_junction(Junction("chr1", 8000, 8500,
+            7000, 10000, "+"));
+    //Add second junction with different strand
+    jc1.add_junction(Junction("chr1", 8000, 8500,
+            7000, 10000, "-"));
+    expected << "chr1" <<
+        "\t" << 7000 << "\t" << 10000 <<
+        "\t" << "JUNC00000002" << "\t" << 1 << "\t" << "+" <<
+        "\t" << 7000 << "\t" << 10000 <<
+        "\t" << "255,0,0" << "\t" << 2 <<
+        "\t" << 8000 - 7000 << "," << 10000 - 8500 <<
+        "\t" << "0," << 8500 - 7000  << endl;
+    expected << "chr1" <<
+        "\t" << 7000 << "\t" << 10000 <<
+        "\t" << "JUNC00000003" << "\t" << 1 << "\t" << "-" <<
+        "\t" << 7000 << "\t" << 10000 <<
+        "\t" << "255,0,0" << "\t" << 2 <<
+        "\t" << 8000 - 7000 << "," << 10000 - 8500 <<
+        "\t" << "0," << 8500 - 7000  << endl;
+    expected << "chr1" <<
+        "\t" << 9500 << "\t" << 10700 <<
+        "\t" << "JUNC00000001" << "\t" << 3 << "\t" << "+" <<
+        "\t" << 9500 << "\t" << 10700 <<
+        "\t" << "255,0,0" << "\t" << 2 <<
+        "\t" << 10000 - 9500 << "," << 10700 - 10200 <<
+        "\t" << "0," << 10200 - 9500  << endl;
+    //This will sort and then print
+    jc1.print_all_junctions(ss1);
+    ASSERT_EQ(expected.str(), ss1.str());
+}
