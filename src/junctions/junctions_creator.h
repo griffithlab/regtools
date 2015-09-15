@@ -111,15 +111,6 @@ class JunctionsCreator {
         string output_file_;
         //Region to identify junctions, in "chr:start-end" format
         string region_;
-        //Pull out the cigar string from the read
-        int parse_read(bam_hdr_t *header, bam1_t *aln);
-        //Parse junctions from the read and store in junction map
-        int parse_cigar_into_junctions(string chr, int read_pos,
-                                       uint32_t *cigar, int n_cigar);
-        //Add a junction to the junctions map
-        int add_junction(Junction j1);
-        //Get the strand from the XS aux tag
-        void set_junction_strand(bam1_t *aln, Junction& j1);
     public:
         //Default constructor
         JunctionsCreator() {
@@ -153,6 +144,15 @@ class JunctionsCreator {
         void sort_junctions();
         //Create the junctions vector from the map
         void create_junctions_vector();
+        //Pull out the cigar string from the read
+        int parse_read(bam_hdr_t *header, bam1_t *aln);
+        //Parse junctions from the read and store in junction map
+        int parse_cigar_into_junctions(string chr, int read_pos,
+                                       uint32_t *cigar, int n_cigar);
+        //Add a junction to the junctions map
+        int add_junction(Junction j1);
+        //Get the strand from the XS aux tag
+        void set_junction_strand(bam1_t *aln, Junction& j1);
 };
 
 #endif
