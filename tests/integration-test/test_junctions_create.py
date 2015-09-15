@@ -4,7 +4,7 @@ from integrationtest import IntegrationTest, main
 import unittest
 
 class TestCreate(IntegrationTest, unittest.TestCase):
-    def test_junctions_create(self):
+    def test_junctions_create_anchor(self):
         bam1 = self.inputFiles("test_hcc1395.bam")[0]
         output_file = self.tempFile("create.out")
         print "BAM1 is ", bam1
