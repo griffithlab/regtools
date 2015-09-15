@@ -43,19 +43,19 @@ int JunctionsCreator::parse_options(int argc, char *argv[]) {
     while((c = getopt(argc, argv, "ha:i:I:o:r:")) != -1) {
         switch(c) {
             case 'a':
-                min_anchor_length = atoi(optarg);
+                min_anchor_length_ = atoi(optarg);
                 break;
             case 'i':
-                min_intron_length = atoi(optarg);
+                min_intron_length_ = atoi(optarg);
                 break;
             case 'I':
-                max_intron_length = atoi(optarg);
+                max_intron_length_ = atoi(optarg);
                 break;
             case 'o':
-                output_file = string(optarg);
+                output_file_ = string(optarg);
                 break;
             case 'r':
-                region = string(optarg);
+                region_ = string(optarg);
                 break;
             case 'h':
                 usage();
@@ -69,11 +69,11 @@ int JunctionsCreator::parse_options(int argc, char *argv[]) {
         throw runtime_error("\nError parsing inputs!");
     }
     bam_ = string(argv[optind]);
-    cerr << endl << "Minimum junction anchor length: " << min_anchor_length;
-    cerr << endl << "Minimum intron length: " << min_intron_length;
-    cerr << endl << "Maximum intron length: " << max_intron_length;
+    cerr << endl << "Minimum junction anchor length: " << min_anchor_length_;
+    cerr << endl << "Minimum intron length: " << min_intron_length_;
+    cerr << endl << "Maximum intron length: " << max_intron_length_;
     cerr << endl << "Alignment: " << bam_;
-    cerr << endl << "Output file: " << output_file;
+    cerr << endl << "Output file: " << output_file_;
     cerr << endl;
     return 0;
 }
@@ -101,7 +101,7 @@ string JunctionsCreator::get_bam() {
 //Name the junction based on the number of junctions
 // in the map.
 string JunctionsCreator::get_new_junction_name() {
-    int index = junctions.size() + 1;
+    int index = junctions_.size() + 1;
     stringstream name_ss;
     name_ss << "JUNC" << setfill('0') << setw(8) << index;
     return name_ss.str();
@@ -109,13 +109,13 @@ string JunctionsCreator::get_new_junction_name() {
 
 //Do some basic qc on the junction
 bool JunctionsCreator::junction_qc(Junction &j1) {
-    if(j1.end - j1.start < min_intron_length ||
-       j1.end - j1.start > max_intron_length) {
+    if(j1.end - j1.start < min_intron_length_ ||
+       j1.end - j1.start > max_intron_length_) {
         return false;
     }
-    if(j1.start - j1.thick_start >= min_anchor_length)
+    if(j1.start - j1.thick_start >= min_anchor_length_)
         j1.has_left_min_anchor = true;
-    if(j1.thick_end - j1.end >= min_anchor_length)
+    if(j1.thick_end - j1.end >= min_anchor_length_)
         j1.has_right_min_anchor = true;
     return true;
 }
@@ -136,11 +136,11 @@ int JunctionsCreator::add_junction(Junction j1) {
     string key = j1.chrom + string(":") + start + "-" + end + ":" + j1.strand;
 
     //Check if new junction
-    if(!junctions.count(key)) {
+    if(!junctions_.count(key)) {
         j1.name = get_new_junction_name();
         j1.read_count = 1;
     } else { //existing junction
-        Junction j0 = junctions[key];
+        Junction j0 = junctions_[key];
         //increment read count
         j1.read_count = j0.read_count + 1;
         //Keep the same name
@@ -155,7 +155,7 @@ int JunctionsCreator::add_junction(Junction j1) {
         j1.has_right_min_anchor = j1.has_right_min_anchor || j0.has_right_min_anchor;
     }
     //Add junction and check anchor while printing.
-    junctions[key] = j1;
+    junctions_[key] = j1;
     return 0;
 }
 
@@ -173,16 +173,16 @@ void JunctionsCreator::print_one_junction(const Junction j1, ostream& out) {
 //Print all the junctions - this function needs work
 void JunctionsCreator::print_all_junctions(ostream& out) {
     ofstream fout;
-    if(output_file != string("NA")) {
-        fout.open(output_file.c_str());
+    if(output_file_ != string("NA")) {
+        fout.open(output_file_.c_str());
     }
     //Sort junctions by position
-    if(!junctions_sorted) {
+    if(!junctions_sorted_) {
         create_junctions_vector();
         sort_junctions();
     }
-    for(vector<Junction> :: iterator it = junctions_vector.begin();
-        it != junctions_vector.end(); it++) {
+    for(vector<Junction> :: iterator it = junctions_vector_.begin();
+        it != junctions_vector_.end(); it++) {
         Junction j1 = *it;
         if(j1.has_left_min_anchor && j1.has_right_min_anchor) {
             if(fout.is_open())
@@ -337,9 +337,7 @@ int JunctionsCreator::identify_junctions_from_BAM() {
         //Initialize iterator
         hts_itr_t *iter = NULL;
         //Move the iterator to the region we are interested in
-        if(region.empty())
-            region = "."; //Default = entire file
-        iter  = sam_itr_querys(idx, header, region.c_str());
+        iter  = sam_itr_querys(idx, header, region_.c_str());
         if(header == NULL || iter == NULL) {
             sam_close(in);
             return 1;
@@ -360,15 +358,15 @@ int JunctionsCreator::identify_junctions_from_BAM() {
 
 //Create the junctions vector from the map
 void JunctionsCreator::create_junctions_vector() {
-    for(map<string, Junction> :: iterator it = junctions.begin();
-        it != junctions.end(); it++) {
+    for(map<string, Junction> :: iterator it = junctions_.begin();
+        it != junctions_.end(); it++) {
         Junction j1 = it->second;
-        junctions_vector.push_back(j1);
+        junctions_vector_.push_back(j1);
     }
 }
 
 //Sort all the junctions by their position
 void JunctionsCreator::sort_junctions() {
-    sort(junctions_vector.begin(), junctions_vector.end(), compare_junctions);
-    junctions_sorted = true;
+    sort(junctions_vector_.begin(), junctions_vector_.end(), compare_junctions);
+    junctions_sorted_ = true;
 }

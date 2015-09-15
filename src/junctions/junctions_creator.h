@@ -94,23 +94,23 @@ class JunctionsCreator {
         //Minimum anchor length for junctions
         //Junctions need atleast this many bp overlap
         // on both ends.
-        uint32_t min_anchor_length;
+        uint32_t min_anchor_length_;
         //Minimum length of an intron, i.e min junction width
-        uint32_t min_intron_length;
+        uint32_t min_intron_length_;
         //Maximum length of an intron, i.e max junction width
-        uint32_t max_intron_length;
+        uint32_t max_intron_length_;
         //Map to store the junctions
         //The key is "chr:start-end"
         //The value is an object of type Junction(see above)
-        map<string, Junction> junctions;
+        map<string, Junction> junctions_;
         //Maintain a sorted list of junctions
-        vector<Junction> junctions_vector;
+        vector<Junction> junctions_vector_;
         //Are the junctions sorted
-        bool junctions_sorted;
+        bool junctions_sorted_;
         //File to write output to - optional, write to STDOUT by default
-        string output_file;
+        string output_file_;
         //Region to identify junctions, in "chr:start-end" format
-        string region;
+        string region_;
         //Pull out the cigar string from the read
         int parse_read(bam_hdr_t *header, bam1_t *aln);
         //Parse junctions from the read and store in junction map
@@ -123,11 +123,12 @@ class JunctionsCreator {
     public:
         //Default constructor
         JunctionsCreator() {
-            min_anchor_length = 8;
-            min_intron_length = 70;
-            max_intron_length = 500000;
-            junctions_sorted = false;
-            output_file = "NA";
+            min_anchor_length_ = 8;
+            min_intron_length_ = 70;
+            max_intron_length_ = 500000;
+            junctions_sorted_ = false;
+            output_file_ = "NA";
+            region_ = ".";
         };
         //Name the junction based on the number of junctions
         // in the map.
