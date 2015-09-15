@@ -65,6 +65,6 @@ TEST_F(JunctionsCreateTest, Usage) {
     out << "\n\t\t" << "-r STR\tThe region to identify junctions "
                      "in \"chr:start-end\" format. Entire BAM by default.";
     out << "\n";
-    j1.usage(out2);
+    jc1.usage(out2);
     ASSERT_EQ(out.str(), out2.str()) << "Error parsing as expected";
 }
