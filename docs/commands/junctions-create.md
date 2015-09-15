@@ -13,7 +13,7 @@ this command with alignments from TopHat.
 
 | Option  | Description |
 | ------  | ----------- |
-| -a      | Minimum anchor length. 8bp by default. Junctions having a minimum overlap of this much on both ends are reported. Note - the required overlap can be observed amongst separate reads, for example one read might have sufficient left overlap and another read might have sufficient right overlap, this is sufficient for the junction to be reported.|
+| -a      | Minimum anchor length. 8bp by default. Junctions having a minimum overlap of this much on both ends are reported. Note - the required overlap can be observed amongst separate reads, for example one read might have sufficient left overlap and another read might have sufficient right overlap, this is sufficient for the junction to be reported. No mismatches are allowed in the anchor regions.|
 | -i      | Minimum intron size. 70bp by default. The intron size is the same as junction.end - junction.start. (Not to be confused with chromStart and chromEnd below, the required blockSizes need to be added/subtracted.)|
 | -I      | Maximum intron size. 500,000bp by default. The intron size the same as junction.end - junction.start. (Not to be confused with chromStart and chromEnd below, the required blockSizes need to be added/subtracted.)|
 | -o      | File to write output to. STDOUT by default.|
