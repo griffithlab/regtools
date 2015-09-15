@@ -24,6 +24,7 @@ DEALINGS IN THE SOFTWARE.  */
 
 #include <iostream>
 #include <getopt.h>
+#include <stdexcept>
 #include "gtf_parser.h"
 #include "junctions_annotator.h"
 #include "junctions_creator.h"
@@ -42,9 +43,11 @@ int junctions_usage(ostream &out = cout) {
 
 //Run 'junctions create'
 int junctions_create(int argc, char *argv[]) {
-    cerr << "\nRunning junctions create\n";
     JunctionsCreator create;
-    if(create.parse_options(argc, argv)) {
+    try {
+        create.parse_options(argc, argv);
+    } catch(const runtime_error& error) {
+        cerr << error.what();
         create.usage();
         return 1;
     }

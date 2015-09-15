@@ -57,15 +57,16 @@ int JunctionsCreator::parse_options(int argc, char *argv[]) {
             case 'r':
                 region = string(optarg);
                 break;
-            case '?':
             case 'h':
+                usage();
+                return 0;
+            case '?':
             default:
-                return 1;
+                throw runtime_error("Error parsing inputs!");
         }
     }
     if(argc == optind) {
-        cerr << endl << "Error parsing inputs!" << endl;
-        return 1;
+        throw runtime_error("\nError parsing inputs!");
     }
     bam_ = string(argv[optind]);
     cerr << endl << "Minimum junction anchor length: " << min_anchor_length;
