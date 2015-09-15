@@ -13,11 +13,23 @@ class TestCreate(IntegrationTest, unittest.TestCase):
                                             anchor + ".out")[0]
             if anchor != "":
                 anchor = "-a " + anchor
-            params = [ "junctions", "create", anchor, "-o", output_file, bam1 ]
+            params = ["junctions", "create", anchor, "-o", output_file, bam1]
             rv, err = self.execute(params)
             self.assertEqual(rv, 0)
             #self.assertEqual('', err)
             self.assertFilesEqual(expected_file, output_file)
+
+    def test_no_bam(self):
+        output_file = self.tempFile("create.out")
+        params = ["junctions", "create", "-o", output_file]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 1)
+
+    def test_help(self):
+        output_file = self.tempFile("create.out")
+        params = ["junctions", "create", "-h"]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 0)
 
 if __name__ == "__main__":
     main()
