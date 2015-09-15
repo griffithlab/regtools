@@ -29,28 +29,28 @@ DEALINGS IN THE SOFTWARE.  */
 
 class JunctionsCreateTest : public ::testing::Test {
     public:
-        JunctionsCreator j1;
+        JunctionsCreator jc1;
 };
 
 TEST_F(JunctionsCreateTest, ParseInput) {
     int argc = 2;
     char * argv[] = {"create", "test_input.bam"};
-    int ret = j1.parse_options(argc, argv);
+    int ret = jc1.parse_options(argc, argv);
     string expected_bam("test_input.bam");
-    ASSERT_EQ(expected_bam, j1.get_bam());
+    ASSERT_EQ(expected_bam, jc1.get_bam());
     ASSERT_EQ(0, ret);
 }
 
 TEST_F(JunctionsCreateTest, ParseNoInput) {
     int argc = 1;
     char * argv[] = {"create"};
-    ASSERT_THROW(j1.parse_options(argc, argv), std::runtime_error);
+    ASSERT_THROW(jc1.parse_options(argc, argv), std::runtime_error);
 }
 
 TEST_F(JunctionsCreateTest, ParseIncorrectOption) {
     int argc = 2;
     char * argv[] = {"create", "-k", "24", "test_input.bam"};
-    ASSERT_THROW(j1.parse_options(argc, argv), std::runtime_error);
+    ASSERT_THROW(jc1.parse_options(argc, argv), std::runtime_error);
 }
 
 TEST_F(JunctionsCreateTest, Usage) {
