@@ -368,9 +368,9 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
 //Usage statement for this tool
 int JunctionsAnnotator::usage() {
     cout << "\nUsage:\t\t" << "regtools junctions annotate [options] -r ref.fa -j junctions.bed -g annotations.gtf";
-    cout << "\nOptions:\t" << "-r ref.fa\tThe reference FASTA file.";
-    cout << "\nOptions:\t" << "-j junctions.bed\tThe junctions to be annotated.";
-    cout << "\nOptions:\t" << "-g annotations.gtf\tThe transcripts that we want to annotate the junctions with.";
+    cout << "\nOptions:\t" << "-r ref.fa\t\tThe reference FASTA file.";
+    cout << "\n\t\t" << "-j junctions.bed\tThe junctions to be annotated.";
+    cout << "\n\t\t" << "-g annotations.gtf\tThe transcripts that we want to annotate the junctions with.";
     cout << "\n";
     return 0;
 }
