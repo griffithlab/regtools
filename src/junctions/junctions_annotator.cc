@@ -23,6 +23,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
 #include <getopt.h>
+#include <stdexcept>
 #include <string>
 #include "common.h"
 #include "junctions_annotator.h"
@@ -69,8 +70,13 @@ bool JunctionsAnnotator::get_splice_site(AnnotatedJunction & line) {
                       num_to_str(line.start + 1) + "-" + num_to_str(line.start + 2);
     string position2 = line.chrom + ":" +
                       num_to_str(line.end - 2) + "-" + num_to_str(line.end - 1);
-    string seq1 = get_reference_sequence(position1);
-    string seq2 = get_reference_sequence(position2);
+    string seq1, seq2;
+    try {
+        seq1 = get_reference_sequence(position1);
+        seq2 = get_reference_sequence(position2);
+    } catch (const runtime_error& e) {
+        throw e;
+    }
     if(line.strand == "-") {
         seq1 = rev_comp(seq1);
         seq2 = rev_comp(seq2);
@@ -314,6 +320,9 @@ string JunctionsAnnotator::get_reference_sequence(string position) {
     int len;
     faidx_t *fai = fai_load(ref_.c_str());
     char *s = fai_fetch(fai, position.c_str(), &len);
+    if(s == NULL)
+        throw runtime_error("Unable to extract FASTA sequence "
+                             "for position " + position);
     std::string seq(s);
     free(s);
     fai_destroy(fai);

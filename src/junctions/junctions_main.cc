@@ -69,7 +69,12 @@ int junctions_annotate(int argc, char *argv[]) {
     int linec = 0;
     line.print_header();
     while(anno.get_single_junction(line)) {
-        anno.get_splice_site(line);
+        try {
+            anno.get_splice_site(line);
+        } catch(const runtime_error& e) {
+            cerr << endl << e.what() << endl;
+            return 1;
+        }
         anno.annotate_junction_with_gtf(line);
         line.print();
         line.reset();
