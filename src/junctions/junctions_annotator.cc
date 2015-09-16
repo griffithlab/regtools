@@ -292,7 +292,6 @@ void JunctionsAnnotator::annotate_junction_with_gtf(AnnotatedJunction & j1) {
     BIN start_bin, end_bin;
     start_bin = (j1.start >> _binFirstShift);
     end_bin = ((j1.end-1) >> _binFirstShift);
-    CHRPOS j1_length = (j1.end - j1.start);
     cerr << endl << "junction_bin " << junction_bin;
     //We loop through each UCSC BIN level for feature A's chrom.
     //For each BIN, we loop through each B feature and add it to
