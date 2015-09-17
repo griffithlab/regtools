@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
 
+project(regtools)
+
 #Add build-common cmake modules path
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build-common/cmake)
-#include(ProjectHelper)
+include(ProjectHelper)
 include(TestHelper)
 
-project(regtools)
 
 
 #versioning stuff
