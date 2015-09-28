@@ -44,11 +44,13 @@ void JunctionsAnnotator::close_junctions() {
 //Adjust the start and end of the junction
 void JunctionsAnnotator::adjust_junction_ends(BED & line) {
     //Adjust the start and end with block sizes
-    //The junction start is start + block_size1
-    //The junction end is end + block_size1
-    if(line.fields[10].empty()) {
-        cerr << "\nBlock sizes not found. Invalid line.";
-        cerr << "\n\tChr " << line.chrom << "\tPos " << line.start;
+    //The junction start is thick_start + block_size1
+    //The junction end is thick_end - block_size2 + 1
+    if(!line.fields.size() || line.fields[10].empty()) {
+        stringstream position;
+        position << line.chrom << ":" << line.start;
+        throw runtime_error("Block sizes not found. Invalid line. " +
+                            position.str());
     }
     string blocksize_field = line.fields[10];
     vector<int> block_sizes;
