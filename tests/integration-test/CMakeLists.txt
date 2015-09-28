@@ -1,1 +1,2 @@
 def_integration_test(regtools junctions_create test_junctions_create.py)
+def_integration_test(regtools junctions_annotate test_junctions_annotate.py)
