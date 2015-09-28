@@ -61,9 +61,12 @@ void JunctionsAnnotator::adjust_junction_ends(BED & line) {
 
 //Get a single line from the junctions file
 bool JunctionsAnnotator::get_single_junction(BED & line) {
-    junctions_.GetNextBed(line);
-    adjust_junction_ends(line);
-    return true;
+    if(junctions_.GetNextBed(line) && junctions_._status == BED_VALID) {
+        adjust_junction_ends(line);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 //Get the splice_site bases
