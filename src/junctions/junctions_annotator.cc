@@ -342,36 +342,31 @@ string JunctionsAnnotator::gtf_file() {
 //Parse the options passed to this tool
 int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
     static struct option long_options[] = {
-        {"ref", required_argument, 0, 'r'},
-        {"junctions", required_argument, 0, 'j'},
-        {"gtf", required_argument, 0, 'g'},
+        {"noskip-single-exon-genes", required_argument, 0, 'E'},
     };
     int option_index = 0;
-    int c = getopt_long(argc, argv, "r:g:j:",
-                    long_options, &option_index);
-    while(c != -1) {
+    while(int c = getopt_long(argc, argv, "E",
+                      long_options, &option_index) != -1) {
         switch(c) {
-            case 'r':
-                ref_ = string(optarg);
-                break;
-            case 'g':
-                gtf_.set_gtffile(string(optarg));
-                break;
-            case 'j':
-                junctions_.bedFile = string(optarg);
+            case 'E':
+                skip_single_exon_genes_ = false;
                 break;
             default:
                 usage();
-                exit(-1);
+                throw runtime_error("\nError parsing inputs!");
         }
-        c = getopt_long(argc, argv, "r:g:j:",
-                    long_options, &option_index);
     }
-    //This could be made an option if need be
-    skip_single_exon_genes_ = true;
-    if(optind < argc || ref_.empty() || junctions_.bedFile.empty() || gtf_.gtffile().empty()) {
+    if(argc - optind >= 3) {
+        junctions_.bedFile = string(argv[optind++]);
+        ref_ = string(argv[optind++]);
+        gtf_.set_gtffile(string(argv[optind++]));
+    }
+    if(optind < argc ||
+       ref_.empty() ||
+       junctions_.bedFile.empty() ||
+       gtf_.gtffile().empty()) {
         usage();
-        exit(-1);
+        throw runtime_error("\nError parsing inputs!");
     }
     cerr << "\nReference: " << ref_;
     cerr << "\nGTF: " << gtf_.gtffile();
@@ -381,10 +376,8 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
 
 //Usage statement for this tool
 int JunctionsAnnotator::usage() {
-    cout << "\nUsage:\t\t" << "regtools junctions annotate [options] -r ref.fa -j junctions.bed -g annotations.gtf";
-    cout << "\nOptions:\t" << "-r ref.fa\t\tThe reference FASTA file.";
-    cout << "\n\t\t" << "-j junctions.bed\tThe junctions to be annotated.";
-    cout << "\n\t\t" << "-g annotations.gtf\tThe transcripts that we want to annotate the junctions with.";
+    cout << "\nUsage:\t\t" << "regtools junctions annotate [options] junctions.bed ref.fa annotations.gtf";
+    cout << "\nOptions:\t" << "-E include single exon genes";
     cout << "\n";
     return 0;
 }
