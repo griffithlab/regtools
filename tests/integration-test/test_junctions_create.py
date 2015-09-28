@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 '''
 test_junctions_create.py -- Integration test for `regtools junctions create`
 
@@ -23,8 +25,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 '''
-
-#!/usr/bin/env python
 
 from integrationtest import IntegrationTest, main
 import unittest
