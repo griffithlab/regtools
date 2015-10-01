@@ -63,25 +63,29 @@ int junctions_create(int argc, char *argv[]) {
 int junctions_annotate(int argc, char *argv[]) {
     JunctionsAnnotator anno;
     AnnotatedJunction line;
+    line.reset();
     int linec = 0;
+    ofstream out;
     try {
         anno.parse_options(argc, argv);
         anno.read_gtf();
         anno.open_junctions();
-        line.print_header();
+        anno.set_ofstream_object(out);
+        line.print_header(out);
         while(anno.get_single_junction(line)) {
             anno.get_splice_site(line);
             anno.annotate_junction_with_gtf(line);
-            line.print();
+            line.print(out);
             line.reset();
             linec++;
         }
+        anno.close_ofstream();
+        cerr << endl << "Annotated " << linec << " lines.";
+        anno.close_junctions();
     } catch(const runtime_error& e) {
             cerr << endl << e.what() << endl;
             return 1;
     }
-    cerr << "Annotated " << linec << " lines.";
-    anno.close_junctions();
     return 0;
 }
 

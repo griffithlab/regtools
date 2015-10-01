@@ -58,8 +58,8 @@ struct AnnotatedJunction : BED {
     //Is this a known junction
     bool known_junction;
     //Print the header line
-    static void print_header() {
-        cout << "chrom" << "\t" << "start" <<
+    static void print_header(ostream& out) {
+        out << "chrom" << "\t" << "start" <<
                 "\t" << "end" << "\t" << "name" <<
                 "\t" << "score" << "\t" << "strand" <<
                 "\t" << "splice_site" << "\t" << "acceptors_skipped" <<
@@ -69,8 +69,8 @@ struct AnnotatedJunction : BED {
                 "\t" << "transcripts" << "\t" << "genes";
     }
     //Print out the junction
-    void print() {
-        cout << endl << chrom << "\t" << start <<
+    void print(ostream &out) {
+        out << endl << chrom << "\t" << start <<
                 "\t" << end << "\t" << name <<
                 "\t" << score << "\t" << strand <<
                 "\t" << splice_site << "\t" << acceptors_skipped.size() <<
@@ -79,25 +79,25 @@ struct AnnotatedJunction : BED {
                 "\t" << known_donor << "\t" << known_acceptor << "\t" << known_junction;
         //See if any transcripts overlap the junction
         if(transcripts_overlap.size()) {
-            cout << "\t";
+            out << "\t";
             for(set<string>::iterator it = transcripts_overlap.begin(); it != transcripts_overlap.end(); ++it) {
                 if(it != transcripts_overlap.begin())
-                    cout << ",";
-                cout << *it;
+                    out << ",";
+                out << *it;
             }
         } else {
-            cout << "\t" << "NA";
+            out << "\t" << "NA";
         }
         //See if any genes overlap the junction
         if(genes_overlap.size()) {
-            cout << "\t";
+            out << "\t";
             for(set<string>::iterator it = genes_overlap.begin(); it != genes_overlap.end(); ++it) {
                 if(it != genes_overlap.begin())
-                    cout << ",";
-                cout << *it;
+                    out << ",";
+                out << *it;
             }
         } else {
-            cout << "\t" << "NA";
+            out << "\t" << "NA";
         }
     }
     //Clear the contents of the junction
