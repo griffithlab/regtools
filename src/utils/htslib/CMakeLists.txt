@@ -12,7 +12,7 @@ set(SOURCES
 
 #htslib headers have relative path to this dir
 include_directories(.)
-
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Wno-long-long")
 find_package(Threads)
 add_library(htslib ${SOURCES} ${CRAM})
 target_link_libraries (htslib ${CMAKE_THREAD_LIBS_INIT})

@@ -25,7 +25,7 @@ add_subdirectory ("${PROJECT_SOURCE_DIR}/src/utils/gtest-1.7.0/")
 
 # Enable warnings after compiling third party dependencies.
 if(${CMAKE_C_COMPILER_ID} MATCHES "GNU|Clang")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Wno-long-long")
     # Uncomment when feeling persnickety.
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Werror")
 endif()

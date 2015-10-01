@@ -4,6 +4,7 @@ include_directories(bedFile/
                     gzstream/
                     lineFileUtilities/
                     stringUtilities/)
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Wno-long-long")
 set(SOURCES
     gzstream/gzstream.C
     fileType/fileType.cpp
