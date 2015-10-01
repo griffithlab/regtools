@@ -31,6 +31,31 @@ DEALINGS IN THE SOFTWARE.  */
 
 using namespace std;
 
+//Return stream to write output to
+void JunctionsAnnotator::close_ofstream() {
+    if(ofs_.is_open())
+        ofs_.close();
+}
+
+//Return stream to write output to
+//If output file is not empty, attempt to open
+//If output file is empty, set to cout
+void JunctionsAnnotator::set_ofstream_object(ofstream &out) {
+    if(output_file_ == "NA") {
+        out.copyfmt(cout);
+        out.basic_ios<char>::rdbuf(cout.rdbuf());
+        out.clear(cout.rdstate());
+        return;
+    }
+    ofs_.open(output_file_.c_str());
+    if(!ofs_.is_open())
+        throw runtime_error("Unable to open " +
+                            output_file_);
+    out.copyfmt(ofs_);
+    out.basic_ios<char>::rdbuf(ofs_.rdbuf());
+    out.clear(ofs_.rdstate());
+}
+
 //Open junctions file
 void JunctionsAnnotator::open_junctions() {
     junctions_.Open();
@@ -341,18 +366,19 @@ string JunctionsAnnotator::gtf_file() {
 
 //Parse the options passed to this tool
 int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
-    static struct option long_options[] = {
-        {"noskip-single-exon-genes", required_argument, 0, 'E'},
-    };
-    int option_index = 0;
-    while(int c = getopt_long(argc, argv, "E",
-                      long_options, &option_index) != -1) {
+    optind = 1; //Reset before parsing again.
+    int c;
+    while((c = getopt(argc, argv, "Eo:")) != -1) {
         switch(c) {
             case 'E':
                 skip_single_exon_genes_ = false;
                 break;
+            case 'o':
+                output_file_ = string(optarg);
+                break;
             default:
                 usage();
+                cerr << c << " here1";
                 throw runtime_error("\nError parsing inputs!");
         }
     }
@@ -362,7 +388,7 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
         gtf_.set_gtffile(string(argv[optind++]));
     }
     if(optind < argc ||
-       ref_.empty() ||
+       ref_ == "NA" ||
        junctions_.bedFile.empty() ||
        gtf_.gtffile().empty()) {
         usage();
@@ -371,6 +397,10 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
     cerr << "\nReference: " << ref_;
     cerr << "\nGTF: " << gtf_.gtffile();
     cerr << "\nJunctions: " << junctions_.bedFile;
+    if(skip_single_exon_genes_)
+        cerr << "\nSkip single exon genes.";
+    if(!output_file_.empty())
+        cerr << "\nOutput file: " << output_file_;
     return 0;
 }
 
@@ -378,8 +408,7 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
 int JunctionsAnnotator::usage() {
     cout << "\nUsage:\t\t" << "regtools junctions annotate [options] junctions.bed ref.fa annotations.gtf";
     cout << "\nOptions:\t" << "-E include single exon genes";
+    cout << "\n\t\t" << "-o Output file";
     cout << "\n";
     return 0;
 }
-
-

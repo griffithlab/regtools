@@ -125,8 +125,12 @@ class JunctionsAnnotator {
         string ref_;
         //skip single exon genes
         bool skip_single_exon_genes_;
+        //output stream to output file
+        ofstream ofs_;
         //GTF file object
         GtfParser gtf_;
+        //File to write output to
+        string output_file_;
         //Check for overlap between a transcript and junctions
         //See if the junction we saw is a known junction
         void check_for_overlap(string transcript_id,
@@ -140,8 +144,18 @@ class JunctionsAnnotator {
         //Annotate the anchor
         void annotate_anchor(AnnotatedJunction & junction);
     public:
+        //Default constructor
+        JunctionsAnnotator()
+            : ref_("NA")
+            , skip_single_exon_genes_(true)
+            , output_file_("NA")
+        {}
         //Get the GTF file
         string gtf_file();
+        //Get ostream object to write output to
+        void set_ofstream_object(ofstream &out);
+        //Close ostream object
+        void close_ofstream();
         //Parse command-line options for this tool
         int parse_options(int argc, char *argv[]);
         //Print default usage
