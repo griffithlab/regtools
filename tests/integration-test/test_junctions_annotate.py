@@ -30,15 +30,16 @@ from integrationtest import IntegrationTest, main
 import unittest
 
 class TestAnnotate(IntegrationTest, unittest.TestCase):
-    def __init__(self):
-        self.junctions = self.inputFiles("test_hcc1395_junctions.bed")[0]
-        self.gtf = self.inputFiles("test_ensemble_chr22.gtf")[0]
-        self.fasta = self.inputFiles("test_chr22.fa")[0]
-        self.output_file = self.tempFile("observed-annotate.out")
     def test_junctions_annotate(self):
-        print "BAM1 is ", bam1
+        junctions = self.inputFiles("test_hcc1395_junctions.bed")[0]
+        gtf = self.inputFiles("test_ensemble_chr22.gtf")[0]
+        fasta = self.inputFiles("test_chr22.fa")[0]
+        output_file = self.tempFile("observed-annotate.out")
         expected_file = self.inputFiles("junctions-annotate/expected-annotate.out")[0]
         params = ["junctions", "annotate", "-o", output_file, junctions, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
         self.assertFilesEqual(expected_file, output_file)
+
+if __name__ == "__main__":
+    main()
