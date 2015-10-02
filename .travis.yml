@@ -5,13 +5,16 @@ compiler:
     - gcc
 
 before_script:
-    - mkdir build
-    - cd build
-    - cmake ..
-    - make
+    - brew update && brew install pyenv && eval "$(pyenv init -)"
+    - pyenv install 2.7.6 && pyenv global 2.7.6 && pyenv rehash
+    - pip install cpp-coveralls && pyenv rehash
 
 script:
+    - mkdir build && cd build && cmake .. && make
     - ctest -V
+
+after_success:
+    - coveralls --exclude src/utils --exclude tests --exclude scripts --gcov-options '\-lp'
 
 os:
     - linux
