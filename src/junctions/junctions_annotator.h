@@ -115,6 +115,14 @@ struct AnnotatedJunction : BED {
     }
 };
 
+//Copy one stream object into another
+inline
+void copy_stream(const ostream &source, ostream &dest) {
+    dest.copyfmt(source);
+    dest.basic_ios<char>::rdbuf(source.rdbuf());
+    dest.clear(source.rdstate());
+}
+
 //The class that does all the annotation
 //Uses a GTF parser object to annotate a junction.
 class JunctionsAnnotator {
