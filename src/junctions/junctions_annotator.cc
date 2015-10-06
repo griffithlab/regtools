@@ -125,7 +125,7 @@ bool JunctionsAnnotator::read_gtf() {
 }
 
 //Find overlap between transcript and junction on the negative strand,
-//function returns true if this is a known junction in the transcript
+//function returns true if either the acceptor or the donor is known
 bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
                                           AnnotatedJunction & junction) {
     //skip single exon genes
@@ -148,8 +148,6 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
         //known junction
         if(exons[i].end == junction.start &&
                 exons[i + 1].start == junction.end) {
-            cerr << endl << "DA";
-            junction.anchor = "DA";
             junction.known_acceptor = true;
             junction.known_donor = true;
             junction.known_junction = true;
@@ -190,11 +188,11 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
         }
     }
     annotate_anchor(junction);
-    return known_junction;
+    return (junction.anchor != "N");
 }
 
 //Find overlap between transcript and junction on the negative strand,
-//function returns true if this is a known junction in the transcript
+//function returns true if either the acceptor or the donor is known
 bool JunctionsAnnotator::overlap_ns(const vector<BED> & exons,
                                           AnnotatedJunction & junction) {
     cerr << endl << "in negative overlap";
@@ -218,8 +216,6 @@ bool JunctionsAnnotator::overlap_ns(const vector<BED> & exons,
         //Check if this is a known junction
         if(exons[i].start == junction.end &&
                 exons[i + 1].end == junction.start) {
-            cerr << endl << "DA";
-            junction.anchor = "DA";
             junction.known_acceptor = true;
             junction.known_donor = true;
             junction.known_junction = true;
@@ -259,13 +255,15 @@ bool JunctionsAnnotator::overlap_ns(const vector<BED> & exons,
         }
     }
     annotate_anchor(junction);
-    return known_junction;
+    return (junction.anchor != "N");
 }
 
-//Annotate the anchor
+//Annotate the anchor i.e is this a known/novel donor-acceptor pair
 void JunctionsAnnotator::annotate_anchor(AnnotatedJunction & junction) {
-    //check if known junction
-    if(!junction.known_junction) {
+    junction.anchor = string("N");
+    if(junction.known_junction) {
+        junction.anchor = "DA";
+    } else {
         if(junction.known_donor)
             if(junction.known_acceptor)
                 junction.anchor = string("NDA");
@@ -273,8 +271,6 @@ void JunctionsAnnotator::annotate_anchor(AnnotatedJunction & junction) {
                 junction.anchor = string("D");
         else if(junction.known_acceptor)
             junction.anchor = string("A");
-        else
-            junction.anchor = string("N");
     }
 }
 
