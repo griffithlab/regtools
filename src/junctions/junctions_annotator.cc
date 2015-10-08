@@ -293,7 +293,6 @@ void JunctionsAnnotator::check_for_overlap(string transcript_id, AnnotatedJuncti
 //Annotate with gtf
 //Takes a single junction BED and annotates with GTF
 void JunctionsAnnotator::annotate_junction_with_gtf(AnnotatedJunction & j1) {
-    BIN junction_bin = getBin(j1.start, j1.end);
     //From BedTools
     BIN start_bin, end_bin;
     start_bin = (j1.start >> _binFirstShift);
