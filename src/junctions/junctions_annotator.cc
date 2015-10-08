@@ -261,9 +261,8 @@ void JunctionsAnnotator::check_for_overlap(string transcript_id, AnnotatedJuncti
     const vector<BED> & exons =
         gtf_.get_exons_from_transcript(transcript_id);
     if(!exons.size()) {
-        cerr << "Unexpected error. No exons for transcript "
-             << transcript_id;
-        exit(1);
+        throw runtime_error("Unexpected error. No exons for transcript "
+                            + transcript_id);
     }
     string transcript_strand = exons[0].strand;
     //Make sure the strands of the junction and transcript match
@@ -283,8 +282,7 @@ void JunctionsAnnotator::check_for_overlap(string transcript_id, AnnotatedJuncti
                     gtf_.get_gene_from_transcript(transcript_id));
         }
     } else {
-        cerr << "\nUnknown strand " << junction.strand;
-        exit(1);
+        throw runtime_error("\nUnknown strand " + junction.strand);
     }
     cerr << "\n\tDonors skipped " << junction.donors_skipped.size();
     cerr << "\n\tExons skipped " << junction.exons_skipped.size();
