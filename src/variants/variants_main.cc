@@ -1,4 +1,4 @@
-/*  regtools.cc -- main
+/*  variants_main.cc -- handle the 'variants' commands
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -23,42 +23,39 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
 #include <iostream>
-#include "version.h"
-
-int junctions_main(int argc, char* argv[]);
-int variants_main(int argc, char* argv[]);
+#include <stdexcept>
+#include "variants_annotator.h"
 
 using namespace std;
 
-//version info
-void version() {
-    cerr << "\nProgram:\tregtools";
-    cerr << "\nVersion:\t" << regtools_VERSION_MAJOR
-         << "." << regtools_VERSION_MINOR << "." << regtools_VERSION_PATCH;
-}
-
-//Regtools usage
-int usage() {
-    cerr << "\nUsage:\t\t" << "regtools <command> [options]";
-    cerr << "\nCommand:\t" << "junctions\tTools that operate on feature junctions."
-         << "\n\t\t\t\t(eg. exon-exon junctions from RNA-seq.)";
-    cerr << "\n\t\t" << "variants\tTools that operate on variants.";
-    cerr << "\n";
+//Usage for variants subcommands
+int variants_usage(ostream &out = cout) {
+    out << "\nUsage:\t\t" << "regtools variants <command> [options]";
+    out << "\nCommand:\t" << "annotate\t\tAnnotate variants with splicing information.";
+    out << "\n";
     return 0;
 }
 
-//Everything starts here
-int main(int argc, char* argv[]) {
-    version();
-    if(argc > 1) {
-        string subcmd(argv[1]);
-        if(subcmd == "junctions") {
-            return junctions_main(argc - 1, argv + 1);
-        }
-        if(subcmd == "variants") {
-            return variants_main(argc - 1, argv + 1);
-        }
+//Run 'variants annotate' subcommand
+int variants_annotate(int argc, char *argv[]) {
+    VariantsAnnotator va;
+    try {
+        va.parse_options(argc, argv);
+        va.annotate_vcf();
+    } catch (runtime_error e) {
+        cerr << e.what();
+        return 1;
     }
-    return usage();
+    return 0;
 }
 
+//Parse out subcommands under variants
+int variants_main(int argc, char *argv[]) {
+    if(argc > 1) {
+        string subcmd(argv[1]);
+        if(subcmd == "annotate") {
+            return variants_annotate(argc - 1, argv + 1);
+        }
+    }
+    return variants_usage();
+}

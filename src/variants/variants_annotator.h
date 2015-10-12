@@ -1,0 +1,101 @@
+/*  variants_annotator.h -- Declarations for `variants annotate`
+
+    Copyright (c) 2015, The Griffith Lab
+
+    Author: Avinash Ramu <aramu@genome.wustl.edu>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.  */
+
+#ifndef JUNCTIONS_ANNOTATOR_H_
+#define JUNCTIONS_ANNOTATOR_H_
+
+#include <iostream>
+#include <stdint.h>
+#include "gtf_parser.h"
+#include "hts.h"
+#include "vcf.h"
+
+using namespace std;
+
+//The class that does all the annotation
+class VariantsAnnotator {
+    private:
+        //Variant file
+        string vcf_;
+        //Gene annotations file
+        string gtffile_;
+        //GTF parser object - holds the GTF in memory
+        GtfParser gtf_;
+        //Output VCF file
+        string vcf_out_;
+        //Minimum distance of a variant from
+        //edge of an exon(intronic) to be considered
+        //a splicing variant
+        uint32_t intronic_min_distance_;
+        //Minimum distance of a variant from
+        //edge of an exon(exonic) to be considered
+        //a splicing variant
+        uint32_t exonic_min_distance_;
+        //VCF file handle
+        htsFile *vcf_fh_in_;
+        //Header of VCF file
+        bcf_hdr_t *vcf_header_in_;
+        //Output VCF file handle
+        htsFile *vcf_fh_out_;
+        //Header of output VCF file
+        bcf_hdr_t *vcf_header_out_;
+        //Each VCF record
+        bcf1_t *vcf_record_;
+    public:
+        //Default constructor
+        VariantsAnnotator() : vcf_("NA"), gtffile_("NA"),
+                              vcf_out_("NA"),
+                              intronic_min_distance_(2),
+                              exonic_min_distance_(3),
+                              vcf_fh_in_(NULL), vcf_header_in_(NULL),
+                              vcf_fh_out_(NULL), vcf_header_out_(NULL),
+                              vcf_record_(NULL) {
+            vcf_record_ = bcf_init();
+        }
+        //Parse command-line options for this tool
+        int parse_options(int argc, char *argv[]);
+        //Usage statement for this tool
+        int usage(ostream& out);
+        //Annotate VCF file
+        void annotate_vcf();
+        //Read in GTF file
+        void load_gtf();
+        //Open input VCF file
+        void open_vcf_in();
+        //Open output VCF file
+        void open_vcf_out();
+        //Cleanup VCF file data structures
+        void cleanup_vcf();
+        //Annotate one line of a VCF
+        void annotate_record_with_transcripts();
+        //Given a transcript ID and variant position,
+        //check if the variant is in a splice relevant region
+        //relevance depends on the user params
+        //intronic_min_distance_ and exonic_min_distance_
+        //Returns distance if within the required cutoffs else returns 0
+        //Negative distance indicates intronic variant, positive indicates exonic
+        int32_t variant_overlaps_spliceregion(const vector<BED>& exons);
+};
+
+#endif
