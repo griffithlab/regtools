@@ -116,6 +116,18 @@ struct AnnotatedJunction : BED {
         transcripts_overlap.clear();
         genes_overlap.clear();
     }
+    //constructor
+    AnnotatedJunction() {
+        reset();
+    }
+    //constructor
+    AnnotatedJunction(string chr1,
+                     uint32_t start1,
+                     uint32_t end1) {
+        chrom = chr1;
+        start = start1;
+        end = end1;
+    }
 };
 
 //Copy one stream object into another
