@@ -27,11 +27,16 @@ DEALINGS IN THE SOFTWARE.  */
 
 #include <iostream>
 #include <stdint.h>
+#include "bedFile.h"
 #include "gtf_parser.h"
 #include "hts.h"
+#include "junctions_annotator.h"
 #include "vcf.h"
 
 using namespace std;
+
+//Reuse type.
+typedef AnnotatedJunction AnnotatedVariant;
 
 //The class that does all the annotation
 class VariantsAnnotator {
@@ -93,9 +98,9 @@ class VariantsAnnotator {
         //check if the variant is in a splice relevant region
         //relevance depends on the user params
         //intronic_min_distance_ and exonic_min_distance_
-        //Returns distance if within the required cutoffs else returns 0
-        //Negative distance indicates intronic variant, positive indicates exonic
-        int32_t variant_overlaps_spliceregion(const vector<BED>& exons);
+        //stores result in the AnnotatedVariant object
+        void get_variant_overlaps_spliceregion(const vector<BED> &exons,
+                                           AnnotatedVariant  &variant);
 };
 
 #endif
