@@ -57,6 +57,8 @@ struct AnnotatedJunction : BED {
     bool known_acceptor;
     //Is this a known junction
     bool known_junction;
+    //Annotation - Exonic/Intronic etc.
+    string annotation;
     //Print the header line
     static void print_header(ostream& out) {
         out << "chrom" << "\t" << "start" <<
@@ -103,6 +105,7 @@ struct AnnotatedJunction : BED {
     //Clear the contents of the junction
     void reset() {
         anchor = string("N");
+        annotation = "";
         splice_site = "";
         known_donor = false;
         known_acceptor = false;
