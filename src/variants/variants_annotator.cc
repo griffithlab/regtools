@@ -121,8 +121,9 @@ void VariantsAnnotator::open_vcf_out() {
                    "##INFO=<ID=distances,Number=1,Type=String,"
                    "Description=\"Vector of Min(Distance from start/end of exon in the transcript.)\"");
     bcf_hdr_append(vcf_header_out_,
-                   "##INFO=<ID=locations,Number=1,Type=String,"
-                   "Description=\"Does the variant fall in exonic/intronic space in the transcript.\"");
+                   "##INFO=<ID=annotations,Number=1,Type=String,"
+                   "Description=\"Does the variant fall in exonic/intronic splicing "
+                   "related space in the transcript.\"");
     bcf_hdr_sync(vcf_header_out_);
     bcf_hdr_write(vcf_fh_out_, vcf_header_out_);
 }
