@@ -77,6 +77,7 @@ int VariantsAnnotator::parse_options(int argc, char *argv[]) {
     cerr << "\nOutput vcf file: " << vcf_out_;
     cerr << "\nIntronic min distance: " << intronic_min_distance_;
     cerr << "\nExonic min distance: " << exonic_min_distance_;
+    cerr << endl;
     return 0;
 }
 
