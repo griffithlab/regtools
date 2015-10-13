@@ -141,42 +141,51 @@ void VariantsAnnotator::cleanup_vcf() {
 //check if the variant is in a splice relevant region
 //relevance depends on the user params
 //intronic_min_distance_ and exonic_min_distance_
-//Returns distance if within the required cutoffs else returns 0
-int32_t VariantsAnnotator::variant_overlaps_spliceregion(const vector<BED>& exons) {
+void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exons,
+                                                      AnnotatedVariant& variant) {
+    variant.score = "-1";
+    variant.annotation = "non_splice_region";
     //check if variant inside transcript coords
-    if(exons[0].start - intronic_min_distance_ > vcf_record_->pos &&
-            exons[exons.size() - 1].end + intronic_min_distance_ < vcf_record_->pos)
-        return false;
+    if(exons[0].start - intronic_min_distance_ > variant.start &&
+            exons[exons.size() - 1].end + intronic_min_distance_ < variant.start) {
+        return;
+    }
     for(std::size_t i = 0; i < exons.size(); i++) {
-        if(exons[i].start - intronic_min_distance_ > vcf_record_->pos) {
+        if(exons[i].start - intronic_min_distance_ > variant.start) {
             //No need to look any further
             //the rest of the exons are outside the junction
-            return false;
+            return;
         }
         //exonic near start
-        if(vcf_record_->pos >= exons[i].start &&
-                vcf_record_->pos <= exons[i].start + exonic_min_distance_ + 1) {
-            return vcf_record_->pos - exons[i].start - 1;
+        if(variant.start >= exons[i].start &&
+                variant.start <= exons[i].start + exonic_min_distance_ + 1) {
+            variant.score =  num_to_str(variant.start - exons[i].start - 1);
+            variant.annotation = "splicing_exonic";
+            return;
         }
         //intronic near start
-        //Multiply intronic distance by -1
-        if(vcf_record_->pos <= exons[i].start &&
-                vcf_record_->pos >= exons[i].start - intronic_min_distance_ - 1) {
-            return (exons[i].start - vcf_record_->pos - 1) * -1;
+        if(variant.start <= exons[i].start &&
+                variant.start >= exons[i].start - intronic_min_distance_ - 1) {
+            variant.score = num_to_str(exons[i].start - variant.start - 1);
+            variant.annotation = "splicing_intronic";
+            return;
         }
         //exonic near end
-        if(vcf_record_->pos <= exons[i].end &&
-                vcf_record_->pos >= exons[i].end - exonic_min_distance_ - 1) {
-            return exons[i].end - vcf_record_->pos - 1;
+        if(variant.start <= exons[i].end &&
+                variant.start >= exons[i].end - exonic_min_distance_ - 1) {
+            variant.score = num_to_str(exons[i].end - variant.start - 1);
+            variant.annotation = "splicing_exonic";
+            return;
         }
         //intronic near end
-        //Multiply intronic distance by -1
-        if(vcf_record_->pos >= exons[i].end &&
-                vcf_record_->pos <= exons[i].end + intronic_min_distance_ + 1) {
-            return (vcf_record_->pos - exons[i].end - 1) * -1;
+        if(variant.start >= exons[i].end &&
+                variant.start <= exons[i].end + intronic_min_distance_ + 1) {
+            variant.score = num_to_str(variant.start - exons[i].end - 1);
+            variant.annotation = "splicing_intronic";
+            return;
         }
     }
-    return 0;
+    return;
 }
 
 //Annotate one line of a VCF
@@ -184,7 +193,7 @@ void VariantsAnnotator::annotate_record_with_transcripts() {
     string overlapping_genes = "NA",
            overlapping_transcripts = "NA",
            overlapping_distances = "NA",
-           locations = "NA";
+           annotations = "NA";
     map<string, bool> unique_genes;
     string chr = std::string(bcf_hdr_id2name(vcf_header_in_, vcf_record_->rid));
     //While calculating BINs, incorporate intronic_distance since transcripts
@@ -203,28 +212,27 @@ void VariantsAnnotator::annotate_record_with_transcripts() {
                     throw runtime_error("Unexpected error. No exons for transcript "
                             + transcripts[i]);
                 }
-                if(int32_t dist = variant_overlaps_spliceregion(exons)) {
+                //Use a AnnotatedVariant object to hold the result
+                AnnotatedVariant variant(chr, vcf_record_->pos, (vcf_record_->pos) + 1);
+                get_variant_overlaps_spliceregion(exons, variant);
+                if(variant.annotation != "non_splice_region") {
                     string gene_id = gtf_.get_gene_from_transcript(transcripts[i]);
                     //Use sign to encode intronic/exonic
-                    string location = "Exonic";
-                    if(dist < 0) {
-                        dist *= -1;
-                        location = "Intronic";
-                    }
-                    string dist_str = num_to_str(dist);
+                    string annotation = variant.annotation;
+                    string dist_str = variant.score;
                     //Add gene only once for multiple transcripts of the same gene.
                     if(overlapping_transcripts != "NA") {
                         if(!unique_genes.count(gene_id))
                             overlapping_genes += "," + gene_id;
                         overlapping_distances += "," + dist_str;
                         overlapping_transcripts += "," + transcripts[i];
-                        locations += "," + location;
+                        annotations += "," + annotation;
                     } else {
                         overlapping_genes = gene_id;
                         overlapping_distances = dist_str;
                         overlapping_transcripts = transcripts[i];
                         unique_genes[gene_id] = true;
-                        locations = location;
+                        annotations = annotation;
                     }
                 }
             }
@@ -239,7 +247,7 @@ void VariantsAnnotator::annotate_record_with_transcripts() {
        bcf_update_info_string(vcf_header_out_, vcf_record_,
                            "distances", overlapping_distances.c_str()) < 0 ||
        bcf_update_info_string(vcf_header_out_, vcf_record_,
-                           "locations", locations.c_str()) < 0) {
+                           "annotations", annotations.c_str()) < 0) {
         throw runtime_error("Unable to update info string");
     }
     bcf_write(vcf_fh_out_, vcf_header_out_, vcf_record_);
