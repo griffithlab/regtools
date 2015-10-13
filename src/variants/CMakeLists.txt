@@ -4,7 +4,8 @@ include_directories(../utils/htslib/htslib/
                     ../utils/
                     ../utils/bedtools/fileType/
                     ../utils/bedtools/gzstream/
-                    ../utils/bedtools/bedFile/)
+                    ../utils/bedtools/bedFile/
+                    ../junctions/)
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__STDC_LIMIT_MACROS")
 
