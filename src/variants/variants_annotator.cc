@@ -175,7 +175,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
         if(variant.end <= exons[i].end &&
                 variant.end >= exons[i].end - exonic_min_distance_) {
             variant.score = num_to_str(exons[i].end - variant.end);
-            variant.annotation = "splicing_exonic_2";
+            variant.annotation = "splicing_exonic";
             return;
         }
         //intronic near end
