@@ -196,6 +196,7 @@ void VariantsAnnotator::annotate_record_with_transcripts() {
            annotations = "NA";
     map<string, bool> unique_genes;
     string chr = std::string(bcf_hdr_id2name(vcf_header_in_, vcf_record_->rid));
+    AnnotatedVariant variant(chr, vcf_record_->pos, (vcf_record_->pos) + 1);
     //While calculating BINs, incorporate intronic_distance since transcripts
     //which lie within that distance will be relevant.
     BIN start_bin = ((vcf_record_->pos - intronic_min_distance_) >> _binFirstShift);
@@ -213,7 +214,6 @@ void VariantsAnnotator::annotate_record_with_transcripts() {
                             + transcripts[i]);
                 }
                 //Use a AnnotatedVariant object to hold the result
-                AnnotatedVariant variant(chr, vcf_record_->pos, (vcf_record_->pos) + 1);
                 get_variant_overlaps_spliceregion(exons, variant);
                 if(variant.annotation != "non_splice_region") {
                     string gene_id = gtf_.get_gene_from_transcript(transcripts[i]);
