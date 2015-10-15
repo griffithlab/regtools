@@ -141,6 +141,7 @@ void VariantsAnnotator::cleanup_vcf() {
 //check if the variant is in a splice relevant region
 //relevance depends on the user params
 //intronic_min_distance_ and exonic_min_distance_
+//The zero-based arithmetic is always fun.
 void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exons,
                                                       AnnotatedVariant& variant) {
     variant.score = "-1";
@@ -151,36 +152,36 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
         return;
     }
     for(std::size_t i = 0; i < exons.size(); i++) {
-        if(exons[i].start - intronic_min_distance_ > variant.start) {
+        if(exons[i].start - intronic_min_distance_ > variant.end) {
             //No need to look any further
             //the rest of the exons are outside the junction
             return;
         }
         //exonic near start
-        if(variant.start >= exons[i].start &&
-                variant.start <= exons[i].start + exonic_min_distance_ + 1) {
-            variant.score =  num_to_str(variant.start - exons[i].start - 1);
+        if(variant.end >= exons[i].start &&
+                variant.end <= exons[i].start + exonic_min_distance_ + 1) {
+            variant.score =  num_to_str(variant.end - exons[i].start);
             variant.annotation = "splicing_exonic";
             return;
         }
         //intronic near start
-        if(variant.start <= exons[i].start &&
-                variant.start >= exons[i].start - intronic_min_distance_ - 1) {
-            variant.score = num_to_str(exons[i].start - variant.start - 1);
+        if(variant.end <= exons[i].start &&
+                variant.end >= exons[i].start - intronic_min_distance_ + 1) {
+            variant.score = num_to_str(exons[i].start - variant.end + 1);
             variant.annotation = "splicing_intronic";
             return;
         }
         //exonic near end
-        if(variant.start <= exons[i].end &&
-                variant.start >= exons[i].end - exonic_min_distance_ - 1) {
-            variant.score = num_to_str(exons[i].end - variant.start - 1);
-            variant.annotation = "splicing_exonic";
+        if(variant.end <= exons[i].end &&
+                variant.end >= exons[i].end - exonic_min_distance_) {
+            variant.score = num_to_str(exons[i].end - variant.end);
+            variant.annotation = "splicing_exonic_2";
             return;
         }
         //intronic near end
-        if(variant.start >= exons[i].end &&
-                variant.start <= exons[i].end + intronic_min_distance_ + 1) {
-            variant.score = num_to_str(variant.start - exons[i].end - 1);
+        if(variant.end >= exons[i].end &&
+                variant.end <= exons[i].end + intronic_min_distance_) {
+            variant.score = num_to_str(variant.end - exons[i].end);
             variant.annotation = "splicing_intronic";
             return;
         }
@@ -189,6 +190,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
 }
 
 //Annotate one line of a VCF
+//The line to be annotated is in vcf_record_
 void VariantsAnnotator::annotate_record_with_transcripts() {
     string overlapping_genes = "NA",
            overlapping_transcripts = "NA",
