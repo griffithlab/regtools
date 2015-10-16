@@ -148,15 +148,26 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
                                                       AnnotatedVariant& variant) {
     variant.score = "-1";
     variant.annotation = "non_splice_region";
-    //check if variant inside transcript coords
-    if(exons[0].start - intronic_min_distance_ > variant.start &&
-            exons[exons.size() - 1].end + intronic_min_distance_ < variant.start) {
+    string transcript_strand = exons[0].strand;
+    //check if variant inside transcript coords for positive strand
+    if(transcript_strand == "+" &&
+       exons[0].start - intronic_min_distance_ > variant.start &&
+       exons[exons.size() - 1].end + intronic_min_distance_ < variant.start) {
+        return;
+    }
+    //check if variant inside transcript coords for negative strand
+    if(transcript_strand == "-" &&
+       exons[exons.size() - 1].start - intronic_min_distance_ > variant.start &&
+       exons[0].end + intronic_min_distance_ < variant.start) {
         return;
     }
     for(std::size_t i = 0; i < exons.size(); i++) {
-        if(exons[i].start - intronic_min_distance_ > variant.end) {
-            //No need to look any further
-            //the rest of the exons are outside the junction
+        //the rest of the exons are outside the junction - ps
+        if(transcript_strand == "+" && exons[i].start - intronic_min_distance_ > variant.end) {
+            return;
+        }
+        //the rest of the exons are outside the junction - ns
+        if(transcript_strand == "-" && exons[i].end + intronic_min_distance_ < variant.end) {
             return;
         }
         //exonic near start
