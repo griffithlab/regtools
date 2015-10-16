@@ -142,6 +142,8 @@ void VariantsAnnotator::cleanup_vcf() {
 //relevance depends on the user params
 //intronic_min_distance_ and exonic_min_distance_
 //The zero-based arithmetic is always fun.
+//The variant object is one-based.
+//GTF is one based
 void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exons,
                                                       AnnotatedVariant& variant) {
     variant.score = "-1";
@@ -159,15 +161,15 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
         }
         //exonic near start
         if(variant.end >= exons[i].start &&
-                variant.end <= exons[i].start + exonic_min_distance_ + 1) {
+                variant.end <= exons[i].start + exonic_min_distance_) {
             variant.score =  num_to_str(variant.end - exons[i].start);
             variant.annotation = "splicing_exonic";
             return;
         }
         //intronic near start
-        if(variant.end <= exons[i].start &&
-                variant.end >= exons[i].start - intronic_min_distance_ + 1) {
-            variant.score = num_to_str(exons[i].start - variant.end + 1);
+        if(variant.end < exons[i].start &&
+                variant.end >= exons[i].start - intronic_min_distance_) {
+            variant.score = num_to_str(exons[i].start - variant.end);
             variant.annotation = "splicing_intronic";
             return;
         }
@@ -179,7 +181,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
             return;
         }
         //intronic near end
-        if(variant.end >= exons[i].end &&
+        if(variant.end > exons[i].end &&
                 variant.end <= exons[i].end + intronic_min_distance_) {
             variant.score = num_to_str(variant.end - exons[i].end);
             variant.annotation = "splicing_intronic";
