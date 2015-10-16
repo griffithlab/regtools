@@ -32,7 +32,7 @@ import unittest
 class TestAnnotate(IntegrationTest, unittest.TestCase):
     def test_variants_annotate_default(self):
         variants = self.inputFiles("test1.vcf")[0]
-        gtf = self.inputFiles("test_ensemble_chr22.gtf")[0]
+        gtf = self.inputFiles("test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
         expected_file = self.inputFiles("variants-annotate/expected-annotate-default.out")[0]
         params = ["variants", "annotate", variants, gtf, output_file]
@@ -41,7 +41,7 @@ class TestAnnotate(IntegrationTest, unittest.TestCase):
         self.assertFilesEqual(expected_file, output_file)
     def test_variants_annotate_exonic_intronic_distance(self):
         variants = self.inputFiles("test1.vcf")[0]
-        gtf = self.inputFiles("test_ensemble_chr22.gtf")[0]
+        gtf = self.inputFiles("test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
         expected_file = self.inputFiles("variants-annotate/expected-annotate-e6-i6.out")[0]
         exonic_distance = "-e 6"
