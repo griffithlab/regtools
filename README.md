@@ -6,16 +6,11 @@
 Tools that integrate DNA-seq and RNA-seq data to help interpret mutations
 in a regulatory and splicing context.
 
-##Usage:
-
-```
-    regtools --help
-```
-
 ##Features
 
 - Extract exon-exon junctions from a RNAseq BAM file.
 - Annotate exon-exon junctions with information from a known transcriptome.
+- Annotate variants with splice-region(the definition of this region is configurable) annotations.
 
 ##Installation
 
@@ -27,6 +22,12 @@ Clone and install regtools by running:
     cd build/
     cmake ..
     make
+```
+
+##Usage:
+
+```
+    regtools --help
 ```
 
 ##Contribute
