@@ -37,8 +37,8 @@ class TestAnnotate(IntegrationTest, unittest.TestCase):
         expected_file = self.inputFiles("variants-annotate/expected-annotate-default.out")[0]
         params = ["variants", "annotate", variants, gtf, output_file]
         rv, err = self.execute(params)
-        self.assertEqual(rv, 0)
-        self.assertFilesEqual(expected_file, output_file)
+        self.assertEqual(rv, 0, err)
+        self.assertFilesEqual(expected_file, output_file, err)
     def test_variants_annotate_exonic_intronic_distance(self):
         variants = self.inputFiles("test1.vcf")[0]
         gtf = self.inputFiles("test_ensemble_chr22.2.gtf")[0]
@@ -50,8 +50,8 @@ class TestAnnotate(IntegrationTest, unittest.TestCase):
         params = ["variants", "annotate", variants, gtf, output_file, exonic_distance,
                   intronic_distance, dont_skip_single_exon_transcripts]
         rv, err = self.execute(params)
-        self.assertEqual(rv, 0)
-        self.assertFilesEqual(expected_file, output_file)
+        self.assertEqual(rv, 0, err)
+        self.assertFilesEqual(expected_file, output_file, err)
 
 if __name__ == "__main__":
     main()
