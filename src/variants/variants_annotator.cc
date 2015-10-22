@@ -38,6 +38,7 @@ int VariantsAnnotator::usage(ostream& out) {
     out << "\n\t\t" << "-i INT\tMinimum distance from the start/end of an exon "
                        "\n\t\t\tto annotate a variant as relevant to splicing, the variant "
                        "\n\t\t\tis in intronic space. [2]";
+    out << "\n\t\t" << "-S\tDon't skip single exon transcripts.";
     out << "\n";
     return 0;
 }
@@ -46,13 +47,16 @@ int VariantsAnnotator::usage(ostream& out) {
 int VariantsAnnotator::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int16_t c;
-    while((c = getopt(argc, argv, "e:i:")) != -1) {
+    while((c = getopt(argc, argv, "e:i:S")) != -1) {
         switch(c) {
             case 'i':
                 intronic_min_distance_ = atoi(optarg);
                 break;
             case 'e':
                 exonic_min_distance_ = atoi(optarg);
+                break;
+            case 'S':
+                skip_single_exon_genes_ = false;
                 break;
             default:
                 usage(std::cout);
@@ -77,6 +81,8 @@ int VariantsAnnotator::parse_options(int argc, char *argv[]) {
     cerr << "\nOutput vcf file: " << vcf_out_;
     cerr << "\nIntronic min distance: " << intronic_min_distance_;
     cerr << "\nExonic min distance: " << exonic_min_distance_;
+    if(!skip_single_exon_genes_)
+        cerr << "\nNot skipping single exon genes.";
     cerr << endl;
     return 0;
 }
@@ -227,6 +233,10 @@ void VariantsAnnotator::annotate_record_with_transcripts() {
                 if(!exons.size()) {
                     throw runtime_error("Unexpected error. No exons for transcript "
                             + transcripts[i]);
+                }
+                //Skip single exon genes
+                if(skip_single_exon_genes_ && exons.size() == 1) {
+                    continue;
                 }
                 //Use a AnnotatedVariant object to hold the result
                 get_variant_overlaps_spliceregion(exons, variant);

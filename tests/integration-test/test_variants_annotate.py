@@ -43,11 +43,12 @@ class TestAnnotate(IntegrationTest, unittest.TestCase):
         variants = self.inputFiles("test1.vcf")[0]
         gtf = self.inputFiles("test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
-        expected_file = self.inputFiles("variants-annotate/expected-annotate-e6-i6.out")[0]
+        expected_file = self.inputFiles("variants-annotate/expected-annotate-e6-i6-S.out")[0]
         exonic_distance = "-e 6"
         intronic_distance = "-i 6"
+        dont_skip_single_exon_transcripts = "-S"
         params = ["variants", "annotate", variants, gtf, output_file, exonic_distance,
-                  intronic_distance]
+                  intronic_distance, dont_skip_single_exon_transcripts]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
         self.assertFilesEqual(expected_file, output_file)

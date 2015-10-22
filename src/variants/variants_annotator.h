@@ -57,6 +57,8 @@ class VariantsAnnotator {
         //edge of an exon(exonic) to be considered
         //a splicing variant
         uint32_t exonic_min_distance_;
+        //Option to skip single exon genes
+        bool skip_single_exon_genes_;
         //VCF file handle
         htsFile *vcf_fh_in_;
         //Header of VCF file
@@ -73,6 +75,7 @@ class VariantsAnnotator {
                               vcf_out_("NA"),
                               intronic_min_distance_(2),
                               exonic_min_distance_(3),
+                              skip_single_exon_genes_(true),
                               vcf_fh_in_(NULL), vcf_header_in_(NULL),
                               vcf_fh_out_(NULL), vcf_header_out_(NULL),
                               vcf_record_(NULL) {
