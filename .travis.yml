@@ -5,7 +5,7 @@ compiler:
     - gcc
 
 before_script:
-    - brew update && brew install lcov
+    - lcov --help || (brew update && brew install lcov)
     - gem install coveralls-lcov
 
 script:
