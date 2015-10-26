@@ -8,6 +8,8 @@ set(SOURCES
     hfile_net.c
     kstring.c
     knetfile.c
+    tbx.c
+    vcf.c
     sam.c)
 
 #htslib headers have relative path to this dir

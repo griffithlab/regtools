@@ -46,16 +46,13 @@ int junctions_create(int argc, char *argv[]) {
     JunctionsCreator create;
     try {
         create.parse_options(argc, argv);
+        create.identify_junctions_from_BAM();
+        create.print_all_junctions();
     } catch(const runtime_error& error) {
         cerr << error.what();
         create.usage();
         return 1;
     }
-    if(create.identify_junctions_from_BAM()) {
-        create.usage();
-        return 1;
-    }
-    create.print_all_junctions();
     return 0;
 }
 

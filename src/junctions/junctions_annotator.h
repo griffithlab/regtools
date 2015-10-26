@@ -57,6 +57,8 @@ struct AnnotatedJunction : BED {
     bool known_acceptor;
     //Is this a known junction
     bool known_junction;
+    //Annotation - Exonic/Intronic etc.
+    string annotation;
     //Print the header line
     static void print_header(ostream& out) {
         out << "chrom" << "\t" << "start" <<
@@ -103,6 +105,7 @@ struct AnnotatedJunction : BED {
     //Clear the contents of the junction
     void reset() {
         anchor = string("N");
+        annotation = "";
         splice_site = "";
         known_donor = false;
         known_acceptor = false;
@@ -113,7 +116,27 @@ struct AnnotatedJunction : BED {
         transcripts_overlap.clear();
         genes_overlap.clear();
     }
+    //constructor
+    AnnotatedJunction() {
+        reset();
+    }
+    //constructor
+    AnnotatedJunction(string chr1,
+                     uint32_t start1,
+                     uint32_t end1) {
+        chrom = chr1;
+        start = start1;
+        end = end1;
+    }
 };
+
+//Copy one stream object into another
+inline
+void copy_stream(const ostream &source, ostream &dest) {
+    dest.copyfmt(source);
+    dest.basic_ios<char>::rdbuf(source.rdbuf());
+    dest.clear(source.rdstate());
+}
 
 //The class that does all the annotation
 //Uses a GTF parser object to annotate a junction.
