@@ -5,7 +5,7 @@ compiler:
     - gcc
 
 before_script:
-    - lcov --help || (brew update && brew install lcov)
+    - if [ "$TRAVIS_OS_NAME" == "osx" ]; then (brew update && brew install lcov); fi
     - gem install coveralls-lcov
 
 script:
