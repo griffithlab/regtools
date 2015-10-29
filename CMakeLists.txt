@@ -32,10 +32,11 @@ endif()
 
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/junctions/")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/gtf/")
+add_subdirectory ("${PROJECT_SOURCE_DIR}/src/variants/")
 
 #The main executable
 add_executable (regtools src/regtools.cc)
-target_link_libraries (regtools junctions bedtools gtf htslib)
+target_link_libraries (regtools junctions variants bedtools gtf htslib)
 
 #Testing
 enable_testing()

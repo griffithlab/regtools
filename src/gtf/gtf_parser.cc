@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <fstream>
 #include <iostream>
 #include <set>
+#include <stdexcept>
 #include <vector>
 #include <algorithm>
 #include "common.h"
@@ -66,7 +67,10 @@ Gtf GtfParser::parse_exon_line(string line) {
     Gtf gtf1;
     vector<string> fields;
     Tokenize(line, fields);
-    assert(fields.size() == 9);
+    if(fields.size() != 9) {
+        cerr << line << endl << fields.size();
+        throw runtime_error("Expected 9 fields in GTF line.");
+    }
     if(fields[2] != "exon") {
         gtf1.is_exon = false;
         return gtf1;

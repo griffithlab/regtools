@@ -1,21 +1,17 @@
 [![Build Status](https://travis-ci.org/griffithlab/regtools.svg?branch=master)](https://travis-ci.org/griffithlab/regtools)
 [![Documentation Status](https://readthedocs.org/projects/regtools/badge/?version=latest)](https://readthedocs.org/projects/regtools/?badge=latest)
+[![Coverage Status](https://coveralls.io/repos/griffithlab/regtools/badge.svg?branch=master&service=github)](https://coveralls.io/github/griffithlab/regtools?branch=master)
 
 #regtools
 
 Tools that integrate DNA-seq and RNA-seq data to help interpret mutations
 in a regulatory and splicing context.
 
-##Usage:
-
-```
-    regtools --help
-```
-
 ##Features
 
 - Extract exon-exon junctions from a RNAseq BAM file.
 - Annotate exon-exon junctions with information from a known transcriptome.
+- Annotate variants with splice-region(the definition of this region is configurable) annotations.
 
 ##Installation
 
@@ -27,6 +23,12 @@ Clone and install regtools by running:
     cd build/
     cmake ..
     make
+```
+
+##Usage:
+
+```
+    regtools --help
 ```
 
 ##Contribute

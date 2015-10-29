@@ -42,18 +42,14 @@ void JunctionsAnnotator::close_ofstream() {
 //If output file is empty, set to cout
 void JunctionsAnnotator::set_ofstream_object(ofstream &out) {
     if(output_file_ == "NA") {
-        out.copyfmt(cout);
-        out.basic_ios<char>::rdbuf(cout.rdbuf());
-        out.clear(cout.rdstate());
+        copy_stream(cout, out);
         return;
     }
     ofs_.open(output_file_.c_str());
     if(!ofs_.is_open())
         throw runtime_error("Unable to open " +
                             output_file_);
-    out.copyfmt(ofs_);
-    out.basic_ios<char>::rdbuf(ofs_.rdbuf());
-    out.clear(ofs_.rdstate());
+    copy_stream(ofs_, out);
 }
 
 //Open junctions file
@@ -129,7 +125,7 @@ bool JunctionsAnnotator::read_gtf() {
 }
 
 //Find overlap between transcript and junction on the negative strand,
-//function returns true if this is a known junction in the transcript
+//function returns true if either the acceptor or the donor is known
 bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
                                           AnnotatedJunction & junction) {
     //skip single exon genes
@@ -141,10 +137,7 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
             exons[exons.size() - 1].end < junction.start)
         return false;
     for(std::size_t i = 0; i < exons.size(); i++) {
-        cerr << endl << "exon number " << i << "\t" << exons[i].start
-             << "\t" << exons[i].end;
         if(exons[i].start > junction.end) {
-            cerr << endl << "-1";
             //No need to look any further
             //the rest of the exons are outside the junction
             break;
@@ -152,56 +145,46 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
         //known junction
         if(exons[i].end == junction.start &&
                 exons[i + 1].start == junction.end) {
-            cerr << endl << "DA";
-            junction.anchor = "DA";
             junction.known_acceptor = true;
             junction.known_donor = true;
             junction.known_junction = true;
             known_junction = true;
         }
         else {
-            cerr << endl << "0";
             if(!junction_start) {
                 if(exons[i].end >= junction.start) {
                     junction_start = true;
-                    cerr << endl << "1";
                 }
             }
             if(junction_start) {
                 if(exons[i].start > junction.start &&
                         exons[i].end < junction.end) {
-                    cerr << endl << "2";
                     junction.exons_skipped.insert(exons[i].name);
                 }
                 if(exons[i].start > junction.start) {
-                    cerr << endl << "3";
                     junction.donors_skipped.insert(exons[i].start);
                 }
                 if(exons[i].end < junction.end) {
-                    cerr << endl << "4";
                     junction.acceptors_skipped.insert(exons[i].end);
                 }
                 if(exons[i].end == junction.start) {
-                    cerr << endl << "5";
                     junction.known_donor = true;
                 }
                 //TODO - check for last exon
                 if(exons[i].start == junction.end) {
-                    cerr << endl << "6";
                     junction.known_acceptor = true;
                 }
             }
         }
     }
     annotate_anchor(junction);
-    return known_junction;
+    return (junction.anchor != "N");
 }
 
 //Find overlap between transcript and junction on the negative strand,
-//function returns true if this is a known junction in the transcript
+//function returns true if either the acceptor or the donor is known
 bool JunctionsAnnotator::overlap_ns(const vector<BED> & exons,
                                           AnnotatedJunction & junction) {
-    cerr << endl << "in negative overlap";
     //skip single exon genes
     if(skip_single_exon_genes_ && exons.size() == 1) return false;
     bool junction_start = false;
@@ -209,12 +192,10 @@ bool JunctionsAnnotator::overlap_ns(const vector<BED> & exons,
     //check if transcript overlaps with junction
     if(exons[0].end < junction.start ||
             exons[exons.size() - 1].start > junction.end) {
-        cerr << endl << "transcript outside junction";
         return known_junction;
     }
     for(std::size_t i = 0; i < exons.size(); i++) {
         if(exons[i].end < junction.start) {
-            cerr << endl << "-1";
             //No need to look any further
             //the rest of the exons are outside the junction
             break;
@@ -222,54 +203,47 @@ bool JunctionsAnnotator::overlap_ns(const vector<BED> & exons,
         //Check if this is a known junction
         if(exons[i].start == junction.end &&
                 exons[i + 1].end == junction.start) {
-            cerr << endl << "DA";
-            junction.anchor = "DA";
             junction.known_acceptor = true;
             junction.known_donor = true;
             junction.known_junction = true;
             known_junction = true;
         }
         else {
-            cerr << endl << "0\t" << i;
             if(!junction_start) {
                 if(exons[i].start <= junction.end) {
-                    cerr << endl << "1";
                     junction_start = true;
                 }
             }
             if(junction_start) {
                 if(exons[i].start > junction.start &&
                         exons[i].end < junction.end) {
-                    cerr << endl << "2";
                     junction.exons_skipped.insert(exons[i].name);
                 }
                 if(exons[i].start > junction.start) {
-                    cerr << endl << "3";
                     junction.donors_skipped.insert(exons[i].start);
                 }
                 if(exons[i].end < junction.end) {
-                    cerr << endl << "4";
                     junction.acceptors_skipped.insert(exons[i].end);
                 }
                 if(exons[i].start == junction.end) {
-                    cerr << endl << "5";
                     junction.known_donor = true;
                 }
                 if(exons[i].end == junction.start) {
-                    cerr << endl << "6";
                     junction.known_acceptor = true;
                 }
             }
         }
     }
     annotate_anchor(junction);
-    return known_junction;
+    return (junction.anchor != "N");
 }
 
-//Annotate the anchor
+//Annotate the anchor i.e is this a known/novel donor-acceptor pair
 void JunctionsAnnotator::annotate_anchor(AnnotatedJunction & junction) {
-    //check if known junction
-    if(!junction.known_junction) {
+    junction.anchor = string("N");
+    if(junction.known_junction) {
+        junction.anchor = "DA";
+    } else {
         if(junction.known_donor)
             if(junction.known_acceptor)
                 junction.anchor = string("NDA");
@@ -277,8 +251,6 @@ void JunctionsAnnotator::annotate_anchor(AnnotatedJunction & junction) {
                 junction.anchor = string("D");
         else if(junction.known_acceptor)
             junction.anchor = string("A");
-        else
-            junction.anchor = string("N");
     }
 }
 
@@ -286,13 +258,11 @@ void JunctionsAnnotator::annotate_anchor(AnnotatedJunction & junction) {
 //Check if the junction we saw is a known junction
 //Calculate exons_skipped, donors_skipped, acceptors_skipped
 void JunctionsAnnotator::check_for_overlap(string transcript_id, AnnotatedJunction & junction) {
-    cerr << "\nTranscript id: " << transcript_id;
     const vector<BED> & exons =
         gtf_.get_exons_from_transcript(transcript_id);
     if(!exons.size()) {
-        cerr << "Unexpected error. No exons for transcript "
-             << transcript_id;
-        exit(1);
+        throw runtime_error("Unexpected error. No exons for transcript "
+                            + transcript_id);
     }
     string transcript_strand = exons[0].strand;
     //Make sure the strands of the junction and transcript match
@@ -312,8 +282,7 @@ void JunctionsAnnotator::check_for_overlap(string transcript_id, AnnotatedJuncti
                     gtf_.get_gene_from_transcript(transcript_id));
         }
     } else {
-        cerr << "\nUnknown strand " << junction.strand;
-        exit(1);
+        throw runtime_error("\nUnknown strand " + junction.strand);
     }
     cerr << "\n\tDonors skipped " << junction.donors_skipped.size();
     cerr << "\n\tExons skipped " << junction.exons_skipped.size();
@@ -324,12 +293,10 @@ void JunctionsAnnotator::check_for_overlap(string transcript_id, AnnotatedJuncti
 //Annotate with gtf
 //Takes a single junction BED and annotates with GTF
 void JunctionsAnnotator::annotate_junction_with_gtf(AnnotatedJunction & j1) {
-    BIN junction_bin = getBin(j1.start, j1.end);
     //From BedTools
     BIN start_bin, end_bin;
     start_bin = (j1.start >> _binFirstShift);
     end_bin = ((j1.end-1) >> _binFirstShift);
-    cerr << endl << "junction_bin " << junction_bin;
     //We loop through each UCSC BIN level for feature A's chrom.
     //For each BIN, we loop through each B feature and add it to
     // hits if it meets all of the user's requests.
@@ -379,7 +346,6 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
                 break;
             default:
                 usage();
-                cerr << c << " here1";
                 throw runtime_error("\nError parsing inputs!");
         }
     }

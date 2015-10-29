@@ -324,13 +324,13 @@ int JunctionsExtractor::identify_junctions_from_BAM() {
         //open BAM for reading
         samFile *in = sam_open(bam_.c_str(), "r");
         if(in == NULL) {
-            return 1;
+            throw runtime_error("Unable to open BAM/SAM file.");
         }
         //Load the index
         hts_idx_t *idx = sam_index_load(in, bam_.c_str());
         if(idx == NULL) {
-            cerr << "Unable to load alignment index. Please index with Samtools.";
-            return -1;
+            throw runtime_error("Unable to open BAM/SAM index."
+                                " Make sure alignments are indexed");
         }
         //Get the header
         bam_hdr_t *header = sam_hdr_read(in);
@@ -340,7 +340,7 @@ int JunctionsExtractor::identify_junctions_from_BAM() {
         iter  = sam_itr_querys(idx, header, region_.c_str());
         if(header == NULL || iter == NULL) {
             sam_close(in);
-            return 1;
+            throw runtime_error("Unable to iterate to region within BAM.");
         }
         //Initiate the alignment record
         bam1_t *aln = bam_init1();

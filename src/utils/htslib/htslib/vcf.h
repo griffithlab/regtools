@@ -194,7 +194,7 @@ typedef struct {
  */
 typedef struct {
     int32_t rid;  // CHROM
-    int32_t pos;  // POS
+    uint32_t pos;  // POS
     int32_t rlen; // length of REF
     float qual;   // QUAL
     uint32_t n_info:16, n_allele:16;

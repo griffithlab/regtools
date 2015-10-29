@@ -46,16 +46,13 @@ int junctions_extract(int argc, char *argv[]) {
     JunctionsExtractor extract;
     try {
         extract.parse_options(argc, argv);
+        extract.identify_junctions_from_BAM();
+        extract.print_all_junctions();
     } catch(const runtime_error& error) {
         cerr << error.what();
         extract.usage();
         return 1;
     }
-    if(extract.identify_junctions_from_BAM()) {
-        extract.usage();
-        return 1;
-    }
-    extract.print_all_junctions();
     return 0;
 }
 
