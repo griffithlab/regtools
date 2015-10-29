@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 set(TEST_LIBS junctions)
 set(TEST_SOURCES
-    test_junctions_creator.cc
+    test_junctions_extractor.cc
     )
 
 set(test_name TestJunctions)

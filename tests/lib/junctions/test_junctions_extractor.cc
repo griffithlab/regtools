@@ -1,4 +1,4 @@
-/*  test_junctions_creator.cc -- Unit-tests for the JunctionsCreator class
+/*  test_junctions_extractor.cc -- Unit-tests for the JunctionsExtractor class
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -25,37 +25,37 @@ DEALINGS IN THE SOFTWARE.  */
 #include <gtest/gtest.h>
 #include <sstream>
 #include <stdexcept>
-#include "junctions_creator.h"
+#include "junctions_extractor.h"
 
-class JunctionsCreateTest : public ::testing::Test {
+class JunctionsExtractTest : public ::testing::Test {
     public:
-        JunctionsCreator jc1;
+        JunctionsExtractor jc1;
 };
 
-TEST_F(JunctionsCreateTest, ParseInput) {
+TEST_F(JunctionsExtractTest, ParseInput) {
     int argc = 2;
-    char * argv[] = {"create", "test_input.bam"};
+    char * argv[] = {"extract", "test_input.bam"};
     int ret = jc1.parse_options(argc, argv);
     string expected_bam("test_input.bam");
     ASSERT_EQ(expected_bam, jc1.get_bam());
     ASSERT_EQ(0, ret);
 }
 
-TEST_F(JunctionsCreateTest, ParseNoInput) {
+TEST_F(JunctionsExtractTest, ParseNoInput) {
     int argc = 1;
-    char * argv[] = {"create"};
+    char * argv[] = {"extract"};
     ASSERT_THROW(jc1.parse_options(argc, argv), std::runtime_error);
 }
 
-TEST_F(JunctionsCreateTest, ParseIncorrectOption) {
+TEST_F(JunctionsExtractTest, ParseIncorrectOption) {
     int argc = 2;
-    char * argv[] = {"create", "-k", "24", "test_input.bam"};
+    char * argv[] = {"extract", "-k", "24", "test_input.bam"};
     ASSERT_THROW(jc1.parse_options(argc, argv), std::runtime_error);
 }
 
-TEST_F(JunctionsCreateTest, Usage) {
+TEST_F(JunctionsExtractTest, Usage) {
     ostringstream out, out2;
-    out << "\nUsage:\t\t" << "regtools junctions create [options] indexed_alignments.bam";
+    out << "\nUsage:\t\t" << "regtools junctions extract [options] indexed_alignments.bam";
     out << "\nOptions:";
     out << "\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum "
                      "anchor length on both sides are reported. [8]";
@@ -69,7 +69,7 @@ TEST_F(JunctionsCreateTest, Usage) {
     ASSERT_EQ(out.str(), out2.str()) << "Error parsing as expected";
 }
 
-TEST_F(JunctionsCreateTest, JunctionName) {
+TEST_F(JunctionsExtractTest, JunctionName) {
     string j1_name = jc1.get_new_junction_name();
     ASSERT_EQ(j1_name, string("JUNC00000001"));
     Junction j1("chr1", 10000, 10200,
@@ -79,7 +79,7 @@ TEST_F(JunctionsCreateTest, JunctionName) {
     ASSERT_EQ(string("JUNC00000002"), j2_name);
 }
 
-TEST_F(JunctionsCreateTest, PrintJunction) {
+TEST_F(JunctionsExtractTest, PrintJunction) {
     stringstream ss1, expected;
     Junction j1("chr1", 10000, 10200,
             9500, 10700, "+");
@@ -96,7 +96,7 @@ TEST_F(JunctionsCreateTest, PrintJunction) {
     ASSERT_EQ(expected.str(), ss1.str());
 }
 
-TEST_F(JunctionsCreateTest, AddJunction) {
+TEST_F(JunctionsExtractTest, AddJunction) {
     stringstream ss1, expected;
     //Add one junction with differing thick start/ends
     jc1.add_junction(Junction("chr1", 10000, 10200,
