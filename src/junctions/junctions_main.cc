@@ -27,30 +27,30 @@ DEALINGS IN THE SOFTWARE.  */
 #include <stdexcept>
 #include "gtf_parser.h"
 #include "junctions_annotator.h"
-#include "junctions_creator.h"
+#include "junctions_extractor.h"
 
 using namespace std;
 
 //Usage for junctions subcommands
 int junctions_usage(ostream &out = cout) {
     out << "\nUsage:\t\t" << "regtools junctions <command> [options]";
-    out << "\nCommand:\t" << "create\t\tIdentify exon-exon junctions from alignments.";
+    out << "\nCommand:\t" << "extract\t\tIdentify exon-exon junctions from alignments.";
     out << "\n\t\tannotate\tAnnotate the junctions.";
     out << "\n";
     return 0;
 }
 
 
-//Run 'junctions create'
-int junctions_create(int argc, char *argv[]) {
-    JunctionsCreator create;
+//Run 'junctions extract'
+int junctions_extract(int argc, char *argv[]) {
+    JunctionsExtractor extract;
     try {
-        create.parse_options(argc, argv);
-        create.identify_junctions_from_BAM();
-        create.print_all_junctions();
+        extract.parse_options(argc, argv);
+        extract.identify_junctions_from_BAM();
+        extract.print_all_junctions();
     } catch(const runtime_error& error) {
         cerr << error.what();
-        create.usage();
+        extract.usage();
         return 1;
     }
     return 0;
@@ -90,8 +90,8 @@ int junctions_annotate(int argc, char *argv[]) {
 int junctions_main(int argc, char *argv[]) {
     if(argc > 1) {
         string subcmd(argv[1]);
-        if(subcmd == "create") {
-            return junctions_create(argc - 1, argv + 1);
+        if(subcmd == "extract") {
+            return junctions_extract(argc - 1, argv + 1);
         }
         if(subcmd == "annotate") {
             return junctions_annotate(argc - 1, argv + 1);

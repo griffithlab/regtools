@@ -1,4 +1,4 @@
-/*  junctions_creator.h -- Declarations for `junctions create` command
+/*  junctions_extractor.h -- Declarations for `junctions extract` command
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -22,8 +22,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
-#ifndef JUNCTIONS_CREATOR_H
-#define JUNCTIONS_CREATOR_H
+#ifndef JUNCTIONS_EXTRACTOR_H
+#define JUNCTIONS_EXTRACTOR_H
 
 #include <iostream>
 #include "bedFile.h"
@@ -105,7 +105,7 @@ static inline bool compare_junctions(const Junction &j1,
 }
 
 //The class that deals with creating the junctions
-class JunctionsCreator {
+class JunctionsExtractor {
     private:
         //Alignment file
         string bam_;
@@ -131,7 +131,7 @@ class JunctionsCreator {
         string region_;
     public:
         //Default constructor
-        JunctionsCreator() {
+        JunctionsExtractor() {
             min_anchor_length_ = 8;
             min_intron_length_ = 70;
             max_intron_length_ = 500000;
@@ -174,4 +174,3 @@ class JunctionsCreator {
 };
 
 #endif
-

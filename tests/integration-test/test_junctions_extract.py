@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-test_junctions_create.py -- Integration test for `regtools junctions create`
+test_junctions_extract.py -- Integration test for `regtools junctions extract`
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -29,30 +29,30 @@ DEALINGS IN THE SOFTWARE.
 from integrationtest import IntegrationTest, main
 import unittest
 
-class TestCreate(IntegrationTest, unittest.TestCase):
-    def test_junctions_create_anchor(self):
+class TestExtract(IntegrationTest, unittest.TestCase):
+    def test_junctions_extract_anchor(self):
         bam1 = self.inputFiles("test_hcc1395.bam")[0]
-        output_file = self.tempFile("create.out")
+        output_file = self.tempFile("extract.out")
         print "BAM1 is ", bam1
         for anchor in ["", "30"]:
-            expected_file = self.inputFiles("junctions-create/expected-a" +
+            expected_file = self.inputFiles("junctions-extract/expected-a" +
                                             anchor + ".out")[0]
             if anchor != "":
                 anchor = "-a " + anchor
-            params = ["junctions", "create", anchor, "-o", output_file, bam1]
+            params = ["junctions", "extract", anchor, "-o", output_file, bam1]
             rv, err = self.execute(params)
             self.assertEqual(rv, 0)
             self.assertFilesEqual(expected_file, output_file)
 
-    def test_junctions_create_intron_size(self):
+    def test_junctions_extract_intron_size(self):
         bam1 = self.inputFiles("test_hcc1395.bam")[0]
-        output_file = self.tempFile("create.out")
+        output_file = self.tempFile("extract.out")
         min_intron = "8039"
         max_intron = "8039"
-        expected_file = self.inputFiles("junctions-create/expected-i" +
+        expected_file = self.inputFiles("junctions-extract/expected-i" +
                 min_intron + "-I" + max_intron +
                 ".out")[0]
-        params = ["junctions", "create", "-o", output_file,
+        params = ["junctions", "extract", "-o", output_file,
                   "-i", min_intron, "-I", max_intron, bam1]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
@@ -60,25 +60,25 @@ class TestCreate(IntegrationTest, unittest.TestCase):
 
     def test_region(self):
         bam1 = self.inputFiles("test_hcc1395.bam")[0]
-        output_file = self.tempFile("create.out")
+        output_file = self.tempFile("extract.out")
         region = "1:22405013-22405020"
-        expected_file = self.inputFiles("junctions-create/expected-r" +
+        expected_file = self.inputFiles("junctions-extract/expected-r" +
                 region + ".out")[0]
-        params = ["junctions", "create", "-o", output_file, "-r", region,
+        params = ["junctions", "extract", "-o", output_file, "-r", region,
                   bam1]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
         self.assertFilesEqual(expected_file, output_file)
 
     def test_no_bam(self):
-        output_file = self.tempFile("create.out")
-        params = ["junctions", "create", "-o", output_file]
+        output_file = self.tempFile("extract.out")
+        params = ["junctions", "extract", "-o", output_file]
         rv, err = self.execute(params)
         self.assertEqual(rv, 1)
 
     def test_help(self):
-        output_file = self.tempFile("create.out")
-        params = ["junctions", "create", "-h"]
+        output_file = self.tempFile("extract.out")
+        params = ["junctions", "extract", "-h"]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
 

@@ -1,4 +1,4 @@
-/*  junctions_creator.h -- Declarations for `junctions create` command
+/*  junctions_extractor.h -- Declarations for `junctions extract` command
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
-#include "junctions_creator.h"
+#include "junctions_extractor.h"
 #include "sam.h"
 #include "hts.h"
 #include "faidx.h"
@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.  */
 using namespace std;
 
 //Parse the options passed to this tool
-int JunctionsCreator::parse_options(int argc, char *argv[]) {
+int JunctionsExtractor::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int c;
     while((c = getopt(argc, argv, "ha:i:I:o:r:")) != -1) {
@@ -79,8 +79,8 @@ int JunctionsCreator::parse_options(int argc, char *argv[]) {
 }
 
 //Usage statement for this tool
-int JunctionsCreator::usage(ostream& out) {
-    out << "\nUsage:\t\t" << "regtools junctions create [options] indexed_alignments.bam";
+int JunctionsExtractor::usage(ostream& out) {
+    out << "\nUsage:\t\t" << "regtools junctions extract [options] indexed_alignments.bam";
     out << "\nOptions:";
     out << "\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum "
                      "anchor length on both sides are reported. [8]";
@@ -94,13 +94,13 @@ int JunctionsCreator::usage(ostream& out) {
 }
 
 //Get the BAM filename
-string JunctionsCreator::get_bam() {
+string JunctionsExtractor::get_bam() {
     return bam_;
 }
 
 //Name the junction based on the number of junctions
 // in the map.
-string JunctionsCreator::get_new_junction_name() {
+string JunctionsExtractor::get_new_junction_name() {
     int index = junctions_.size() + 1;
     stringstream name_ss;
     name_ss << "JUNC" << setfill('0') << setw(8) << index;
@@ -108,7 +108,7 @@ string JunctionsCreator::get_new_junction_name() {
 }
 
 //Do some basic qc on the junction
-bool JunctionsCreator::junction_qc(Junction &j1) {
+bool JunctionsExtractor::junction_qc(Junction &j1) {
     if(j1.end - j1.start < min_intron_length_ ||
        j1.end - j1.start > max_intron_length_) {
         return false;
@@ -122,7 +122,7 @@ bool JunctionsCreator::junction_qc(Junction &j1) {
 
 //Add a junction to the junctions map
 //The read_count field is the number of reads supporting the junction.
-int JunctionsCreator::add_junction(Junction j1) {
+int JunctionsExtractor::add_junction(Junction j1) {
     //Check junction_qc
     if(!junction_qc(j1)) {
         return 0;
@@ -160,7 +160,7 @@ int JunctionsCreator::add_junction(Junction j1) {
 }
 
 //Print one junction
-void JunctionsCreator::print_one_junction(const Junction j1, ostream& out) {
+void JunctionsExtractor::print_one_junction(const Junction j1, ostream& out) {
     out << j1.chrom <<
         "\t" << j1.thick_start << "\t" << j1.thick_end <<
         "\t" << j1.name << "\t" << j1.read_count << "\t" << j1.strand <<
@@ -171,7 +171,7 @@ void JunctionsCreator::print_one_junction(const Junction j1, ostream& out) {
 }
 
 //Print all the junctions - this function needs work
-void JunctionsCreator::print_all_junctions(ostream& out) {
+void JunctionsExtractor::print_all_junctions(ostream& out) {
     ofstream fout;
     if(output_file_ != string("NA")) {
         fout.open(output_file_.c_str());
@@ -196,7 +196,7 @@ void JunctionsCreator::print_all_junctions(ostream& out) {
 }
 
 //Get the strand from the XS aux tag
-void JunctionsCreator::set_junction_strand(bam1_t *aln, Junction& j1) {
+void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
     uint8_t *p = bam_aux_get(aln, "XS");
     if(p != NULL) {
         char strand = bam_aux2A(p);
@@ -208,7 +208,7 @@ void JunctionsCreator::set_junction_strand(bam1_t *aln, Junction& j1) {
 }
 
 //Parse junctions from the read and store in junction map
-int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *aln) {
+int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *aln) {
     int n_cigar = aln->core.n_cigar;
     if (n_cigar <= 1) // max one cigar operation exists(likely all matches)
         return 0;
@@ -319,7 +319,7 @@ int JunctionsCreator::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *
 }
 
 //The workhorse - identifies junctions from BAM
-int JunctionsCreator::identify_junctions_from_BAM() {
+int JunctionsExtractor::identify_junctions_from_BAM() {
     if(!bam_.empty()) {
         //open BAM for reading
         samFile *in = sam_open(bam_.c_str(), "r");
@@ -357,7 +357,7 @@ int JunctionsCreator::identify_junctions_from_BAM() {
 }
 
 //Create the junctions vector from the map
-void JunctionsCreator::create_junctions_vector() {
+void JunctionsExtractor::create_junctions_vector() {
     for(map<string, Junction> :: iterator it = junctions_.begin();
         it != junctions_.end(); it++) {
         Junction j1 = it->second;
@@ -366,7 +366,7 @@ void JunctionsCreator::create_junctions_vector() {
 }
 
 //Sort all the junctions by their position
-void JunctionsCreator::sort_junctions() {
+void JunctionsExtractor::sort_junctions() {
     sort(junctions_vector_.begin(), junctions_vector_.end(), compare_junctions);
     junctions_sorted_ = true;
 }

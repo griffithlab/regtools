@@ -9,6 +9,6 @@ include_directories(../gtf/
 
 add_library(junctions
     junctions_main.cc
-    junctions_creator.cc
+    junctions_extractor.cc
     junctions_annotator.cc)
 
