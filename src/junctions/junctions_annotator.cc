@@ -350,7 +350,7 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
                 break;
             default:
                 usage();
-                throw runtime_error("\nError parsing inputs!");
+                throw runtime_error("\nError parsing inputs!(1)");
         }
     }
     if(argc - optind >= 3) {
@@ -363,7 +363,7 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
        junctions_.bedFile.empty() ||
        gtf_.gtffile().empty()) {
         usage();
-        throw runtime_error("\nError parsing inputs!");
+        throw runtime_error("\nError parsing inputs!(2)");
     }
     cerr << "\nReference: " << ref_;
     cerr << "\nGTF: " << gtf_.gtffile();
