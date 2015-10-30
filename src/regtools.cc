@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.  */
 
 int junctions_main(int argc, char* argv[]);
 int variants_main(int argc, char* argv[]);
+int cis_splice_effects_main(int argc, char* argv[]);
 
 using namespace std;
 
@@ -40,9 +41,10 @@ void version() {
 //Regtools usage
 int usage() {
     cerr << "\nUsage:\t\t" << "regtools <command> [options]";
-    cerr << "\nCommand:\t" << "junctions\tTools that operate on feature junctions."
-         << "\n\t\t\t\t(eg. exon-exon junctions from RNA-seq.)";
-    cerr << "\n\t\t" << "variants\tTools that operate on variants.";
+    cerr << "\nCommand:\t" << "junctions\t\tTools that operate on feature junctions."
+         << "\n\t\t\t\t\t(eg. exon-exon junctions from RNA-seq.)";
+    cerr << "\n\t\t" << "cis-splice-effects\tTools related to splicing effects of variants.";
+    cerr << "\n\t\t" << "variants\t\tTools that operate on variants.";
     cerr << "\n";
     return 0;
 }
@@ -57,6 +59,9 @@ int main(int argc, char* argv[]) {
         }
         if(subcmd == "variants") {
             return variants_main(argc - 1, argv + 1);
+        }
+        if(subcmd == "cis-splice-effects") {
+            return cis_splice_effects_main(argc - 1, argv + 1);
         }
     }
     return usage();
