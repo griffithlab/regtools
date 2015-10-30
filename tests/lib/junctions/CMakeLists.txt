@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 set(TEST_LIBS junctions)
 set(TEST_SOURCES
-    test_junctions_extractor.cc
-    )
+    "test_junctions_extractor.cc"
+    "test_junctions_annotator.cc")
 
 set(test_name TestJunctions)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
@@ -22,4 +22,4 @@ set(NOSTRING_FLAG "-Wno-write-strings")
 set_target_properties(${test_name} PROPERTIES COMPILE_FLAGS
     ${NOSTRING_FLAG})
 
-add_test(${TEST_SOURCES} ${test_name})
+add_test(${test_name} ${test_name})
