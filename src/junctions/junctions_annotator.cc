@@ -370,7 +370,7 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
     cerr << "\nJunctions: " << junctions_.bedFile;
     if(skip_single_exon_genes_)
         cerr << "\nSkip single exon genes.";
-    if(!output_file_.empty())
+    if(output_file_ != "NA")
         cerr << "\nOutput file: " << output_file_;
     return 0;
 }
