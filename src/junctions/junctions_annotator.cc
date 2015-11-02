@@ -67,10 +67,10 @@ void JunctionsAnnotator::adjust_junction_ends(BED & line) {
     //Adjust the start and end with block sizes
     //The junction start is thick_start + block_size1
     //The junction end is thick_end - block_size2 + 1
-    if(!line.fields.size() || line.fields[10].empty()) {
+    if(line.fields.size() != 12  || line.fields[10].empty()) {
         stringstream position;
         position << line.chrom << ":" << line.start;
-        throw runtime_error("Block sizes not found. Invalid line. " +
+        throw runtime_error("BED file not in BED12 format. start: " +
                             position.str());
     }
     string blocksize_field = line.fields[10];
@@ -369,9 +369,10 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
     cerr << "\nGTF: " << gtf_.gtffile();
     cerr << "\nJunctions: " << junctions_.bedFile;
     if(skip_single_exon_genes_)
-        cerr << "\nSkip single exon genes.";
-    if(!output_file_.empty())
+        cerr << "\nSkipping single exon genes.";
+    if(output_file_ != "NA")
         cerr << "\nOutput file: " << output_file_;
+    cerr << endl << endl;
     return 0;
 }
 
