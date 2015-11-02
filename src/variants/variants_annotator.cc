@@ -47,7 +47,8 @@ int VariantsAnnotator::usage(ostream& out) {
 int VariantsAnnotator::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int16_t c;
-    while((c = getopt(argc, argv, "e:i:S")) != -1) {
+    stringstream help_ss;
+    while((c = getopt(argc, argv, "e:hi:S")) != -1) {
         switch(c) {
             case 'i':
                 intronic_min_distance_ = atoi(optarg);
@@ -58,6 +59,9 @@ int VariantsAnnotator::parse_options(int argc, char *argv[]) {
             case 'S':
                 skip_single_exon_genes_ = false;
                 break;
+            case 'h':
+                usage(help_ss);
+                throw cmdline_help_exception(help_ss.str());
             default:
                 usage(std::cout);
                 throw runtime_error("\nError parsing inputs!");

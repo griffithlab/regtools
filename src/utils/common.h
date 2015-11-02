@@ -26,8 +26,9 @@ DEALINGS IN THE SOFTWARE.  */
 #define COMMON_H_
 
 #include <iostream>
-#include <sstream>
 #include <map>
+#include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -87,5 +88,12 @@ inline void unquote(string & s1) {
     }
 }
 
-#endif
+//Define cmdline_help_exception - Thanks tabbott!
+class cmdline_help_exception : public std::runtime_error {
+    public:
+        cmdline_help_exception(std::string const& msg)
+            : std::runtime_error(msg) {
+        }
+};
 
+#endif
