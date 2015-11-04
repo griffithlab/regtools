@@ -1,17 +1,48 @@
-# Examples
 [junction_annotation]: ../images/junction_annotation_examples.png
 [anchor_annotation]: ../images/anchor_examples.png
 
-###Annotate
+###Synopsis
 The `regtools junctions annotate` command is a tool to annotate the observed junctions with respect to a known
 transcript structure. The known transcript structure is in the form of a GTF file obtained from one of the standard
 Gene Annotation databases such as Ensembl/RefSeq/UCSC etc. The goal of the annotation step is to help identify novel/unusual junctions.
 
+###Usage
+`regtools junctions annotate [options] junctions.bed ref.fa annotations.gtf`
+
 ###Input
+| Input           | Description |
+| ------          | ----------- |
+| junctions.bed   | The BED file with the junctions that have be annotated. This file has to be in the BED12 format. One recommended way of obtaining this file is by running `regtools junctions extract`. See [here](junctions-extract.md) for more details.|
+| ref.fa          | The reference FASTA file. The donor and acceptor sequences used in the "splice-site" column are extracted from the FASTA file. |
+| annotations.gtf | The GTF file specifies the transcriptome that is used to annotate the junctions. For examples, the Ensembl GTFs for release78 are [here](ftp://ftp.ensembl.org/pub/release-78/gtf/)|
+
 
 ###Options
+| Option  | Description |
+| ------  | ----------- |
+| -E      | Do not skip single exon genes. The default is to skip the single exon genes while annotating junctions.|
+| -o      | File to write output to. STDOUT by default. The output format is described [here](#output)|
+| -h      | Display help message for this command.|
 
 ###Output
+| Column name       | Description |
+| -----------       | ----------- |
+| chrom             | Chromosome of the junction.|
+| start             | Junction start co-ordinate. [zero based format]|
+| end               | Junction end co-ordinate. [zero based format] |
+| name              | Identifier for the junction.|
+| score             | The number of reads supporting the junction. [integer]|
+| strand            | The strand the junction is identified. Same as the input file. [+/-]|
+| splice_site       | The two basepairs at the donor and acceptor sites separated by a hyphen. [e.g CT-AG]|
+| acceptors_skipped | Number of known acceptors skipped by this junction according to the GTF. See[Notes](#notes) below for explanation. [integer]|
+| exons_skipped     | Number of known exons skipped by this junction according to the GTF. See[Notes](#notes) below for explanation. [integer]|
+| donors_skipped    | Number of known donors skipped by this junction according to the GTF. See[Notes](#notes) below for explanation. [integer]|
+| anchor            | Field that specifies the donor, acceptor configuration. See [Notes](#notes) below for explanation. [D/A/DA/NDA/N]|
+| known_donor       | Is the junction-donor a known donor in the GTF file? [0/1]|
+| known_acceptor    | Is junction-donor a known acceptor in the GTF file? [0/1]|
+| known_junction    | Does the junction have a known donor-acceptor pair according to the GTF file. This is equivalent to "DA" in the "anchor" column.|
+| transcripts       | The transcripts that overlap the junction according to the input GTF file. |
+| genes             | The genes that overlap the junction according to the input GTF file. |
 
 ###Notes
 ####Annotating observed junctions with known donor/acceptor/junction information
