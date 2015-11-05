@@ -81,6 +81,9 @@ class VariantsAnnotator {
                               vcf_record_(NULL) {
             vcf_record_ = bcf_init();
         }
+        ~VariantsAnnotator() {
+            cleanup_vcf();
+        }
         //Parse command-line options for this tool
         int parse_options(int argc, char *argv[]);
         //Usage statement for this tool

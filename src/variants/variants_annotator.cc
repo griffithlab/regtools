@@ -38,6 +38,7 @@ int VariantsAnnotator::usage(ostream& out) {
     out << "\n\t\t" << "-i INT\tMinimum distance from the start/end of an exon "
                        "\n\t\t\tto annotate a variant as relevant to splicing, the variant "
                        "\n\t\t\tis in intronic space. [2]";
+    out << "\n\t\t" << "-o\tFile to write output to. [STDOUT]";
     out << "\n\t\t" << "-S\tDon't skip single exon transcripts.";
     out << "\n";
     return 0;
@@ -48,13 +49,16 @@ int VariantsAnnotator::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int16_t c;
     stringstream help_ss;
-    while((c = getopt(argc, argv, "e:hi:S")) != -1) {
+    while((c = getopt(argc, argv, "e:hi:o:S")) != -1) {
         switch(c) {
             case 'i':
                 intronic_min_distance_ = atoi(optarg);
                 break;
             case 'e':
                 exonic_min_distance_ = atoi(optarg);
+                break;
+            case 'o':
+                vcf_out_ = string(optarg);
                 break;
             case 'S':
                 skip_single_exon_genes_ = false;
@@ -64,21 +68,19 @@ int VariantsAnnotator::parse_options(int argc, char *argv[]) {
                 throw cmdline_help_exception(help_ss.str());
             default:
                 usage(std::cout);
-                throw runtime_error("\nError parsing inputs!");
+                throw runtime_error("\nError parsing inputs!(1)\n");
         }
     }
-    if(argc - optind >= 3) {
+    if(argc - optind >= 2) {
         vcf_ = string(argv[optind++]);
         gtffile_ = string(argv[optind++]);
         gtf_.set_gtffile(gtffile_);
-        vcf_out_ = string(argv[optind++]);
     }
     if(optind < argc ||
        vcf_ == "NA" ||
-       gtffile_ == "NA" ||
-       vcf_out_ == "NA") {
+       gtffile_ == "NA") {
         usage(std::cout);
-        throw runtime_error("\nError parsing inputs!");
+        throw runtime_error("\nError parsing inputs!(2)\n");
     }
     cerr << "\nVariant file: " << vcf_;
     cerr << "\nGTF file: " << gtffile_;
@@ -87,6 +89,8 @@ int VariantsAnnotator::parse_options(int argc, char *argv[]) {
     cerr << "\nExonic min distance: " << exonic_min_distance_;
     if(!skip_single_exon_genes_)
         cerr << "\nNot skipping single exon genes.";
+    if(vcf_out_ != "NA")
+        cerr << "\nOutput file: " << vcf_out_;
     cerr << endl;
     return 0;
 }
@@ -114,7 +118,8 @@ void VariantsAnnotator::open_vcf_in() {
 
 //Open output VCF file
 void VariantsAnnotator::open_vcf_out() {
-    vcf_fh_out_ =  hts_open(vcf_out_.c_str(), "w");
+    vcf_fh_out_ =  hts_open(vcf_out_ == "NA" ? "-" : vcf_out_.c_str(),
+                            "w");
     if(vcf_fh_out_ == NULL) {
         throw runtime_error("Unable to open output VCF file");
     }
@@ -140,11 +145,16 @@ void VariantsAnnotator::open_vcf_out() {
 
 //Free relevant pointers
 void VariantsAnnotator::cleanup_vcf() {
-    bcf_hdr_destroy(vcf_header_in_);
-    bcf_close(vcf_fh_in_);
-    bcf_hdr_destroy(vcf_header_out_);
-    bcf_close(vcf_fh_out_);
-    bcf_destroy(vcf_record_);
+    if(vcf_header_in_)
+        bcf_hdr_destroy(vcf_header_in_);
+    if(vcf_fh_in_)
+        bcf_close(vcf_fh_in_);
+    if(vcf_header_out_)
+        bcf_hdr_destroy(vcf_header_out_);
+    if(vcf_fh_out_)
+        bcf_close(vcf_fh_out_);
+    if(vcf_record_)
+        bcf_destroy(vcf_record_);
 }
 
 //Given a transcript ID and variant position,
@@ -290,5 +300,4 @@ void VariantsAnnotator::annotate_vcf() {
     while(bcf_read(vcf_fh_in_, vcf_header_in_, vcf_record_) == 0) {
         annotate_record_with_transcripts();
     }
-    cleanup_vcf();
 }
