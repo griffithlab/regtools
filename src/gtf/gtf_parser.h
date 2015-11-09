@@ -123,20 +123,17 @@ class GtfParser {
         TranscriptToBin transcript_to_bin_;
         //keyed by transcript_id
         ChrBinToTranscripts chrbin_to_transcripts_;
+    public:
+        //Constructor
+        GtfParser()
+            : n_exons_(0)
+            , transcripts_sorted_(false)
+        {}
         //Parse an exon line into a gtf struct
         Gtf parse_exon_line(string line);
         //Parse the required field from attributes column
         string parse_attribute(vector<string> attributes1,
                            string field_name);
-    public:
-
-        GtfParser()
-            : n_exons_(0)
-            , transcripts_sorted_(false)
-        {}
-
-        ~GtfParser() {}
-
         //Close the gtf filehandle
         void close();
         //Assemble transcripts into a map
