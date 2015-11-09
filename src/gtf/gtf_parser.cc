@@ -231,7 +231,6 @@ void GtfParser::create_transcript_map() {
         Gtf gtf_l = parse_exon_line(line);
         if(gtf_l.is_exon) {
             add_exon_to_transcript_map(gtf_l);
-            n_exons_++;
         }
     }
     GtfParser::close();
