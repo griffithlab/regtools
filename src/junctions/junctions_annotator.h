@@ -182,7 +182,7 @@ class JunctionsAnnotator {
         //Parse command-line options for this tool
         int parse_options(int argc, char *argv[]);
         //Print default usage
-        int usage();
+        int usage(ostream& out = cerr);
         //Get the reference bases at a position
         string get_reference_sequence(string position);
         //Get a single line from the junctions file

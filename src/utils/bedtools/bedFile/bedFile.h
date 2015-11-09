@@ -167,8 +167,31 @@ public:
         return end-start;
     }
 
+    //Equals operator
+    bool operator== (const BED &other) const {
+        return chrom == other.chrom &&
+            start == other.start &&
+            end == other.end &&
+            score == other.score &&
+            strand == other.strand &&
+            fields == other.fields;
+    }
+    //Insert operator
+    friend ostream& operator<< (ostream &out, const BED& bed1);
 }; // BED
 
+inline ostream& operator<< (ostream &out, const BED& bed1) {
+    out << bed1.chrom << "\t";
+    out << bed1.start << "\t";
+    out << bed1.end << "\t";
+    out << bed1.score << "\t";
+    out << bed1.strand << "\t";
+    for(size_t i = 0; i<bed1.fields.size(); i++) {
+        out << bed1.fields[i] << "\t";
+    }
+    out << endl;
+    return out;
+}
 
 /*
     Structure for each end of a paired BED record

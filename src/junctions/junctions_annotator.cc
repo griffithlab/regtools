@@ -67,10 +67,10 @@ void JunctionsAnnotator::adjust_junction_ends(BED & line) {
     //Adjust the start and end with block sizes
     //The junction start is thick_start + block_size1
     //The junction end is thick_end - block_size2 + 1
-    if(!line.fields.size() || line.fields[10].empty()) {
+    if(line.fields.size() != 12  || line.fields[10].empty()) {
         stringstream position;
         position << line.chrom << ":" << line.start;
-        throw runtime_error("Block sizes not found. Invalid line. " +
+        throw runtime_error("BED file not in BED12 format. start: " +
                             position.str());
     }
     string blocksize_field = line.fields[10];
@@ -336,7 +336,8 @@ string JunctionsAnnotator::gtf_file() {
 int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int c;
-    while((c = getopt(argc, argv, "Eo:")) != -1) {
+    stringstream help_ss;
+    while((c = getopt(argc, argv, "Eo:h")) != -1) {
         switch(c) {
             case 'E':
                 skip_single_exon_genes_ = false;
@@ -344,6 +345,9 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
             case 'o':
                 output_file_ = string(optarg);
                 break;
+            case 'h':
+                usage(help_ss);
+                throw cmdline_help_exception(help_ss.str());
             default:
                 usage();
                 throw runtime_error("\nError parsing inputs!");
@@ -365,17 +369,18 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
     cerr << "\nGTF: " << gtf_.gtffile();
     cerr << "\nJunctions: " << junctions_.bedFile;
     if(skip_single_exon_genes_)
-        cerr << "\nSkip single exon genes.";
-    if(!output_file_.empty())
+        cerr << "\nSkipping single exon genes.";
+    if(output_file_ != "NA")
         cerr << "\nOutput file: " << output_file_;
+    cerr << endl << endl;
     return 0;
 }
 
 //Usage statement for this tool
-int JunctionsAnnotator::usage() {
-    cout << "\nUsage:\t\t" << "regtools junctions annotate [options] junctions.bed ref.fa annotations.gtf";
-    cout << "\nOptions:\t" << "-E include single exon genes";
-    cout << "\n\t\t" << "-o Output file";
-    cout << "\n";
+int JunctionsAnnotator::usage(ostream& out) {
+    out << "\nUsage:\t\t" << "regtools junctions annotate [options] junctions.bed ref.fa annotations.gtf";
+    out << "\nOptions:\t" << "-E include single exon genes";
+    out << "\n\t\t" << "-o Output file";
+    out << "\n";
     return 0;
 }
