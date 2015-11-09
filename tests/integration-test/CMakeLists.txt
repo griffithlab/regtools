@@ -1,3 +1,5 @@
+def_integration_test(regtools junctions_main test_junctions_main.py)
 def_integration_test(regtools junctions_extract test_junctions_extract.py)
 def_integration_test(regtools junctions_annotate test_junctions_annotate.py)
+def_integration_test(regtools variants_main test_variants_main.py)
 def_integration_test(regtools variants_annotate test_variants_annotate.py)
