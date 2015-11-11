@@ -1,11 +1,12 @@
-# Regtools
+# regtools
 
-Regtools is a set of tools that integrate DNA-seq and RNA-seq data to help interpret mutations in a regulatory and splicing context.
+regtools is a set of tools that integrate DNA-seq and RNA-seq data to help interpret mutations in a regulatory and splicing context.
 
 ##Features
 
-- Extract exon-exon junctions from a RNAseq alignment.
-- Annotate exon-exon junctions with transcript annotations,for example to identify known and novel donor-acceptor pairs.
+- Extract exon-exon junctions from a RNAseq BAM file.
+- Annotate exon-exon junctions with information from a known transcriptome.
+- Annotate variants with splice-region(the definition of this region is configurable) annotations.
 
 ##Installation
 
@@ -21,6 +22,9 @@ Clone and install regtools by running:
 
 ##Usage
 
+```
+    regtools --help
+```
 For information about the individual regtools commands, please see [the Commands page](commands/commands.md)
 
 ##Contribute
@@ -31,18 +35,12 @@ For information about the individual regtools commands, please see [the Commands
 ##Support
 
 If you have issues using the project, please let us know.
-We have a mailing list located at: [regtools@googlegroups.com](mailto:regtools@googlegroups.com)
-and the forum is [here](https://groups.google.com/forum/#!forum/regtools).
-Github issues are another option to contact the project about
-potential bugs.
-
-##Documentation
-The documentation for the project is hosted on
-[Read the Docs.](https://regtools.readthedocs.org/en/latest/)
+We have a mailing list located at: [regtools@googlegroups.com](mailto:regtools@googlegroups.com) and the forum is [here](https://groups.google.com/forum/#!forum/regtools).
+Github issues are another option to contact the project about potential bugs.
 
 ##Acknowledgements
 
-Regtools uses several open-source libraries. We would like to thank the
+regtools uses several open-source libraries. We would like to thank the
 developers of htslib and bedtools. We would also like to thank Travis Abbott for
 useful comments and code.
 

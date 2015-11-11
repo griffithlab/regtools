@@ -24,6 +24,7 @@ DEALINGS IN THE SOFTWARE.  */
 
 #include <iostream>
 #include <stdexcept>
+#include "common.h"
 #include "variants_annotator.h"
 
 using namespace std;
@@ -42,6 +43,9 @@ int variants_annotate(int argc, char *argv[]) {
     try {
         va.parse_options(argc, argv);
         va.annotate_vcf();
+    } catch(const cmdline_help_exception& e) {
+        cerr << e.what();
+        return 0;
     } catch (runtime_error e) {
         cerr << e.what();
         return 1;

@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
+#include "common.h"
 #include "junctions_extractor.h"
 #include "sam.h"
 #include "hts.h"
@@ -40,6 +41,7 @@ using namespace std;
 int JunctionsExtractor::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int c;
+    stringstream help_ss;
     while((c = getopt(argc, argv, "ha:i:I:o:r:")) != -1) {
         switch(c) {
             case 'a':
@@ -58,8 +60,8 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
                 region_ = string(optarg);
                 break;
             case 'h':
-                usage();
-                return 0;
+                usage(help_ss);
+                throw cmdline_help_exception(help_ss.str());
             case '?':
             default:
                 throw runtime_error("Error parsing inputs!");

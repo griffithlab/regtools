@@ -61,18 +61,48 @@ struct Transcript {
 };
 
 //Struct to hold each GTF line
-struct Gtf {
-    string seqname; //Name of chromosome
-    string source; //Program name
-    string feature; //Feature type e.g gene
-    CHRPOS start; //Feature start position, this type is from bedtools
-    CHRPOS end; //Feature end position
-    string score; //Feature score
-    string strand; //Feature strand
-    char frame; //Frame position of feature-start 0/1/2
-    string attributes; //semi-colon delimited tag-value pairs
-    bool is_exon; //Is this feature an exon?
+class Gtf {
+    public:
+        string seqname; //Name of chromosome
+        string source; //Program name
+        string feature; //Feature type e.g gene
+        CHRPOS start; //Feature start position, this type is from bedtools
+        CHRPOS end; //Feature end position
+        string score; //Feature score
+        string strand; //Feature strand
+        char frame; //Frame position of feature-start 0/1/2
+        string attributes; //semi-colon delimited tag-value pairs
+        bool is_exon; //Is this feature an exon?
+        //Equals operator
+        bool operator== (const Gtf &other) const {
+            return seqname == other.seqname &&
+                source == other.source &&
+                feature == other.feature &&
+                start == other.start &&
+                end == other.end &&
+                score == other.score &&
+                strand == other.strand &&
+                frame == other.frame &&
+                attributes == other.attributes &&
+                is_exon == other.is_exon;
+        }
+        //Insert operator
+        friend ostream& operator<< (ostream &out, const Gtf& gtf1);
 };
+
+inline ostream& operator<< (ostream &out, const Gtf& gtf1) {
+    out << gtf1.seqname << "\t";
+    out << gtf1.source << "\t";
+    out << gtf1.feature << "\t";
+    out << gtf1.start << "\t";
+    out << gtf1.end << "\t";
+    out << gtf1.score << "\t";
+    out << gtf1.strand << "\t";
+    out << gtf1.frame << "\t";
+    out << gtf1.attributes << "\t";
+    out << gtf1.is_exon << endl;
+    return out;
+}
 
 class GtfParser {
     private:
@@ -93,20 +123,17 @@ class GtfParser {
         TranscriptToBin transcript_to_bin_;
         //keyed by transcript_id
         ChrBinToTranscripts chrbin_to_transcripts_;
+    public:
+        //Constructor
+        GtfParser()
+            : n_exons_(0)
+            , transcripts_sorted_(false)
+        {}
         //Parse an exon line into a gtf struct
         Gtf parse_exon_line(string line);
         //Parse the required field from attributes column
         string parse_attribute(vector<string> attributes1,
                            string field_name);
-    public:
-
-        GtfParser()
-            : n_exons_(0)
-            , transcripts_sorted_(false)
-        {}
-
-        ~GtfParser() {}
-
         //Close the gtf filehandle
         void close();
         //Assemble transcripts into a map
@@ -145,4 +172,3 @@ class GtfParser {
 };
 
 #endif
-

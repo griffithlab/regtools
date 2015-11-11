@@ -231,7 +231,6 @@ void GtfParser::create_transcript_map() {
         Gtf gtf_l = parse_exon_line(line);
         if(gtf_l.is_exon) {
             add_exon_to_transcript_map(gtf_l);
-            n_exons_++;
         }
     }
     GtfParser::close();
@@ -252,7 +251,7 @@ string GtfParser::get_gene_from_transcript(string transcript_id) {
 }
 
 //Set the gene ID for a trancript ID
-void GtfParser::set_transcript_gene(string transcript_id, string gene_id) {
+inline void GtfParser::set_transcript_gene(string transcript_id, string gene_id) {
     //check if key already exists
     if(transcript_to_gene_.count(transcript_id) == 0)
         transcript_to_gene_[transcript_id] = gene_id;
