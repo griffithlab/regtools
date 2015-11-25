@@ -70,7 +70,7 @@ void JunctionsAnnotator::adjust_junction_ends(BED & line) {
     if(line.fields.size() != 12  || line.fields[10].empty()) {
         stringstream position;
         position << line.chrom << ":" << line.start;
-        throw runtime_error("BED file not in BED12 format. start: " +
+        throw runtime_error("BED line not in BED12 format. start: " +
                             position.str());
     }
     string blocksize_field = line.fields[10];
