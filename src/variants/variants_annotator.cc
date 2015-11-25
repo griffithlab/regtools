@@ -220,7 +220,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
 
 //Annotate one line of a VCF
 //The line to be annotated is in vcf_record_
-void VariantsAnnotator::annotate_record_with_transcripts() {
+AnnotatedVariant VariantsAnnotator::annotate_record_with_transcripts(bool write_output) {
     string overlapping_genes = "NA",
            overlapping_transcripts = "NA",
            overlapping_distances = "NA",
@@ -278,17 +278,20 @@ void VariantsAnnotator::annotate_record_with_transcripts() {
         start_bin >>= _binNextShift;
         end_bin >>= _binNextShift;
     }
-    if(bcf_update_info_string(vcf_header_out_, vcf_record_,
-                           "genes", overlapping_genes.c_str()) < 0 ||
-       bcf_update_info_string(vcf_header_out_, vcf_record_,
-                           "transcripts", overlapping_transcripts.c_str()) < 0 ||
-       bcf_update_info_string(vcf_header_out_, vcf_record_,
-                           "distances", overlapping_distances.c_str()) < 0 ||
-       bcf_update_info_string(vcf_header_out_, vcf_record_,
-                           "annotations", annotations.c_str()) < 0) {
-        throw runtime_error("Unable to update info string");
+    if(write_output) {
+        if(bcf_update_info_string(vcf_header_out_, vcf_record_,
+                    "genes", overlapping_genes.c_str()) < 0 ||
+                bcf_update_info_string(vcf_header_out_, vcf_record_,
+                    "transcripts", overlapping_transcripts.c_str()) < 0 ||
+                bcf_update_info_string(vcf_header_out_, vcf_record_,
+                    "distances", overlapping_distances.c_str()) < 0 ||
+                bcf_update_info_string(vcf_header_out_, vcf_record_,
+                    "annotations", annotations.c_str()) < 0) {
+            throw runtime_error("Unable to update info string");
+        }
+        bcf_write(vcf_fh_out_, vcf_header_out_, vcf_record_);
     }
-    bcf_write(vcf_fh_out_, vcf_header_out_, vcf_record_);
+    return variant;
 }
 
 //Heavylifting happens here.

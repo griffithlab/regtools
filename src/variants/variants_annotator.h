@@ -120,7 +120,7 @@ class VariantsAnnotator {
             return gtf_;
         }
         //Annotate one line of a VCF
-        void annotate_record_with_transcripts();
+        AnnotatedVariant annotate_record_with_transcripts(bool write_output = true);
         //Given a transcript ID and variant position,
         //check if the variant is in a splice relevant region
         //relevance depends on the user params
