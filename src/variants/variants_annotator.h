@@ -81,6 +81,19 @@ class VariantsAnnotator {
                               vcf_record_(NULL) {
             vcf_record_ = bcf_init();
         }
+        //constructor
+        VariantsAnnotator(string vcf_f, string gtf_f) : vcf_(vcf_f), gtffile_(gtf_f),
+                              vcf_out_("NA"),
+                              intronic_min_distance_(2),
+                              exonic_min_distance_(3),
+                              skip_single_exon_genes_(true),
+                              vcf_fh_in_(NULL), vcf_header_in_(NULL),
+                              vcf_fh_out_(NULL), vcf_header_out_(NULL),
+                              vcf_record_(NULL) {
+            vcf_record_ = bcf_init();
+            gtf_.set_gtffile(gtffile_);
+        }
+        //Destructor
         ~VariantsAnnotator() {
             cleanup_vcf();
         }
