@@ -60,7 +60,7 @@ struct AnnotatedJunction : BED {
     //Annotation - Exonic/Intronic etc.
     string annotation;
     //Print the header line
-    static void print_header(ostream& out) {
+    static void print_header(ostream& out = std::cout) {
         out << "chrom" << "\t" << "start" <<
                 "\t" << "end" << "\t" << "name" <<
                 "\t" << "score" << "\t" << "strand" <<
@@ -71,7 +71,7 @@ struct AnnotatedJunction : BED {
                 "\t" << "transcripts" << "\t" << "genes";
     }
     //Print out the junction
-    void print(ostream &out) {
+    void print(ostream &out = std::cout) {
         out << endl << chrom << "\t" << start <<
                 "\t" << end << "\t" << name <<
                 "\t" << score << "\t" << strand <<
