@@ -111,6 +111,14 @@ class VariantsAnnotator {
         void open_vcf_out();
         //Cleanup VCF file data structures
         void cleanup_vcf();
+        //Set the GTF parser
+        void set_gtf_parser(GtfParser gp1) {
+            gtf_ = gp1;
+        }
+        //Return GTF parser
+        GtfParser gtf() {
+            return gtf_;
+        }
         //Annotate one line of a VCF
         void annotate_record_with_transcripts();
         //Given a transcript ID and variant position,
