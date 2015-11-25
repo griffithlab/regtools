@@ -46,8 +46,6 @@ struct Junction : BED {
     //reads, only junctions anchored on both sides are reported.
     bool has_left_min_anchor;
     bool has_right_min_anchor;
-    //Name of the junction
-    string name;
     //Color for the BED line
     string color;
     //Number of blocks
