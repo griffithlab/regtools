@@ -137,7 +137,7 @@ class JunctionsExtractor {
             bam_ = "NA";
             output_file_ = "NA";
             region_ = ".";
-        };
+        }
         //Name the junction based on the number of junctions
         // in the map.
         string get_new_junction_name();
