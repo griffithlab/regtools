@@ -84,7 +84,6 @@ void JunctionsAnnotator::adjust_junction_ends(BED & line) {
 bool JunctionsAnnotator::get_single_junction(BED & line) {
     junctions_._status = BED_INVALID;
     if(junctions_.GetNextBed(line) && junctions_._status == BED_VALID) {
-        adjust_junction_ends(line);
         return true;
     } else {
         return false;
