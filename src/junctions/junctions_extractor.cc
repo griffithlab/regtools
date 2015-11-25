@@ -67,10 +67,12 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
                 throw runtime_error("Error parsing inputs!");
         }
     }
-    if(argc == optind) {
+    if(argc - optind >= 1) {
+        bam_ = string(argv[optind++]);
+    }
+    if(optind < argc || bam_ == "NA") {
         throw runtime_error("\nError parsing inputs!");
     }
-    bam_ = string(argv[optind]);
     cerr << endl << "Minimum junction anchor length: " << min_anchor_length_;
     cerr << endl << "Minimum intron length: " << min_intron_length_;
     cerr << endl << "Maximum intron length: " << max_intron_length_;
