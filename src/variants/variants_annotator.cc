@@ -294,12 +294,17 @@ AnnotatedVariant VariantsAnnotator::annotate_record_with_transcripts(bool write_
     return variant;
 }
 
+//Read in next record
+bool VariantsAnnotator::read_next_record() {
+    return (bcf_read(vcf_fh_in_, vcf_header_in_, vcf_record_) == 0);
+}
+
 //Heavylifting happens here.
 void VariantsAnnotator::annotate_vcf() {
     load_gtf();
     open_vcf_in();
     open_vcf_out();
-    while(bcf_read(vcf_fh_in_, vcf_header_in_, vcf_record_) == 0) {
+    while(read_next_record()) {
         annotate_record_with_transcripts();
     }
 }

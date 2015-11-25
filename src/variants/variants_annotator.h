@@ -128,6 +128,8 @@ class VariantsAnnotator {
         //stores result in the AnnotatedVariant object
         void get_variant_overlaps_spliceregion(const vector<BED> &exons,
                                            AnnotatedVariant  &variant);
+        //Read next record of VCF.
+        bool read_next_record();
 };
 
 #endif
