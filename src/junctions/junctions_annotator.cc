@@ -115,13 +115,9 @@ bool JunctionsAnnotator::get_splice_site(AnnotatedJunction & line) {
 }
 
 //Extract gtf info
-bool JunctionsAnnotator::read_gtf() {
+bool JunctionsAnnotator::load_gtf() {
     try {
-        gtf_.create_transcript_map();
-        gtf_.construct_junctions();
-        gtf_.sort_exons_within_transcripts();
-        gtf_.annotate_transcript_with_bins();
-        //gtf_.print_transcripts();
+        gtf_.load();
     } catch (runtime_error e) {
         throw e;
     }

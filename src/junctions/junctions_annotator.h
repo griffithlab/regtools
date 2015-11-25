@@ -194,7 +194,7 @@ class JunctionsAnnotator {
         //Close junctions file
         void close_junctions();
         //Extract gtf info
-        bool read_gtf();
+        bool load_gtf();
         //Annotate with gtf
         void annotate_junction_with_gtf(AnnotatedJunction & j1);
         //Adjust the start and end of the junction

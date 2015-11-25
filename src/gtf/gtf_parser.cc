@@ -250,6 +250,15 @@ string GtfParser::get_gene_from_transcript(string transcript_id) {
     }
 }
 
+//Load all the necessary objects into memory
+void GtfParser::load() {
+    create_transcript_map();
+    construct_junctions();
+    sort_exons_within_transcripts();
+    annotate_transcript_with_bins();
+    //print_transcripts();
+}
+
 //Set the gene ID for a trancript ID
 inline void GtfParser::set_transcript_gene(string transcript_id, string gene_id) {
     //check if key already exists
