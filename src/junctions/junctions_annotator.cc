@@ -283,10 +283,6 @@ void JunctionsAnnotator::check_for_overlap(string transcript_id, AnnotatedJuncti
     } else {
         throw runtime_error("\nUnknown strand " + junction.strand);
     }
-    cerr << "\n\tDonors skipped " << junction.donors_skipped.size();
-    cerr << "\n\tExons skipped " << junction.exons_skipped.size();
-    cerr << "\n\tAcceptors skipped " << junction.acceptors_skipped.size();
-    cerr << "\n\tSplice site " << junction.anchor;
 }
 
 //Annotate with gtf
