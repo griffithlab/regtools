@@ -225,7 +225,7 @@ void VariantsAnnotator::annotate_record_with_transcripts() {
            overlapping_transcripts = "NA",
            overlapping_distances = "NA",
            annotations = "NA";
-    map<string, bool> unique_genes;
+    set<string> unique_genes;
     string chr = std::string(bcf_hdr_id2name(vcf_header_in_, vcf_record_->rid));
     AnnotatedVariant variant(chr, vcf_record_->pos, (vcf_record_->pos) + 1);
     //While calculating BINs, incorporate intronic_distance since transcripts
@@ -257,8 +257,11 @@ void VariantsAnnotator::annotate_record_with_transcripts() {
                     string dist_str = variant.score;
                     //Add gene only once for multiple transcripts of the same gene.
                     if(overlapping_transcripts != "NA") {
-                        if(!unique_genes.count(gene_id))
+                        //Check if this gene is new
+                        if(unique_genes.find(gene_id) == unique_genes.end()) {
                             overlapping_genes += "," + gene_id;
+                            unique_genes.insert(gene_id);
+                        }
                         overlapping_distances += "," + dist_str;
                         overlapping_transcripts += "," + transcripts[i];
                         annotations += "," + annotation;
@@ -266,7 +269,7 @@ void VariantsAnnotator::annotate_record_with_transcripts() {
                         overlapping_genes = gene_id;
                         overlapping_distances = dist_str;
                         overlapping_transcripts = transcripts[i];
-                        unique_genes[gene_id] = true;
+                        unique_genes.insert(gene_id);
                         annotations = annotation;
                     }
                 }
