@@ -188,7 +188,7 @@ class JunctionsAnnotator {
         //Get a single line from the junctions file
         bool get_single_junction(BED & line);
         //Get the anchor bases
-        bool get_splice_site(AnnotatedJunction & line);
+        void get_splice_site(AnnotatedJunction & line);
         //Open junctions file
         void open_junctions();
         //Close junctions file

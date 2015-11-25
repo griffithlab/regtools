@@ -92,7 +92,7 @@ bool JunctionsAnnotator::get_single_junction(BED & line) {
 }
 
 //Get the splice_site bases
-bool JunctionsAnnotator::get_splice_site(AnnotatedJunction & line) {
+void JunctionsAnnotator::get_splice_site(AnnotatedJunction & line) {
     string position1 = line.chrom + ":" +
                       num_to_str(line.start + 1) + "-" + num_to_str(line.start + 2);
     string position2 = line.chrom + ":" +
@@ -111,7 +111,7 @@ bool JunctionsAnnotator::get_splice_site(AnnotatedJunction & line) {
     } else {
         line.splice_site = seq1 + "-" + seq2;
     }
-    return true;
+    return;
 }
 
 //Extract gtf info
