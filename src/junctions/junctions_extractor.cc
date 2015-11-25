@@ -175,6 +175,16 @@ void JunctionsExtractor::print_one_junction(const Junction j1, ostream& out) {
 }
 
 //Print all the junctions - this function needs work
+vector<Junction> JunctionsExtractor::get_all_junctions() {
+    //Sort junctions by position
+    if(!junctions_sorted_) {
+        create_junctions_vector();
+        sort_junctions();
+    }
+    return junctions_vector_;
+}
+
+//Print all the junctions - this function needs work
 void JunctionsExtractor::print_all_junctions(ostream& out) {
     ofstream fout;
     if(output_file_ != string("NA")) {

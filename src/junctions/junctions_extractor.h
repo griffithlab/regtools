@@ -152,6 +152,8 @@ class JunctionsExtractor {
         void print_one_junction(const Junction j1, ostream& out = cout);
         //Print all the junctions
         void print_all_junctions(ostream& out = cout);
+        //Get a vector of all the junctions
+        vector<Junction> get_all_junctions();
         //Get the BAM filename
         string get_bam();
         //Parse the alignment into the junctions map
