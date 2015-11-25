@@ -132,9 +132,9 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
     bool junction_start = false;
     bool known_junction = false;
     //check if transcript overlaps with junction
-    if(exons[0].start > junction.end &&
+    if(exons[0].start > junction.end ||
             exons[exons.size() - 1].end < junction.start)
-        return false;
+        return known_junction;
     for(std::size_t i = 0; i < exons.size(); i++) {
         if(exons[i].start > junction.end) {
             //No need to look any further
