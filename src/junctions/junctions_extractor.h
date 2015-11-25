@@ -138,6 +138,14 @@ class JunctionsExtractor {
             output_file_ = "NA";
             region_ = ".";
         }
+        //Default constructor
+        JunctionsExtractor(string bam1, string region1) : bam_(bam1), region_(region1) {
+            min_anchor_length_ = 8;
+            min_intron_length_ = 70;
+            max_intron_length_ = 500000;
+            junctions_sorted_ = false;
+            output_file_ = "NA";
+        }
         //Name the junction based on the number of junctions
         // in the map.
         string get_new_junction_name();
