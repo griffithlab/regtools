@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <iterator>
 #include "bedFile.h"
 #include "gtf_parser.h"
+#include "junctions_extractor.h"
 
 using namespace std;
 
@@ -128,7 +129,23 @@ struct AnnotatedJunction : BED {
         start = start1;
         end = end1;
     }
+    //Constructor
+    AnnotatedJunction(const Junction &j1) {
+        chrom = j1.chrom;
+        //Note this is start,end and not thick_start, thick_end
+        //So we don't have to adjust ends!
+        start = j1.start;
+        end = j1.end + 1;
+        name = j1.name;
+        score = j1.score;
+        strand = j1.strand;
+        fields = j1.fields;
+    }
 };
+
+inline bool operator<(const AnnotatedJunction& lhs, const AnnotatedJunction& rhs) {
+  return lhs.chrom == rhs.chrom && lhs.start < rhs.start && lhs.end < rhs.end;
+}
 
 //Copy one stream object into another
 inline
