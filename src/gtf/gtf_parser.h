@@ -110,8 +110,6 @@ class GtfParser {
         string gtffile_;
         //GTF filehandle
         ifstream gtf_fh_;
-        //Number of exons in the gtf
-        int n_exons_;
         //Are exons within transcripts sorted
         bool transcripts_sorted_;
         //Jump from transcript-id to gene-id
@@ -126,7 +124,6 @@ class GtfParser {
     public:
         //Constructor
         GtfParser()
-            : n_exons_(0)
             , transcripts_sorted_(false)
         {}
         //Parse an exon line into a gtf struct
