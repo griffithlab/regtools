@@ -265,3 +265,14 @@ inline void GtfParser::set_transcript_gene(string transcript_id, string gene_id)
     if(transcript_to_gene_.count(transcript_id) == 0)
         transcript_to_gene_[transcript_id] = gene_id;
 }
+
+//Assignment operator
+GtfParser& GtfParser::operator= (const GtfParser& gtf1) {
+    gtffile_ = gtf1.gtffile_;
+    transcripts_sorted_ = gtf1.transcripts_sorted_;
+    transcript_to_gene_ = gtf1.transcript_to_gene_;
+    transcript_map_ = gtf1.transcript_map_;
+    transcript_to_bin_ = gtf1.transcript_to_bin_;
+    chrbin_to_transcripts_ = gtf1.chrbin_to_transcripts_;
+    return *this;
+}

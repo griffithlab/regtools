@@ -182,6 +182,8 @@ class GtfParser {
         void set_transcript_gene(string transcript_id, string gene_id);
         //Load all the necessary objects into memory
         void load();
+        //Assignment operator
+        GtfParser& operator= (const GtfParser& gtf1);
 };
 
 #endif
