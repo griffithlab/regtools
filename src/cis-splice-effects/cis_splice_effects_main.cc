@@ -25,6 +25,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <iostream>
 #include <getopt.h>
 #include <stdexcept>
+#include "cis_splice_effects_identifier.h"
 
 using namespace std;
 
@@ -37,15 +38,19 @@ int cis_splice_effects_identify() {
 //Usage for cis-splice-effects subcommands
 int cis_splice_effects_usage(ostream &out = cout) {
     out << "\nUsage:\t\t" << "regtools cis-splice-effects <command> [options]";
+    out << "\nCommand:\t" << "identify\t\tIdentify cis splicing effects.";
     out << "\n";
     return 0;
 }
 
 //Main command for cis-splice-effects
 int cis_splice_effects_main(int argc, char* argv[]) {
-    cerr << endl << "in splice effects model";
-    if(string(argv[0]) == "identify") {
-        cis_splice_effects_identify();
+    if(argc < 2) {
+        return cis_splice_effects_usage(std::cout);
     }
+    if(string(argv[1]) == "identify") {
+        return cis_splice_effects_identify(argc - 1, argv + 1);
+    }
+    return cis_splice_effects_usage(std::cout);
     return 0;
 }
