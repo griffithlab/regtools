@@ -219,6 +219,10 @@ class JunctionsAnnotator {
         void close_junctions();
         //Extract gtf info
         bool load_gtf();
+        //Set the GTF parser
+        void set_gtf_parser(GtfParser gp1) {
+            gtf_ = gp1;
+        }
         //Annotate with gtf
         void annotate_junction_with_gtf(AnnotatedJunction & j1);
         //Adjust the start and end of the junction
