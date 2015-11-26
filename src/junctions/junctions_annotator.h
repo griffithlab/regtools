@@ -190,6 +190,13 @@ class JunctionsAnnotator {
             , skip_single_exon_genes_(true)
             , output_file_("NA")
         {}
+        //Default constructor
+        JunctionsAnnotator(string ref1, GtfParser gp1)
+            : ref_(ref1)
+            , skip_single_exon_genes_(true)
+            , gtf_(gp1)
+            , output_file_("NA")
+        {}
         //Get the GTF file
         string gtf_file();
         //Get ostream object to write output to
