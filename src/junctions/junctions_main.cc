@@ -69,7 +69,7 @@ int junctions_annotate(int argc, char *argv[]) {
     ofstream out;
     try {
         anno.parse_options(argc, argv);
-        anno.read_gtf();
+        anno.load_gtf();
         anno.open_junctions();
         anno.set_ofstream_object(out);
         line.print_header(out);
@@ -106,4 +106,3 @@ int junctions_main(int argc, char *argv[]) {
     }
     return junctions_usage();
 }
-
