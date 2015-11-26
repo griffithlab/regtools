@@ -124,8 +124,22 @@ class GtfParser {
     public:
         //Constructor
         GtfParser()
+            : transcripts_sorted_(false)
+        {}
+        //Constructor
+        GtfParser(string gtf1)
+            : gtffile_(gtf1)
             , transcripts_sorted_(false)
         {}
+        //Copy constructor
+        GtfParser(const GtfParser &gp1) {
+            gtffile_ = gp1.gtffile_;
+            transcripts_sorted_ = gp1.transcripts_sorted_;
+            transcript_to_gene_ = gp1.transcript_to_gene_;
+            transcript_map_ = gp1.transcript_map_;
+            transcript_to_bin_ = gp1.transcript_to_bin_;
+            chrbin_to_transcripts_ = gp1.chrbin_to_transcripts_;
+        }
         //Parse an exon line into a gtf struct
         Gtf parse_exon_line(string line);
         //Parse the required field from attributes column
