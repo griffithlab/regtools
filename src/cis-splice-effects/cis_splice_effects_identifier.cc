@@ -22,15 +22,95 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
+#include <stdexcept>
+#include <set>
+#include "common.h"
 #include "cis_splice_effects_identifier.h"
 #include "junctions_annotator.h"
 #include "junctions_extractor.h"
 #include "variants_annotator.h"
 
-void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
-    std::cerr << "inside parse options\n";
+//Usage for this tool
+void CisSpliceEffectsIdentifier::usage(ostream& out) {
+    out << "\nUsage:\t\t"
+        << "regtools cis-splice-effects identify [options] variants.vcf"
+        << " alignments.bam ref.fa annotations.gtf";
+    out << "\nOptions:\t";
+    out << "\t" << "-o Output file [STDOUT]";
+    out << "\n";
 }
 
-void CisSpliceEffectsIdentifier::read_variants() {
-    std::cerr << "Inside read variants\n";
+//Parse command line options
+void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
+    optind = 1; //Reset before parsing again.
+    stringstream help_ss;
+    char c;
+    while((c = getopt(argc, argv, "o:w:h")) != -1) {
+        switch(c) {
+            case 'o':
+                output_file_ = string(optarg);
+                break;
+            case 'w':
+                window_size_ = atoi(optarg);
+                break;
+            case 'h':
+                usage(help_ss);
+                throw cmdline_help_exception(help_ss.str());
+            default:
+                usage(std::cerr);
+                throw runtime_error("\nError parsing inputs!(1)");
+        }
+    }
+    if(argc - optind >= 2) {
+        vcf_ = string(argv[optind++]);
+        bam_ = string(argv[optind++]);
+        ref_ = string(argv[optind++]);
+        gtf_ = string(argv[optind++]);
+    }
+    if(optind < argc ||
+       vcf_ == "NA" ||
+       bam_ == "NA" ||
+       ref_ == "NA" ||
+       gtf_ == "NA"){
+        usage(std::cout);
+        throw runtime_error("\nError parsing inputs!(2)\n");
+    }
+    cerr << "\nVariant file: " << vcf_;
+    cerr << "\nAlignment file: " << bam_;
+    cerr << "\nReference fasta file: " << ref_;
+    cerr << "\nAnnotation file: " << gtf_;
+    cerr << "\nWindow size: " << window_size_;
+    cerr << endl;
+}
+
+void CisSpliceEffectsIdentifier::identify() {
+    GtfParser gp1(gtf_);
+    gp1.load();
+    VariantsAnnotator va(vcf_, gtf_);
+    va.open_vcf_in();
+    va.set_gtf_parser(gp1);
+    JunctionsAnnotator ja1(ref_, va.gtf());
+    ja1.set_gtf_parser(gp1);
+    set<Junction> unique_junctions;
+    while(va.read_next_record()) {
+        AnnotatedVariant v1 = va.annotate_record_with_transcripts(false);
+        if(v1.annotation != non_splice_region_annotation) {
+            string variant_region = v1.chrom + ":" +
+                                    num_to_str(v1.start - window_size_) +
+                                    "-" + num_to_str(v1.end + window_size_);
+            std::cerr << variant_region << endl;
+            JunctionsExtractor je1(bam_, variant_region);
+            je1.identify_junctions_from_BAM();
+            vector<Junction> junctions = je1.get_all_junctions();
+            for (size_t i = 0; i < junctions.size(); i++) {
+                unique_junctions.insert(junctions[i]);
+            }
+        }
+    }
+    for (set<Junction>::iterator j1 = unique_junctions.begin(); j1 != unique_junctions.end(); j1++) {
+        AnnotatedJunction line(*j1);
+        ja1.get_splice_site(line);
+        ja1.annotate_junction_with_gtf(line);
+        line.print();
+    }
 }

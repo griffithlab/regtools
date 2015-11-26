@@ -30,8 +30,15 @@ DEALINGS IN THE SOFTWARE.  */
 using namespace std;
 
 //Main command for identify
-int cis_splice_effects_identify() {
-    cerr << "in identify";
+int cis_splice_effects_identify(int argc, char* argv[]) {
+    CisSpliceEffectsIdentifier csei1;
+    try {
+        csei1.parse_options(argc, argv);
+        csei1.identify();
+    } catch (std::runtime_error e) {
+        cerr << e.what();
+        return 1;
+    }
     return 0;
 }
 
