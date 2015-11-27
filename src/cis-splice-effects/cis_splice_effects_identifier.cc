@@ -111,6 +111,8 @@ void CisSpliceEffectsIdentifier::identify() {
         AnnotatedJunction line(*j1);
         ja1.get_splice_site(line);
         ja1.annotate_junction_with_gtf(line);
-        line.print();
+        if(line.anchor != "DA") {
+            line.print();
+        }
     }
 }
