@@ -23,3 +23,15 @@ cd /tmp/junction_summary/
 rm -fr SpliceJunctionSummary.R.stderr summary SpliceJunctionSummary.R.stdout Ensembl.Junction.TranscriptExpression.top1percent.tsv Ensembl.Junction.GeneExpression.top1percent.tsv
 ```
 
+###MGI datasets for testing regtools analysis
+Requirements: WGS (or exome maybe) and RNA-seq on the same sample. Ideally a tumor/normal pair where we have RNA-seq for a matched adjacent normal.
+
+- HCC1395 (no matched adjacent normal, but there is a matched blood normal with RNA-seq)
+- ALL1 (no matched adjacent normal, but we can use the 'healthy' normals for comparison)
+- AML31 (no matched adjacent normal, but we can compare primary and relapse)
+- HCC30 (has matched adjacent normal RNA-seq)
+- LUC1-20 (has matched adjacent normal RNA-seq)
+
+
+
+
