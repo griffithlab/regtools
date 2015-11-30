@@ -74,6 +74,7 @@ int junctions_annotate(int argc, char *argv[]) {
         anno.set_ofstream_object(out);
         line.print_header(out);
         while(anno.get_single_junction(line)) {
+            anno.adjust_junction_ends(line);
             anno.get_splice_site(line);
             anno.annotate_junction_with_gtf(line);
             line.print(out);
