@@ -26,7 +26,15 @@ rm -fr SpliceJunctionSummary.R.stderr summary SpliceJunctionSummary.R.stdout Ens
 ###MGI datasets for testing regtools analysis
 Requirements: WGS (or exome maybe) and RNA-seq on the same sample. Ideally a tumor/normal pair where we have RNA-seq for a matched adjacent normal.
 
-- HCC1395 (no matched adjacent normal, but there is a matched blood normal with RNA-seq)
+**HCC1395 (no matched adjacent normal, but there is a matched blood normal with RNA-seq)**
+Tumor RNA-seq model: 5602f6df362745898b689c871714cfa2
+Tumor WGS model: c6b40b160f60484bab5668dcdbbae681
+Normal WGS model: 959e3cd8c5e14008b99f203d6c40b7c2
+
+```
+genome model list --filter 'id in [5602f6df362745898b689c871714cfa2,c6b40b160f60484bab5668dcdbbae681,959e3cd8c5e14008b99f203d6c40b7c2]' --show last_complete_build.merged_alignment_result.bam_path --noheaders | perl -ne 'print "https://gscweb.gsc.wustl.edu$_"'
+```
+
 - ALL1 (no matched adjacent normal, but we can use the 'healthy' normals for comparison)
 - AML31 (no matched adjacent normal, but we can compare primary and relapse)
 - HCC30 (has matched adjacent normal RNA-seq)
