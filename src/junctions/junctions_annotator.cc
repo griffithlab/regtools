@@ -93,9 +93,9 @@ bool JunctionsAnnotator::get_single_junction(BED & line) {
 //Get the splice_site bases
 void JunctionsAnnotator::get_splice_site(AnnotatedJunction & line) {
     string position1 = line.chrom + ":" +
-                      num_to_str(line.start + 1) + "-" + num_to_str(line.start + 2);
+                      common::num_to_str(line.start + 1) + "-" + common::num_to_str(line.start + 2);
     string position2 = line.chrom + ":" +
-                      num_to_str(line.end - 2) + "-" + num_to_str(line.end - 1);
+                      common::num_to_str(line.end - 2) + "-" + common::num_to_str(line.end - 1);
     string seq1, seq2;
     try {
         seq1 = get_reference_sequence(position1);
@@ -104,8 +104,8 @@ void JunctionsAnnotator::get_splice_site(AnnotatedJunction & line) {
         throw e;
     }
     if(line.strand == "-") {
-        seq1 = rev_comp(seq1);
-        seq2 = rev_comp(seq2);
+        seq1 = common::rev_comp(seq1);
+        seq2 = common::rev_comp(seq2);
         line.splice_site = seq2 + "-" + seq1;
     } else {
         line.splice_site = seq1 + "-" + seq2;
@@ -342,7 +342,7 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
                 break;
             case 'h':
                 usage(help_ss);
-                throw cmdline_help_exception(help_ss.str());
+                throw common::cmdline_help_exception(help_ss.str());
             default:
                 usage();
                 throw runtime_error("\nError parsing inputs!(1)");

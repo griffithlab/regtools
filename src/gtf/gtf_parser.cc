@@ -99,7 +99,7 @@ string GtfParser::parse_attribute(vector<string> attributes1,
         }
         Tokenize(attributes1[i], tokens, ' ');
         if(tokens[0] == field_name) {
-            unquote(tokens[1]);
+            common::unquote(tokens[1]);
             return tokens[1];
         }
     }

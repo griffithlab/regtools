@@ -49,7 +49,7 @@ int junctions_extract(int argc, char *argv[]) {
         extract.parse_options(argc, argv);
         extract.identify_junctions_from_BAM();
         extract.print_all_junctions();
-    } catch(const cmdline_help_exception& e) {
+    } catch(const common::cmdline_help_exception& e) {
         cerr << e.what();
         return 0;
     } catch(const runtime_error& error) {
@@ -84,7 +84,7 @@ int junctions_annotate(int argc, char *argv[]) {
         anno.close_ofstream();
         cerr << endl << "Annotated " << linec << " lines.";
         anno.close_junctions();
-    } catch(const cmdline_help_exception& e) {
+    } catch(const common::cmdline_help_exception& e) {
         cerr << e.what();
         return 0;
     } catch(const runtime_error& e) {

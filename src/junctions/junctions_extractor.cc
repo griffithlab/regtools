@@ -61,7 +61,7 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
                 break;
             case 'h':
                 usage(help_ss);
-                throw cmdline_help_exception(help_ss.str());
+                throw common::cmdline_help_exception(help_ss.str());
             case '?':
             default:
                 throw runtime_error("Error parsing inputs!");

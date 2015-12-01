@@ -65,7 +65,7 @@ int VariantsAnnotator::parse_options(int argc, char *argv[]) {
                 break;
             case 'h':
                 usage(help_ss);
-                throw cmdline_help_exception(help_ss.str());
+                throw common::cmdline_help_exception(help_ss.str());
             default:
                 usage(std::cout);
                 throw runtime_error("\nError parsing inputs!(1)\n");
@@ -189,28 +189,28 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
         //exonic near start
         if(variant.end >= exons[i].start &&
                 variant.end <= exons[i].start + exonic_min_distance_) {
-            variant.score =  num_to_str(variant.end - exons[i].start);
+            variant.score =  common::num_to_str(variant.end - exons[i].start);
             variant.annotation = "splicing_exonic";
             return;
         }
         //intronic near start
         if(variant.end < exons[i].start &&
                 variant.end >= exons[i].start - intronic_min_distance_) {
-            variant.score = num_to_str(exons[i].start - variant.end);
+            variant.score = common::num_to_str(exons[i].start - variant.end);
             variant.annotation = "splicing_intronic";
             return;
         }
         //exonic near end
         if(variant.end <= exons[i].end &&
                 variant.end >= exons[i].end - exonic_min_distance_) {
-            variant.score = num_to_str(exons[i].end - variant.end);
+            variant.score = common::num_to_str(exons[i].end - variant.end);
             variant.annotation = "splicing_exonic";
             return;
         }
         //intronic near end
         if(variant.end > exons[i].end &&
                 variant.end <= exons[i].end + intronic_min_distance_) {
-            variant.score = num_to_str(variant.end - exons[i].end);
+            variant.score = common::num_to_str(variant.end - exons[i].end);
             variant.annotation = "splicing_intronic";
             return;
         }

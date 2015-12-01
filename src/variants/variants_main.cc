@@ -43,7 +43,7 @@ int variants_annotate(int argc, char *argv[]) {
     try {
         va.parse_options(argc, argv);
         va.annotate_vcf();
-    } catch(const cmdline_help_exception& e) {
+    } catch(const common::cmdline_help_exception& e) {
         cerr << e.what();
         return 0;
     } catch (runtime_error e) {
