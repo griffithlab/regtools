@@ -40,7 +40,7 @@ namespace common {
             stringstream ss;
             ss << num;
             return ss.str();
-        }
+    }
 
     //Reverse complement short DNA seqs
     inline string rev_comp(string s1) {
