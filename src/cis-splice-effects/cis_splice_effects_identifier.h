@@ -55,6 +55,8 @@ class CisSpliceEffectsIdentifier {
         CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"), window_size_(500){}
         //Parse command line arguments
         void parse_options(int argc, char* argv[]);
+        //Check if files exist
+        void file_qc();
         //Identify cis splicing effects
         void identify();
         //Usage for this tool
