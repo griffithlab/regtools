@@ -35,8 +35,21 @@ DEALINGS IN THE SOFTWARE.  */
 
 using namespace std;
 
-//Reuse type.
-typedef AnnotatedJunction AnnotatedVariant;
+//Hold annotations
+struct AnnotatedVariant : public BED {
+    string overlapping_genes;
+    string overlapping_transcripts;
+    string overlapping_distances;
+    string annotation;
+    AnnotatedVariant() : overlapping_genes("NA"),
+                         overlapping_transcripts("NA"),
+                         overlapping_distances("NA"){}
+    AnnotatedVariant(string chr1, CHRPOS start1, CHRPOS end1):
+                         BED(chr1, start1, end1),
+                         overlapping_genes("NA"),
+                         overlapping_transcripts("NA"),
+                         overlapping_distances("NA") {}
+};
 
 //The class that does all the annotation
 class VariantsAnnotator {
