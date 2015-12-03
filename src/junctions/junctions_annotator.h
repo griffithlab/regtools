@@ -128,6 +128,7 @@ struct AnnotatedJunction : BED {
         chrom = chr1;
         start = start1;
         end = end1;
+        reset();
     }
     //Constructor
     AnnotatedJunction(const Junction &j1) {
@@ -140,6 +141,7 @@ struct AnnotatedJunction : BED {
         score = j1.score;
         strand = j1.strand;
         fields = j1.fields;
+        reset();
     }
 };
 
