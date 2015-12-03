@@ -68,7 +68,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
                 break;
             case 'h':
                 usage(help_ss);
-                throw cmdline_help_exception(help_ss.str());
+                throw common::cmdline_help_exception(help_ss.str());
             default:
                 usage(std::cerr);
                 throw runtime_error("\nError parsing inputs!(1)");
