@@ -63,6 +63,6 @@ class CisSpliceEffectsIdentifier {
         void usage(ostream &out);
 };
 
-const string non_splice_region_annotation = "non_splice_region";
+const string non_splice_region_annotation_string = "NA";
 
 #endif
