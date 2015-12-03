@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <iostream>
 #include <iterator>
 #include "bedFile.h"
+#include "common.h"
 #include "gtf_parser.h"
 #include "junctions_extractor.h"
 
@@ -146,7 +147,13 @@ struct AnnotatedJunction : BED {
 };
 
 inline bool operator<(const AnnotatedJunction& lhs, const AnnotatedJunction& rhs) {
-  return lhs.chrom == rhs.chrom && lhs.start < rhs.start && lhs.end < rhs.end;
+  if(lhs.chrom < rhs.chrom )
+      return true;
+  if(lhs.chrom == rhs.chrom && lhs.start < rhs.start)
+      return true;
+  if(lhs.chrom == rhs.chrom && lhs.start == rhs.start && lhs.end < rhs.end)
+      return true;
+  return false;
 }
 
 //Copy one stream object into another
