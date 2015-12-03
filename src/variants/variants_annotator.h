@@ -133,7 +133,7 @@ class VariantsAnnotator {
             return gtf_;
         }
         //Annotate one line of a VCF
-        AnnotatedVariant annotate_record_with_transcripts(bool write_output = true);
+        AnnotatedVariant annotate_record_with_transcripts();
         //Given a transcript ID and variant position,
         //check if the variant is in a splice relevant region
         //relevance depends on the user params
@@ -143,6 +143,8 @@ class VariantsAnnotator {
                                            AnnotatedVariant  &variant);
         //Read next record of VCF.
         bool read_next_record();
+        //Write annotation output
+        void write_annotation_output(const AnnotatedVariant &v1);
 };
 
 #endif

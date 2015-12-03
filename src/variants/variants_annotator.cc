@@ -220,7 +220,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
 
 //Annotate one line of a VCF
 //The line to be annotated is in vcf_record_
-AnnotatedVariant VariantsAnnotator::annotate_record_with_transcripts(bool write_output) {
+AnnotatedVariant VariantsAnnotator::annotate_record_with_transcripts() {
     string overlapping_genes = "NA",
            overlapping_transcripts = "NA",
            overlapping_distances = "NA",
@@ -278,20 +278,26 @@ AnnotatedVariant VariantsAnnotator::annotate_record_with_transcripts(bool write_
         start_bin >>= _binNextShift;
         end_bin >>= _binNextShift;
     }
-    if(write_output) {
-        if(bcf_update_info_string(vcf_header_out_, vcf_record_,
-                    "genes", overlapping_genes.c_str()) < 0 ||
-                bcf_update_info_string(vcf_header_out_, vcf_record_,
-                    "transcripts", overlapping_transcripts.c_str()) < 0 ||
-                bcf_update_info_string(vcf_header_out_, vcf_record_,
-                    "distances", overlapping_distances.c_str()) < 0 ||
-                bcf_update_info_string(vcf_header_out_, vcf_record_,
-                    "annotations", annotations.c_str()) < 0) {
-            throw runtime_error("Unable to update info string");
-        }
-        bcf_write(vcf_fh_out_, vcf_header_out_, vcf_record_);
-    }
+    variant.annotation = annotations;
+    variant.overlapping_genes = overlapping_genes;
+    variant.overlapping_transcripts = overlapping_transcripts;
+    variant.overlapping_distances = overlapping_distances;
     return variant;
+}
+
+//Write annotation output
+void VariantsAnnotator::write_annotation_output(const AnnotatedVariant &v1) {
+    if(bcf_update_info_string(vcf_header_out_, vcf_record_,
+                              "genes", v1.overlapping_genes.c_str()) < 0 ||
+       bcf_update_info_string(vcf_header_out_, vcf_record_,
+                              "transcripts", v1.overlapping_transcripts.c_str()) < 0 ||
+       bcf_update_info_string(vcf_header_out_, vcf_record_,
+                              "distances", v1.overlapping_distances.c_str()) < 0 ||
+       bcf_update_info_string(vcf_header_out_, vcf_record_,
+                              "annotations", v1.annotation.c_str()) < 0) {
+        throw runtime_error("Unable to update info string");
+    }
+    bcf_write(vcf_fh_out_, vcf_header_out_, vcf_record_);
 }
 
 //Read in next record
@@ -305,6 +311,7 @@ void VariantsAnnotator::annotate_vcf() {
     open_vcf_in();
     open_vcf_out();
     while(read_next_record()) {
-        annotate_record_with_transcripts();
+        AnnotatedVariant v1 = annotate_record_with_transcripts();
+        write_annotation_output(v1);
     }
 }
