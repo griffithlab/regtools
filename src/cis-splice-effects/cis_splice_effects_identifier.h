@@ -49,7 +49,7 @@ class CisSpliceEffectsIdentifier {
         string output_file_;
         //Window size to look in
         //Looks at variant.pos +/- window_size
-        int window_size_;
+        uint32_t window_size_;
     public:
         //Constructor
         CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"), window_size_(500){}
