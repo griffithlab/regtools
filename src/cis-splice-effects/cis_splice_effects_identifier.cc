@@ -97,6 +97,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     cerr << endl;
 }
 
+//The workhorse
 void CisSpliceEffectsIdentifier::identify() {
     GtfParser gp1(gtf_);
     gp1.load();
@@ -107,17 +108,20 @@ void CisSpliceEffectsIdentifier::identify() {
     ja1.set_gtf_parser(gp1);
     set<Junction> unique_junctions;
     while(va.read_next_record()) {
-        AnnotatedVariant v1 = va.annotate_record_with_transcripts(false);
-        if(v1.annotation != non_splice_region_annotation) {
+        AnnotatedVariant v1 = va.annotate_record_with_transcripts();
+        if(v1.annotation != non_splice_region_annotation_string) {
+            std::cerr << v1.chrom << "\t" << v1.start << "\t" << v1.annotation << "\n";
             string variant_region = v1.chrom + ":" +
-                                    num_to_str(v1.start - window_size_) +
-                                    "-" + num_to_str(v1.end + window_size_);
-            std::cerr << variant_region << endl;
+                                    common::num_to_str(v1.start - window_size_) +
+                                    "-" + common::num_to_str(v1.end + window_size_);
             JunctionsExtractor je1(bam_, variant_region);
             je1.identify_junctions_from_BAM();
             vector<Junction> junctions = je1.get_all_junctions();
             for (size_t i = 0; i < junctions.size(); i++) {
-                unique_junctions.insert(junctions[i]);
+                if(common::coordinate_diff(junctions[i].start, v1.start) < window_size_ &&
+                   common::coordinate_diff(junctions[i].end, v1.start) <= window_size_) {
+                       unique_junctions.insert(junctions[i]);
+                }
             }
         }
     }
