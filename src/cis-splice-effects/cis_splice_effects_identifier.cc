@@ -40,6 +40,19 @@ void CisSpliceEffectsIdentifier::usage(ostream& out) {
     out << "\n";
 }
 
+//Do QC on files
+void CisSpliceEffectsIdentifier::file_qc() {
+    if(vcf_ == "NA" || bam_ == "NA" ||
+       ref_ == "NA" || gtf_ == "NA") {
+        usage(std::cout);
+        throw runtime_error("\nError parsing inputs!(2)\n");
+    }
+    if(!common::file_exists(vcf_) || !common::file_exists(bam_) ||
+       !common::file_exists(ref_) || !common::file_exists(gtf_)) {
+        throw runtime_error("\nPlease make sure input files exist.\n");
+    }
+}
+
 //Parse command line options
 void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
@@ -75,6 +88,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
         usage(std::cout);
         throw runtime_error("\nError parsing inputs!(2)\n");
     }
+    file_qc();
     cerr << "\nVariant file: " << vcf_;
     cerr << "\nAlignment file: " << bam_;
     cerr << "\nReference fasta file: " << ref_;
