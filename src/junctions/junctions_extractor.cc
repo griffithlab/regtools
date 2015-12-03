@@ -143,10 +143,12 @@ int JunctionsExtractor::add_junction(Junction j1) {
     if(!junctions_.count(key)) {
         j1.name = get_new_junction_name();
         j1.read_count = 1;
+        j1.score = common::num_to_str(j1.read_count);
     } else { //existing junction
         Junction j0 = junctions_[key];
         //increment read count
         j1.read_count = j0.read_count + 1;
+        j1.score = common::num_to_str(j1.read_count);
         //Keep the same name
         j1.name = j0.name;
         //Check if thick starts are any better
