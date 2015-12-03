@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.  */
 #include <sstream>
 #include <stdexcept>
 #include <sys/stat.h>
+#include "stdint.h"
+#include "bedFile.h"
 
 using namespace std;
 
@@ -40,6 +42,15 @@ namespace common {
             stringstream ss;
             ss << num;
             return ss.str();
+    }
+
+    //Convert a number to a string
+    inline uint32_t str_to_num(string num) {
+            stringstream ss;
+            uint32_t num_uint;
+            ss << num;
+            ss >> num_uint;
+            return num_uint;
     }
 
     //Reverse complement short DNA seqs
@@ -93,6 +104,13 @@ namespace common {
         return (stat(file.c_str(), &buf1) == 0);
     }
 
+    //Difference in CHRPOS coordinates
+    inline uint32_t coordinate_diff(CHRPOS pos1, CHRPOS pos2) {
+        if(pos1 > pos2)
+            return pos1 - pos2;
+        else
+            return pos2 - pos1;
+    }
 }
 
 #endif
