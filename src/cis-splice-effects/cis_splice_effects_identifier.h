@@ -47,12 +47,21 @@ class CisSpliceEffectsIdentifier {
         string gtf_;
         //File to write output to
         string output_file_;
+        //File to write output to
+        string annotated_variant_file_;
+        //Flag to indicate whether to write output vcf
+        bool write_annotated_variants_;
         //Window size to look in
         //Looks at variant.pos +/- window_size
         uint32_t window_size_;
+        //output stream to output file
+        ofstream ofs_;
     public:
         //Constructor
-        CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"), window_size_(500){}
+        CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"),
+                                       annotated_variant_file_("NA"),
+                                       write_annotated_variants_(false),
+                                       window_size_(500) {}
         //Parse command line arguments
         void parse_options(int argc, char* argv[]);
         //Check if files exist
@@ -61,6 +70,11 @@ class CisSpliceEffectsIdentifier {
         void identify();
         //Usage for this tool
         void usage(ostream &out);
+        //Set ofstream object to appropriate value
+        //This could write to output_file_ or to std::cout
+        void set_ostream();
+        //Close ofstream object
+        void close_ostream();
 };
 
 const string non_splice_region_annotation_string = "NA";

@@ -37,7 +37,28 @@ void CisSpliceEffectsIdentifier::usage(ostream& out) {
         << " alignments.bam ref.fa annotations.gtf";
     out << "\nOptions:\t";
     out << "\t" << "-o Output file [STDOUT]";
+    out << "\t" << "-v Annotated variants(optional, this is in the VCF format)";
     out << "\n";
+}
+
+//Return stream to write output to
+void CisSpliceEffectsIdentifier::close_ostream() {
+    if(ofs_.is_open())
+        ofs_.close();
+}
+
+//Return stream to write output to
+//If output file is not empty, attempt to open
+//If output file is empty, set to cout
+void CisSpliceEffectsIdentifier::set_ostream() {
+    if(output_file_ == "NA") {
+        common::copy_stream(cout, ofs_);
+        return;
+    }
+    ofs_.open(output_file_.c_str());
+    if(!ofs_.is_open())
+        throw runtime_error("Unable to open " +
+                            output_file_);
 }
 
 //Do QC on files
@@ -58,13 +79,16 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     stringstream help_ss;
     char c;
-    while((c = getopt(argc, argv, "o:w:h")) != -1) {
+    while((c = getopt(argc, argv, "o:v:w:h")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
                 break;
             case 'w':
                 window_size_ = atoi(optarg);
+                break;
+            case 'v':
+                annotated_variant_file_ = string(optarg);
                 break;
             case 'h':
                 usage(help_ss);
@@ -74,7 +98,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
                 throw runtime_error("\nError parsing inputs!(1)");
         }
     }
-    if(argc - optind >= 2) {
+    if(argc - optind >= 4) {
         vcf_ = string(argv[optind++]);
         bam_ = string(argv[optind++]);
         ref_ = string(argv[optind++]);
@@ -94,29 +118,44 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     cerr << "\nReference fasta file: " << ref_;
     cerr << "\nAnnotation file: " << gtf_;
     cerr << "\nWindow size: " << window_size_;
+    if(output_file_ != "NA")
+        cerr << "\nOutput file: " << output_file_;
+    if(annotated_variant_file_ != "NA") {
+        cerr << "\nAnnotated variants file: " << annotated_variant_file_;
+        write_annotated_variants_ = true;
+    }
     cerr << endl;
 }
 
 //The workhorse
 void CisSpliceEffectsIdentifier::identify() {
+    //GTF parser object
     GtfParser gp1(gtf_);
     gp1.load();
-    VariantsAnnotator va(vcf_, gtf_);
+    //variant annotator
+    VariantsAnnotator va(vcf_, gtf_, annotated_variant_file_);
     va.open_vcf_in();
+    if(write_annotated_variants_)
+        va.open_vcf_out();
     va.set_gtf_parser(gp1);
     JunctionsAnnotator ja1(ref_, va.gtf());
     ja1.set_gtf_parser(gp1);
+    //Unique set of junctions near splicing variants
     set<Junction> unique_junctions;
+    //Annotate each variant and pay attention to splicing related ones
     while(va.read_next_record()) {
         AnnotatedVariant v1 = va.annotate_record_with_transcripts();
         if(v1.annotation != non_splice_region_annotation_string) {
-            std::cerr << v1.chrom << "\t" << v1.start << "\t" << v1.annotation << "\n";
             string variant_region = v1.chrom + ":" +
                                     common::num_to_str(v1.start - window_size_) +
                                     "-" + common::num_to_str(v1.end + window_size_);
+            if(write_annotated_variants_)
+                va.write_annotation_output(v1);
+            //Extract junctions near this variant
             JunctionsExtractor je1(bam_, variant_region);
             je1.identify_junctions_from_BAM();
             vector<Junction> junctions = je1.get_all_junctions();
+            //Add all the junctions to the unique set
             for (size_t i = 0; i < junctions.size(); i++) {
                 if(common::coordinate_diff(junctions[i].start, v1.start) < window_size_ &&
                    common::coordinate_diff(junctions[i].end, v1.start) <= window_size_) {
@@ -125,12 +164,17 @@ void CisSpliceEffectsIdentifier::identify() {
             }
         }
     }
+    set_ostream();
+    //Annotate the junctions in the set and write to file
+    AnnotatedJunction::print_header(ofs_);
+    //This is ugly, waiting to start using C++11/14
     for (set<Junction>::iterator j1 = unique_junctions.begin(); j1 != unique_junctions.end(); j1++) {
         AnnotatedJunction line(*j1);
         ja1.get_splice_site(line);
         ja1.annotate_junction_with_gtf(line);
         if(line.anchor != "DA") {
-            line.print();
+            line.print(ofs_);
         }
     }
+    close_ostream();
 }
