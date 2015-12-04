@@ -35,8 +35,11 @@ int cis_splice_effects_identify(int argc, char* argv[]) {
     try {
         csei1.parse_options(argc, argv);
         csei1.identify();
-    } catch (std::runtime_error e) {
-        cerr << e.what();
+    } catch (const std::runtime_error &e) {
+        cerr << endl << e.what();
+        return 1;
+    } catch (const std::logic_error &e) {
+        cerr << endl << e.what();
         return 1;
     }
     return 0;
