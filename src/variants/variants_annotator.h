@@ -109,7 +109,7 @@ class VariantsAnnotator {
         }
         //Destructor
         ~VariantsAnnotator() {
-            cleanup_vcf();
+            cleanup();
         }
         //Parse command-line options for this tool
         int parse_options(int argc, char *argv[]);
@@ -124,7 +124,7 @@ class VariantsAnnotator {
         //Open output VCF file
         void open_vcf_out();
         //Cleanup VCF file data structures
-        void cleanup_vcf();
+        void cleanup();
         //Set the GTF parser
         void set_gtf_parser(GtfParser gp1) {
             gtf_ = gp1;

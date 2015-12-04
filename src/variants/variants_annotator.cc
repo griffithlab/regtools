@@ -140,7 +140,7 @@ void VariantsAnnotator::open_vcf_out() {
 }
 
 //Free relevant pointers
-void VariantsAnnotator::cleanup_vcf() {
+void VariantsAnnotator::cleanup() {
     if(vcf_header_in_)
         bcf_hdr_destroy(vcf_header_in_);
     if(vcf_fh_in_)
@@ -314,4 +314,5 @@ void VariantsAnnotator::annotate_vcf() {
         AnnotatedVariant v1 = annotate_record_with_transcripts();
         write_annotation_output(v1);
     }
+    //The close happens in the destructor - see cleanup()
 }
