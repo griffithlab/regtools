@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="b37" hasGeneTrack="true" hasSequenceTrack="true" locus="All" path="/Users/mgriffit/git/regtools/tests/hcc1395_igv_session.xml" version="8">
+    <Resources>
+        <Resource path="https://gscweb.gsc.wustl.edu/gscmnt/gc8002/info/build_merged_alignments/merged-alignment-blade9-3-2.gsc.wustl.edu-jwalker-2798-7169f237d9e043f7a08564a0c1c3cae4/7169f237d9e043f7a08564a0c1c3cae4.bam"/>
+        <Resource path="https://gscweb.gsc.wustl.edu/gscmnt/gc13001/info/build_merged_alignments/merged-alignment-blade11-2-10.gsc.wustl.edu-apipe-builder-32358-135679530/135679530.bam"/>
+        <Resource path="https://gscweb.gsc.wustl.edu/gscmnt/gc8002/info/build_merged_alignments/merged-alignment-blade14-4-3.gsc.wustl.edu-apipe-builder-18098-135585350/135585350.bam"/>
+    </Resources>
+    <Panel height="162" name="Panel1449187048115" width="1133">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="https://gscweb.gsc.wustl.edu/gscmnt/gc8002/info/build_merged_alignments/merged-alignment-blade14-4-3.gsc.wustl.edu-apipe-builder-18098-135585350/135585350.bam_coverage" name="Normal WGS" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="https://gscweb.gsc.wustl.edu/gscmnt/gc8002/info/build_merged_alignments/merged-alignment-blade14-4-3.gsc.wustl.edu-apipe-builder-18098-135585350/135585350.bam" name="135585350.bam" showSpliceJunctions="false" sortable="true" visible="true">
+            <RenderOptions colorByTag="" colorOption="FIRST_OF_PAIR_STRAND" flagUnmappedPairs="false" groupByTag="" maxInsertSize="1000" minInsertSize="50" shadeBasesOption="QUALITY" shadeCenters="true" showAllBases="false" sortByTag=""/>
+        </Track>
+    </Panel>
+    <Panel height="168" name="Panel1449187060070" width="1133">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="https://gscweb.gsc.wustl.edu/gscmnt/gc13001/info/build_merged_alignments/merged-alignment-blade11-2-10.gsc.wustl.edu-apipe-builder-32358-135679530/135679530.bam_coverage" name="Tumor WGS" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="https://gscweb.gsc.wustl.edu/gscmnt/gc13001/info/build_merged_alignments/merged-alignment-blade11-2-10.gsc.wustl.edu-apipe-builder-32358-135679530/135679530.bam" name="135679530.bam" showSpliceJunctions="false" sortable="true" visible="true">
+            <RenderOptions colorByTag="" colorOption="FIRST_OF_PAIR_STRAND" flagUnmappedPairs="false" groupByTag="" maxInsertSize="1000" minInsertSize="50" shadeBasesOption="QUALITY" shadeCenters="true" showAllBases="false" sortByTag=""/>
+        </Track>
+    </Panel>
+    <Panel height="168" name="Panel1449187069629" width="1133">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="https://gscweb.gsc.wustl.edu/gscmnt/gc8002/info/build_merged_alignments/merged-alignment-blade9-3-2.gsc.wustl.edu-jwalker-2798-7169f237d9e043f7a08564a0c1c3cae4/7169f237d9e043f7a08564a0c1c3cae4.bam_coverage" name="Tumor RNA-seq" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="https://gscweb.gsc.wustl.edu/gscmnt/gc8002/info/build_merged_alignments/merged-alignment-blade9-3-2.gsc.wustl.edu-jwalker-2798-7169f237d9e043f7a08564a0c1c3cae4/7169f237d9e043f7a08564a0c1c3cae4.bam" name="7169f237d9e043f7a08564a0c1c3cae4.bam" showSpliceJunctions="false" sortable="true" visible="true">
+            <RenderOptions colorByTag="" colorOption="FIRST_OF_PAIR_STRAND" flagUnmappedPairs="false" groupByTag="" maxInsertSize="1000" minInsertSize="50" shadeBasesOption="QUALITY" shadeCenters="true" showAllBases="false" sortByTag=""/>
+        </Track>
+    </Panel>
+    <Panel height="64" name="FeaturePanel" width="1133">
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="Reference sequence" name="Reference sequence" sortable="false" visible="true"/>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;251.0;255,255,255;0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="35" id="b37_genes" name="Gene" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="251.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <PanelLayout dividerFractions="0.01020408163265306,0.2942176870748299,0.5884353741496599,0.8826530612244898"/>
+</Session>

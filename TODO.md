@@ -26,13 +26,16 @@ rm -fr SpliceJunctionSummary.R.stderr summary SpliceJunctionSummary.R.stdout Ens
 ###MGI datasets for testing regtools analysis
 Requirements: WGS (or exome maybe) and RNA-seq on the same sample. Ideally a tumor/normal pair where we have RNA-seq for a matched adjacent normal.
 
+#Look for a model/build to use
+genome model rna-seq list --filter subject.name=H_NJ-HCC1395-HCC1395_RNA --show id,processing_profile,last_complete_build.id,last_complete_build.merged_alignment_result.bam_path --noheaders --style tsv | grep -v NULL
+
 **HCC1395 (no matched adjacent normal, but there is a matched blood normal with RNA-seq)**
-Tumor RNA-seq model: 5602f6df362745898b689c871714cfa2
-Tumor WGS model: c6b40b160f60484bab5668dcdbbae681
-Normal WGS model: 959e3cd8c5e14008b99f203d6c40b7c2
+Normal WGS model: 2891325882
+Tumor WGS model: 2891325873
+Tumor RNA-seq model: 060145d385274d258569a9fc013e4ada
 
 ```
-genome model list --filter 'id in [5602f6df362745898b689c871714cfa2,c6b40b160f60484bab5668dcdbbae681,959e3cd8c5e14008b99f203d6c40b7c2]' --show last_complete_build.merged_alignment_result.bam_path --noheaders | perl -ne 'print "https://gscweb.gsc.wustl.edu$_"'
+genome model list --filter 'id in [2891325882,2891325873,060145d385274d258569a9fc013e4ada]' --show last_complete_build.merged_alignment_result.bam_path --noheaders | perl -ne 'print "https://gscweb.gsc.wustl.edu$_"'
 ```
 
 - ALL1 (no matched adjacent normal, but we can use the 'healthy' normals for comparison)
