@@ -42,14 +42,14 @@ void JunctionsAnnotator::close_ofstream() {
 //If output file is empty, set to cout
 void JunctionsAnnotator::set_ofstream_object(ofstream &out) {
     if(output_file_ == "NA") {
-        copy_stream(cout, out);
+        common::copy_stream(cout, out);
         return;
     }
     ofs_.open(output_file_.c_str());
     if(!ofs_.is_open())
         throw runtime_error("Unable to open " +
                             output_file_);
-    copy_stream(ofs_, out);
+    common::copy_stream(ofs_, out);
 }
 
 //Open junctions file
