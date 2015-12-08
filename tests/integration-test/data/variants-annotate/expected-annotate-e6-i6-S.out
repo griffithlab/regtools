@@ -23,7 +23,7 @@
 ##INFO=<ID=distances,Number=1,Type=String,Description="Vector of Min(Distance from start/end of exon in the transcript.)">
 ##INFO=<ID=annotations,Number=1,Type=String,Description="Does the variant fall in exonic/intronic splicing related space in the transcript.">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	A	B
-22	12785	.	C	T	59.2	PASS	AN=4;AC=2;genes=EP300;transcripts=ENST00000263253;distances=6;annotations=splicing_intronic	GT:GQ	0/1:245	0/1:245
+22	12785	.	C	T	59.2	PASS	AN=4;AC=2;genes=NA;transcripts=NA;distances=NA;annotations=NA	GT:GQ	0/1:245	0/1:245
 22	12791	.	C	T	59.2	PASS	AN=4;AC=2;genes=EP300;transcripts=ENST00000263253;distances=0;annotations=splicing_exonic	GT:GQ	0/1:245	0/1:245
 22	12797	.	C	T	59.2	PASS	AN=4;AC=2;genes=EP300;transcripts=ENST00000263253;distances=6;annotations=splicing_exonic	GT:GQ	0/1:245	0/1:245
 22	14010	.	C	T	59.2	PASS	AN=4;AC=2;genes=NA;transcripts=NA;distances=NA;annotations=NA	GT:GQ	0/1:245	0/1:245
@@ -33,7 +33,7 @@
 22	100000	.	G	T	29.2	PASS	AN=4;AC=2;genes=NA;transcripts=NA;distances=NA;annotations=NA	GT:GQ	0/1:215	0/1:225
 22	101076	.	G	T	29.2	PASS	AN=4;AC=2;genes=EP300,EP300_fake1;transcripts=ENST00000263253,ENST00000263253_fake1;distances=6,6;annotations=splicing_exonic,splicing_exonic	GT:GQ	0/1:215	0/1:225
 22	101080	.	G	T	29.2	PASS	AN=4;AC=2;genes=EP300,EP300_fake1;transcripts=ENST00000263253,ENST00000263253_fake1;distances=2,2;annotations=splicing_exonic,splicing_exonic	GT:GQ	0/1:215	0/1:225
-22	101088	.	G	T	29.2	PASS	AN=4;AC=2;genes=EP300,EP300_fake1;transcripts=ENST00000263253,ENST00000263253_fake1;distances=6,6;annotations=splicing_intronic,splicing_intronic	GT:GQ	0/1:215	0/1:225
+22	101088	.	G	T	29.2	PASS	AN=4;AC=2;genes=NA;transcripts=NA;distances=NA;annotations=NA	GT:GQ	0/1:215	0/1:225
 22	167675	.	G	T	29.2	PASS	AN=4;AC=2;genes=RANGAP1;transcripts=ENST00000356244,ENST00000405486,ENST00000407260,ENST00000455915;distances=2,2,2,2;annotations=splicing_exonic,splicing_exonic,splicing_exonic,splicing_exonic	GT:GQ	0/1:215	0/1:225
 22	167677	.	G	T	29.2	PASS	AN=4;AC=2;genes=RANGAP1;transcripts=ENST00000356244,ENST00000405486,ENST00000407260,ENST00000455915;distances=0,0,0,0;annotations=splicing_exonic,splicing_exonic,splicing_exonic,splicing_exonic	GT:GQ	0/1:215	0/1:225
 22	167679	.	G	T	29.2	PASS	AN=4;AC=2;genes=RANGAP1;transcripts=ENST00000356244,ENST00000405486,ENST00000407260,ENST00000455915;distances=2,2,2,2;annotations=splicing_intronic,splicing_intronic,splicing_intronic,splicing_intronic	GT:GQ	0/1:215	0/1:225
