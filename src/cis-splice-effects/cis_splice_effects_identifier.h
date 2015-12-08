@@ -61,7 +61,7 @@ class CisSpliceEffectsIdentifier {
         CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"),
                                        annotated_variant_file_("NA"),
                                        write_annotated_variants_(false),
-                                       window_size_(500) {}
+                                       window_size_(0) {}
         //Parse command line arguments
         void parse_options(int argc, char* argv[]);
         //Check if files exist
