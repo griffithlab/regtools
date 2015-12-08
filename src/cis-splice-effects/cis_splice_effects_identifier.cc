@@ -117,7 +117,9 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     cerr << "\nAlignment file: " << bam_;
     cerr << "\nReference fasta file: " << ref_;
     cerr << "\nAnnotation file: " << gtf_;
-    cerr << "\nWindow size: " << window_size_;
+    if(window_size_ != 0) {
+        cerr << "\nWindow size: " << window_size_;
+    }
     if(output_file_ != "NA")
         cerr << "\nOutput file: " << output_file_;
     if(annotated_variant_file_ != "NA") {
@@ -146,9 +148,13 @@ void CisSpliceEffectsIdentifier::identify() {
     while(va.read_next_record()) {
         AnnotatedVariant v1 = va.annotate_record_with_transcripts();
         if(v1.annotation != non_splice_region_annotation_string) {
-            string variant_region = v1.chrom + ":" +
-                                    common::num_to_str(v1.start - window_size_) +
-                                    "-" + common::num_to_str(v1.end + window_size_);
+            string region_start = window_size_ ? common::num_to_str(v1.start - window_size_) :
+                                           common::num_to_str(v1.cis_effect_start);
+            string region_end = window_size_ ? common::num_to_str(v1.end + window_size_) :
+                                           common::num_to_str(v1.cis_effect_end);
+            string variant_region = v1.chrom + ":" + region_start + "-" + region_end;
+            cerr << "\n\nVariant " << v1;
+            cerr << "Variant region is " << variant_region;
             if(write_annotated_variants_)
                 va.write_annotation_output(v1);
             //Extract junctions near this variant
@@ -157,6 +163,13 @@ void CisSpliceEffectsIdentifier::identify() {
             vector<Junction> junctions = je1.get_all_junctions();
             //Add all the junctions to the unique set
             for (size_t i = 0; i < junctions.size(); i++) {
+                if(window_size_ == 0) {
+                    if(junctions[i].start >= v1.cis_effect_start &&
+                       junctions[i].end <= v1.cis_effect_end) {
+                       unique_junctions.insert(junctions[i]);
+                    }
+                    continue;
+                }
                 if(common::coordinate_diff(junctions[i].start, v1.start) < window_size_ &&
                    common::coordinate_diff(junctions[i].end, v1.start) <= window_size_) {
                        unique_junctions.insert(junctions[i]);
