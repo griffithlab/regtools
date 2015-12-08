@@ -67,5 +67,5 @@ TEST_F(CisSpliceEffectsIdentifierTest, ConstructorTest) {
     EXPECT_EQ(csei1.vcf(), "NA");
     EXPECT_EQ(csei1.output_file(), "NA");
     EXPECT_EQ(csei1.annotated_variant_file(), "NA");
-    EXPECT_EQ(csei1.window_size(), 0);
+    EXPECT_EQ(csei1.window_size(), 0u);
 }
