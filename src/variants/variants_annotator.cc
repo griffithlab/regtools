@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.  */
 
 //Usage statement for this tool
 int VariantsAnnotator::usage(ostream& out) {
-    out << "\nUsage:\t\t" << "regtools variants annotate [options] variants.vcf annotations.gtf annotated_output.vcf";
+    out << "\nUsage:\t\t" << "regtools variants annotate [options] variants.vcf annotations.gtf";
     out << "\n\t\t" << "-e INT\tMinimum distance from the start/end of an exon "
                        "\n\t\t\tto annotate a variant as relevant to splicing, the variant "
                        "\n\t\t\tis in exonic space, i.e a coding variant. [3]";
