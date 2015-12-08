@@ -193,9 +193,15 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
             variant.annotation = "splicing_exonic";
             return;
         }
-        //intronic near start
+        //intronic near start (make sure not first/last exon.)
         if(variant.end < exons[i].start &&
                 variant.end >= exons[i].start - intronic_min_distance_) {
+            //outside transcript - PS
+            if(i == 0 && transcript_strand == "+")
+                return;
+            //outside transcript - NS
+            if(i == exons.size() - 1  && transcript_strand == "-")
+                return;
             variant.score = common::num_to_str(exons[i].start - variant.end);
             variant.annotation = "splicing_intronic";
             return;
@@ -207,9 +213,15 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
             variant.annotation = "splicing_exonic";
             return;
         }
-        //intronic near end
+        //intronic near end (make sure not last exon.)
         if(variant.end > exons[i].end &&
                 variant.end <= exons[i].end + intronic_min_distance_) {
+            //outside transcript - PS
+            if(i == exons.size() - 1  && transcript_strand == "+")
+                return;
+            //outside transcript - NS
+            if(i == 0  && transcript_strand == "-")
+                return;
             variant.score = common::num_to_str(variant.end - exons[i].end);
             variant.annotation = "splicing_intronic";
             return;
