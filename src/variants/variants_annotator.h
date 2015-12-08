@@ -26,6 +26,7 @@ DEALINGS IN THE SOFTWARE.  */
 #define VARIANTS_ANNOTATOR_H_
 
 #include <iostream>
+#include <limits>
 #include <stdint.h>
 #include "bedFile.h"
 #include "gtf_parser.h"
@@ -41,14 +42,20 @@ struct AnnotatedVariant : public BED {
     string overlapping_transcripts;
     string overlapping_distances;
     string annotation;
+    CHRPOS cis_effect_start;
+    CHRPOS cis_effect_end;
     AnnotatedVariant() : overlapping_genes("NA"),
                          overlapping_transcripts("NA"),
-                         overlapping_distances("NA"){}
+                         overlapping_distances("NA"),
+                         cis_effect_start(std::numeric_limits<unsigned int>::max()),
+                         cis_effect_end(0) {}
     AnnotatedVariant(string chr1, CHRPOS start1, CHRPOS end1):
                          BED(chr1, start1, end1),
                          overlapping_genes("NA"),
                          overlapping_transcripts("NA"),
-                         overlapping_distances("NA") {}
+                         overlapping_distances("NA"),
+                         cis_effect_start(std::numeric_limits<unsigned int>::max()),
+                         cis_effect_end(0) {}
 };
 
 //The class that does all the annotation
@@ -146,6 +153,18 @@ class VariantsAnnotator {
         bool read_next_record();
         //Write annotation output
         void write_annotation_output(const AnnotatedVariant &v1);
+        //Get the coordinate limits for the 'cis effect' of this variant
+        void set_variant_cis_effect_limits(const vector<BED>& exons,
+                                           AnnotatedVariant& variant1,
+                                           uint32_t i);
+        //Cis limits negative strand
+        void set_variant_cis_effect_limits_ns(const vector<BED>& exons,
+                                              AnnotatedVariant& variant1,
+                                              uint32_t i);
+        //Cis limits positive strand
+        void set_variant_cis_effect_limits_ps(const vector<BED>& exons,
+                                              AnnotatedVariant& variant1,
+                                              uint32_t i);
 };
 
 #endif
