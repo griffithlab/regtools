@@ -75,6 +75,14 @@ class CisSpliceEffectsIdentifier {
         void set_ostream();
         //Close ofstream object
         void close_ostream();
+        //Get the window size
+        uint32_t window_size() { return window_size_; }
+        //Get the annotated variants file(VCF)
+        string annotated_variant_file() { return annotated_variant_file_; }
+        //Get the file with splice junctions(BED)
+        string output_file() { return output_file_; }
+        //Get the Input VCF
+        string vcf() { return vcf_; }
 };
 
 const string non_splice_region_annotation_string = "NA";
