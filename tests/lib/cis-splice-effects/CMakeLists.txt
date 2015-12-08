@@ -18,8 +18,8 @@ include_directories("${PROJECT_SOURCE_DIR}/src/gtf/"
                     "${PROJECT_SOURCE_DIR}/src/utils/bedtools/stringUtilities/"
                     "${PROJECT_SOURCE_DIR}/src/utils/htslib/htslib/")
 add_executable(${test_name} ${TEST_SOURCES})
-target_link_libraries(${test_name} gtest gtest_main junctions
-                      bedtools gtf htslib cis-splice-effects variants)
+target_link_libraries(${test_name} gtest gtest_main cis-splice-effects variants gtf junctions bedtools htslib)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__STDC_LIMIT_MACROS")
 set(NOSTRING_FLAG "-Wno-write-strings")
 set_target_properties(${test_name} PROPERTIES COMPILE_FLAGS
     ${NOSTRING_FLAG})
