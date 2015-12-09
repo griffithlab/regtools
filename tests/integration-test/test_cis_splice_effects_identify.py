@@ -50,5 +50,16 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         rv, err = self.execute(params)
         self.assertEqual(rv, 0, err)
 
+    #Test missing input
+    def test_nobam(self):
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("observed-cse-identify.out")
+        params = ["cis-splice-effects", "identify",
+                  "-o ", output_file, variants, fasta, gtf]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 1, err)
+
 if __name__ == "__main__":
     main()
