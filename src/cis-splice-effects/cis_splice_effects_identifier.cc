@@ -35,9 +35,9 @@ void CisSpliceEffectsIdentifier::usage(ostream& out) {
     out << "\nUsage:\t\t"
         << "regtools cis-splice-effects identify [options] variants.vcf"
         << " alignments.bam ref.fa annotations.gtf";
-    out << "\nOptions:\t";
-    out << "\t" << "-o Output file [STDOUT]";
-    out << "\t" << "-v Annotated variants(optional, this is in the VCF format)";
+    out << "\nOptions:";
+    out << "\t"   << "-o Output file [STDOUT]";
+    out << "\n\t\t" << "-v Annotated variants(optional, this is in the VCF format)";
     out << "\n";
 }
 
@@ -109,7 +109,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
        bam_ == "NA" ||
        ref_ == "NA" ||
        gtf_ == "NA"){
-        usage(std::cout);
+        usage(std::cerr);
         throw runtime_error("\nError parsing inputs!(2)\n");
     }
     file_qc();
