@@ -36,8 +36,8 @@ void CisSpliceEffectsIdentifier::usage(ostream& out) {
         << "regtools cis-splice-effects identify [options] variants.vcf"
         << " alignments.bam ref.fa annotations.gtf";
     out << "\nOptions:";
-    out << "\t"   << "-o Output file [STDOUT]";
-    out << "\n\t\t" << "-v Annotated variants(optional, this is in the VCF format)";
+    out << "\t"   << "-o STR Output file containing the aberrant splice junctions. [STDOUT]";
+    out << "\n\t\t" << "-v STR Output file containing variants annotated as splice relevant (VCF format).";
     out << "\n";
 }
 
