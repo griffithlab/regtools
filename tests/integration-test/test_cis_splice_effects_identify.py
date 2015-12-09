@@ -30,7 +30,8 @@ from integrationtest import IntegrationTest, main
 import unittest
 
 class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
-    def test_cis_splice_effects_identify(self):
+    #Test default options.
+    def test_default(self):
         variants = self.inputFiles("vcf/test1.vcf")[0]
         bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
         fasta = self.inputFiles("fa/test_chr22.fa")[0]
@@ -42,6 +43,12 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         rv, err = self.execute(params)
         self.assertEqual(rv, 0, err)
         self.assertFilesEqual(expected_file, output_file, err)
+
+    #Test -h works as expected
+    def test_help(self):
+        params = ["cis-splice-effects", "identify", "-h "]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 0, err)
 
 if __name__ == "__main__":
     main()

@@ -35,6 +35,9 @@ int cis_splice_effects_identify(int argc, char* argv[]) {
     try {
         csei1.parse_options(argc, argv);
         csei1.identify();
+    } catch(const common::cmdline_help_exception& e) {
+        cerr << e.what();
+        return 0;
     } catch (const std::runtime_error &e) {
         cerr << endl << e.what();
         return 1;
