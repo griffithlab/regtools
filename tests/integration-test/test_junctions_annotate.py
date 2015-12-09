@@ -31,9 +31,9 @@ import unittest
 
 class TestAnnotate(IntegrationTest, unittest.TestCase):
     def test_junctions_annotate(self):
-        junctions = self.inputFiles("test_hcc1395_junctions.bed")[0]
-        gtf = self.inputFiles("test_ensemble_chr22.gtf")[0]
-        fasta = self.inputFiles("test_chr22.fa")[0]
+        junctions = self.inputFiles("bed/test_hcc1395_junctions.bed")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.gtf")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
         output_file = self.tempFile("observed-annotate.out")
         expected_file = self.inputFiles("junctions-annotate/expected-annotate.out")[0]
         params = ["junctions", "annotate", "-o", output_file, junctions, fasta, gtf]
