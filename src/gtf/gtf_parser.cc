@@ -228,6 +228,8 @@ void GtfParser::create_transcript_map() {
     }
     string line;
     while(getline(gtf_fh_, line)) {
+        if(line.at(0) == '#') //ignore comments
+            continue;
         Gtf gtf_l = parse_exon_line(line);
         if(gtf_l.is_exon) {
             add_exon_to_transcript_map(gtf_l);
