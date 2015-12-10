@@ -99,7 +99,7 @@ string GtfParser::parse_attribute(vector<string> attributes1,
         }
         Tokenize(attributes1[i], tokens, ' ');
         if(tokens[0] == field_name) {
-            unquote(tokens[1]);
+            common::unquote(tokens[1]);
             return tokens[1];
         }
     }
@@ -228,6 +228,8 @@ void GtfParser::create_transcript_map() {
     }
     string line;
     while(getline(gtf_fh_, line)) {
+        if(line.at(0) == '#') //ignore comments
+            continue;
         Gtf gtf_l = parse_exon_line(line);
         if(gtf_l.is_exon) {
             add_exon_to_transcript_map(gtf_l);
@@ -250,9 +252,29 @@ string GtfParser::get_gene_from_transcript(string transcript_id) {
     }
 }
 
+//Load all the necessary objects into memory
+void GtfParser::load() {
+    create_transcript_map();
+    construct_junctions();
+    sort_exons_within_transcripts();
+    annotate_transcript_with_bins();
+    //print_transcripts();
+}
+
 //Set the gene ID for a trancript ID
 inline void GtfParser::set_transcript_gene(string transcript_id, string gene_id) {
     //check if key already exists
     if(transcript_to_gene_.count(transcript_id) == 0)
         transcript_to_gene_[transcript_id] = gene_id;
+}
+
+//Assignment operator
+GtfParser& GtfParser::operator= (const GtfParser& gtf1) {
+    gtffile_ = gtf1.gtffile_;
+    transcripts_sorted_ = gtf1.transcripts_sorted_;
+    transcript_to_gene_ = gtf1.transcript_to_gene_;
+    transcript_map_ = gtf1.transcript_map_;
+    transcript_to_bin_ = gtf1.transcript_to_bin_;
+    chrbin_to_transcripts_ = gtf1.chrbin_to_transcripts_;
+    return *this;
 }

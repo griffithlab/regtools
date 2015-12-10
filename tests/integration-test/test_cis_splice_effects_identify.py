@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-test_variants_annotate.py -- Integration test for `regtools variants annotate`
+test_cis_splice_effects_identify.py -- Integration test for `regtools cis-splice-effects identify`
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -29,31 +29,37 @@ DEALINGS IN THE SOFTWARE.
 from integrationtest import IntegrationTest, main
 import unittest
 
-class TestAnnotate(IntegrationTest, unittest.TestCase):
-    def test_variants_annotate_default(self):
+class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
+    #Test default options.
+    def test_default(self):
         variants = self.inputFiles("vcf/test1.vcf")[0]
+        bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
-        output_file = self.tempFile("observed-annotate.vcf")
-        expected_file = self.inputFiles("variants-annotate/expected-annotate-default.out")[0]
-        params = ["variants", "annotate",
-                  "-o ", output_file, variants, gtf]
+        output_file = self.tempFile("observed-cse-identify.out")
+        expected_file = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default.out")[0]
+        params = ["cis-splice-effects", "identify",
+                  "-o ", output_file, variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0, err)
         self.assertFilesEqual(expected_file, output_file, err)
-    def test_variants_annotate_exonic_intronic_distance(self):
-        variants = self.inputFiles("vcf/test1.vcf")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
-        output_file = self.tempFile("observed-annotate.vcf")
-        expected_file = self.inputFiles("variants-annotate/expected-annotate-e6-i6-S.out")[0]
-        exonic_distance = "-e 6"
-        intronic_distance = "-i 6"
-        dont_skip_single_exon_transcripts = "-S"
-        params = ["variants", "annotate", "-o ", output_file, exonic_distance,
-                  intronic_distance, dont_skip_single_exon_transcripts,
-                  variants, gtf]
+
+    #Test -h works as expected
+    def test_help(self):
+        params = ["cis-splice-effects", "identify", "-h "]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0, err)
-        self.assertFilesEqual(expected_file, output_file, err)
+
+    #Test missing input
+    def test_nobam(self):
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("observed-cse-identify.out")
+        params = ["cis-splice-effects", "identify",
+                  "-o ", output_file, variants, fasta, gtf]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 1, err)
 
 if __name__ == "__main__":
     main()

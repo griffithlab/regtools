@@ -42,14 +42,14 @@ void JunctionsAnnotator::close_ofstream() {
 //If output file is empty, set to cout
 void JunctionsAnnotator::set_ofstream_object(ofstream &out) {
     if(output_file_ == "NA") {
-        copy_stream(cout, out);
+        common::copy_stream(cout, out);
         return;
     }
     ofs_.open(output_file_.c_str());
     if(!ofs_.is_open())
         throw runtime_error("Unable to open " +
                             output_file_);
-    copy_stream(ofs_, out);
+    common::copy_stream(ofs_, out);
 }
 
 //Open junctions file
@@ -70,7 +70,7 @@ void JunctionsAnnotator::adjust_junction_ends(BED & line) {
     if(line.fields.size() != 12  || line.fields[10].empty()) {
         stringstream position;
         position << line.chrom << ":" << line.start;
-        throw runtime_error("BED file not in BED12 format. start: " +
+        throw runtime_error("BED line not in BED12 format. start: " +
                             position.str());
     }
     string blocksize_field = line.fields[10];
@@ -84,7 +84,6 @@ void JunctionsAnnotator::adjust_junction_ends(BED & line) {
 bool JunctionsAnnotator::get_single_junction(BED & line) {
     junctions_._status = BED_INVALID;
     if(junctions_.GetNextBed(line) && junctions_._status == BED_VALID) {
-        adjust_junction_ends(line);
         return true;
     } else {
         return false;
@@ -92,11 +91,11 @@ bool JunctionsAnnotator::get_single_junction(BED & line) {
 }
 
 //Get the splice_site bases
-bool JunctionsAnnotator::get_splice_site(AnnotatedJunction & line) {
+void JunctionsAnnotator::get_splice_site(AnnotatedJunction & line) {
     string position1 = line.chrom + ":" +
-                      num_to_str(line.start + 1) + "-" + num_to_str(line.start + 2);
+                      common::num_to_str(line.start + 1) + "-" + common::num_to_str(line.start + 2);
     string position2 = line.chrom + ":" +
-                      num_to_str(line.end - 2) + "-" + num_to_str(line.end - 1);
+                      common::num_to_str(line.end - 2) + "-" + common::num_to_str(line.end - 1);
     string seq1, seq2;
     try {
         seq1 = get_reference_sequence(position1);
@@ -105,22 +104,22 @@ bool JunctionsAnnotator::get_splice_site(AnnotatedJunction & line) {
         throw e;
     }
     if(line.strand == "-") {
-        seq1 = rev_comp(seq1);
-        seq2 = rev_comp(seq2);
+        seq1 = common::rev_comp(seq1);
+        seq2 = common::rev_comp(seq2);
         line.splice_site = seq2 + "-" + seq1;
     } else {
         line.splice_site = seq1 + "-" + seq2;
     }
-    return true;
+    return;
 }
 
 //Extract gtf info
-bool JunctionsAnnotator::read_gtf() {
-    gtf_.create_transcript_map();
-    gtf_.construct_junctions();
-    gtf_.sort_exons_within_transcripts();
-    gtf_.annotate_transcript_with_bins();
-    //gtf_.print_transcripts();
+bool JunctionsAnnotator::load_gtf() {
+    try {
+        gtf_.load();
+    } catch (runtime_error e) {
+        throw e;
+    }
     return true;
 }
 
@@ -284,10 +283,6 @@ void JunctionsAnnotator::check_for_overlap(string transcript_id, AnnotatedJuncti
     } else {
         throw runtime_error("\nUnknown strand " + junction.strand);
     }
-    cerr << "\n\tDonors skipped " << junction.donors_skipped.size();
-    cerr << "\n\tExons skipped " << junction.exons_skipped.size();
-    cerr << "\n\tAcceptors skipped " << junction.acceptors_skipped.size();
-    cerr << "\n\tSplice site " << junction.anchor;
 }
 
 //Annotate with gtf
@@ -347,10 +342,10 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
                 break;
             case 'h':
                 usage(help_ss);
-                throw cmdline_help_exception(help_ss.str());
+                throw common::cmdline_help_exception(help_ss.str());
             default:
                 usage();
-                throw runtime_error("\nError parsing inputs!");
+                throw runtime_error("\nError parsing inputs!(1)");
         }
     }
     if(argc - optind >= 3) {
@@ -363,7 +358,7 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
        junctions_.bedFile.empty() ||
        gtf_.gtffile().empty()) {
         usage();
-        throw runtime_error("\nError parsing inputs!");
+        throw runtime_error("\nError parsing inputs!(2)");
     }
     cerr << "\nReference: " << ref_;
     cerr << "\nGTF: " << gtf_.gtffile();

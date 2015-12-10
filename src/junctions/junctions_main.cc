@@ -49,7 +49,7 @@ int junctions_extract(int argc, char *argv[]) {
         extract.parse_options(argc, argv);
         extract.identify_junctions_from_BAM();
         extract.print_all_junctions();
-    } catch(const cmdline_help_exception& e) {
+    } catch(const common::cmdline_help_exception& e) {
         cerr << e.what();
         return 0;
     } catch(const runtime_error& error) {
@@ -69,11 +69,12 @@ int junctions_annotate(int argc, char *argv[]) {
     ofstream out;
     try {
         anno.parse_options(argc, argv);
-        anno.read_gtf();
+        anno.load_gtf();
         anno.open_junctions();
         anno.set_ofstream_object(out);
         line.print_header(out);
         while(anno.get_single_junction(line)) {
+            anno.adjust_junction_ends(line);
             anno.get_splice_site(line);
             anno.annotate_junction_with_gtf(line);
             line.print(out);
@@ -83,7 +84,7 @@ int junctions_annotate(int argc, char *argv[]) {
         anno.close_ofstream();
         cerr << endl << "Annotated " << linec << " lines.";
         anno.close_junctions();
-    } catch(const cmdline_help_exception& e) {
+    } catch(const common::cmdline_help_exception& e) {
         cerr << e.what();
         return 0;
     } catch(const runtime_error& e) {
@@ -106,4 +107,3 @@ int junctions_main(int argc, char *argv[]) {
     }
     return junctions_usage();
 }
-

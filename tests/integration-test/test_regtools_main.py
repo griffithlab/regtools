@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-test_junctions_annotate.py -- Integration test for `regtools junctions annotate`
+test_regtools_main.py -- Integration test for `regtools` command
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -29,17 +29,11 @@ DEALINGS IN THE SOFTWARE.
 from integrationtest import IntegrationTest, main
 import unittest
 
-class TestAnnotate(IntegrationTest, unittest.TestCase):
-    def test_junctions_annotate(self):
-        junctions = self.inputFiles("bed/test_hcc1395_junctions.bed")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.gtf")[0]
-        fasta = self.inputFiles("fa/test_chr22.fa")[0]
-        output_file = self.tempFile("observed-annotate.out")
-        expected_file = self.inputFiles("junctions-annotate/expected-annotate.out")[0]
-        params = ["junctions", "annotate", "-o", output_file, junctions, fasta, gtf]
+class TestRegtools(IntegrationTest, unittest.TestCase):
+    def test_help(self):
+        params = ["-h"]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
-        self.assertFilesEqual(expected_file, output_file)
 
 if __name__ == "__main__":
     main()

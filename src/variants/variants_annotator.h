@@ -26,6 +26,7 @@ DEALINGS IN THE SOFTWARE.  */
 #define VARIANTS_ANNOTATOR_H_
 
 #include <iostream>
+#include <limits>
 #include <stdint.h>
 #include "bedFile.h"
 #include "gtf_parser.h"
@@ -35,8 +36,27 @@ DEALINGS IN THE SOFTWARE.  */
 
 using namespace std;
 
-//Reuse type.
-typedef AnnotatedJunction AnnotatedVariant;
+//Hold annotations
+struct AnnotatedVariant : public BED {
+    string overlapping_genes;
+    string overlapping_transcripts;
+    string overlapping_distances;
+    string annotation;
+    CHRPOS cis_effect_start;
+    CHRPOS cis_effect_end;
+    AnnotatedVariant() : overlapping_genes("NA"),
+                         overlapping_transcripts("NA"),
+                         overlapping_distances("NA"),
+                         cis_effect_start(std::numeric_limits<unsigned int>::max()),
+                         cis_effect_end(0) {}
+    AnnotatedVariant(string chr1, CHRPOS start1, CHRPOS end1):
+                         BED(chr1, start1, end1),
+                         overlapping_genes("NA"),
+                         overlapping_transcripts("NA"),
+                         overlapping_distances("NA"),
+                         cis_effect_start(std::numeric_limits<unsigned int>::max()),
+                         cis_effect_end(0) {}
+};
 
 //The class that does all the annotation
 class VariantsAnnotator {
@@ -81,8 +101,22 @@ class VariantsAnnotator {
                               vcf_record_(NULL) {
             vcf_record_ = bcf_init();
         }
+        //constructor
+        VariantsAnnotator(string vcf_f, string gtf_f, string vcf_out) : vcf_(vcf_f),
+                              gtffile_(gtf_f),
+                              vcf_out_(vcf_out),
+                              intronic_min_distance_(2),
+                              exonic_min_distance_(3),
+                              skip_single_exon_genes_(true),
+                              vcf_fh_in_(NULL), vcf_header_in_(NULL),
+                              vcf_fh_out_(NULL), vcf_header_out_(NULL),
+                              vcf_record_(NULL) {
+            vcf_record_ = bcf_init();
+            gtf_.set_gtffile(gtffile_);
+        }
+        //Destructor
         ~VariantsAnnotator() {
-            cleanup_vcf();
+            cleanup();
         }
         //Parse command-line options for this tool
         int parse_options(int argc, char *argv[]);
@@ -97,9 +131,17 @@ class VariantsAnnotator {
         //Open output VCF file
         void open_vcf_out();
         //Cleanup VCF file data structures
-        void cleanup_vcf();
+        void cleanup();
+        //Set the GTF parser
+        void set_gtf_parser(GtfParser gp1) {
+            gtf_ = gp1;
+        }
+        //Return GTF parser
+        GtfParser gtf() {
+            return gtf_;
+        }
         //Annotate one line of a VCF
-        void annotate_record_with_transcripts();
+        AnnotatedVariant annotate_record_with_transcripts();
         //Given a transcript ID and variant position,
         //check if the variant is in a splice relevant region
         //relevance depends on the user params
@@ -107,6 +149,22 @@ class VariantsAnnotator {
         //stores result in the AnnotatedVariant object
         void get_variant_overlaps_spliceregion(const vector<BED> &exons,
                                            AnnotatedVariant  &variant);
+        //Read next record of VCF.
+        bool read_next_record();
+        //Write annotation output
+        void write_annotation_output(const AnnotatedVariant &v1);
+        //Get the coordinate limits for the 'cis effect' of this variant
+        void set_variant_cis_effect_limits(const vector<BED>& exons,
+                                           AnnotatedVariant& variant1,
+                                           uint32_t i);
+        //Cis limits negative strand
+        void set_variant_cis_effect_limits_ns(const vector<BED>& exons,
+                                              AnnotatedVariant& variant1,
+                                              uint32_t i);
+        //Cis limits positive strand
+        void set_variant_cis_effect_limits_ps(const vector<BED>& exons,
+                                              AnnotatedVariant& variant1,
+                                              uint32_t i);
 };
 
 #endif

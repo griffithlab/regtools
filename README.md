@@ -9,6 +9,7 @@ in a regulatory and splicing context.
 
 ##Features
 
+- Identify evidence for aberrant splicing in RNA reads near a list of variants.
 - Extract exon-exon junctions from a RNAseq BAM file.
 - Annotate exon-exon junctions with information from a known transcriptome.
 - Annotate variants with splice-region(the definition of this region is configurable) annotations.

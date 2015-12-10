@@ -1,3 +1,8 @@
+def_integration_test(regtools regtools_main test_regtools_main.py)
+def_integration_test(regtools cis_splice_effects_identify
+    test_cis_splice_effects_identify.py)
+def_integration_test(regtools cis_splice_effects_main
+    test_cis_splice_effects_main.py)
 def_integration_test(regtools junctions_main test_junctions_main.py)
 def_integration_test(regtools junctions_extract test_junctions_extract.py)
 def_integration_test(regtools junctions_annotate test_junctions_annotate.py)

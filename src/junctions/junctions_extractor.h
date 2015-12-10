@@ -46,8 +46,6 @@ struct Junction : BED {
     //reads, only junctions anchored on both sides are reported.
     bool has_left_min_anchor;
     bool has_right_min_anchor;
-    //Name of the junction
-    string name;
     //Color for the BED line
     string color;
     //Number of blocks
@@ -136,9 +134,18 @@ class JunctionsExtractor {
             min_intron_length_ = 70;
             max_intron_length_ = 500000;
             junctions_sorted_ = false;
+            bam_ = "NA";
             output_file_ = "NA";
             region_ = ".";
-        };
+        }
+        //Default constructor
+        JunctionsExtractor(string bam1, string region1) : bam_(bam1), region_(region1) {
+            min_anchor_length_ = 8;
+            min_intron_length_ = 70;
+            max_intron_length_ = 500000;
+            junctions_sorted_ = false;
+            output_file_ = "NA";
+        }
         //Name the junction based on the number of junctions
         // in the map.
         string get_new_junction_name();
@@ -152,6 +159,8 @@ class JunctionsExtractor {
         void print_one_junction(const Junction j1, ostream& out = cout);
         //Print all the junctions
         void print_all_junctions(ostream& out = cout);
+        //Get a vector of all the junctions
+        vector<Junction> get_all_junctions();
         //Get the BAM filename
         string get_bam();
         //Parse the alignment into the junctions map

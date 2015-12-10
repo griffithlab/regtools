@@ -28,7 +28,9 @@ DEALINGS IN THE SOFTWARE.  */
 #include <iostream>
 #include <iterator>
 #include "bedFile.h"
+#include "common.h"
 #include "gtf_parser.h"
+#include "junctions_extractor.h"
 
 using namespace std;
 
@@ -60,7 +62,7 @@ struct AnnotatedJunction : BED {
     //Annotation - Exonic/Intronic etc.
     string annotation;
     //Print the header line
-    static void print_header(ostream& out) {
+    static void print_header(ostream& out = std::cout) {
         out << "chrom" << "\t" << "start" <<
                 "\t" << "end" << "\t" << "name" <<
                 "\t" << "score" << "\t" << "strand" <<
@@ -71,7 +73,7 @@ struct AnnotatedJunction : BED {
                 "\t" << "transcripts" << "\t" << "genes";
     }
     //Print out the junction
-    void print(ostream &out) {
+    void print(ostream &out = std::cout) {
         out << endl << chrom << "\t" << start <<
                 "\t" << end << "\t" << name <<
                 "\t" << score << "\t" << strand <<
@@ -127,15 +129,31 @@ struct AnnotatedJunction : BED {
         chrom = chr1;
         start = start1;
         end = end1;
+        reset();
+    }
+    //Constructor
+    AnnotatedJunction(const Junction &j1) {
+        chrom = j1.chrom;
+        //Note this is start,end and not thick_start, thick_end
+        //So we don't have to adjust ends!
+        start = j1.start;
+        end = j1.end + 1;
+        name = j1.name;
+        score = j1.score;
+        strand = j1.strand;
+        fields = j1.fields;
+        reset();
     }
 };
 
-//Copy one stream object into another
-inline
-void copy_stream(const ostream &source, ostream &dest) {
-    dest.copyfmt(source);
-    dest.basic_ios<char>::rdbuf(source.rdbuf());
-    dest.clear(source.rdstate());
+inline bool operator<(const AnnotatedJunction& lhs, const AnnotatedJunction& rhs) {
+  if(lhs.chrom < rhs.chrom )
+      return true;
+  if(lhs.chrom == rhs.chrom && lhs.start < rhs.start)
+      return true;
+  if(lhs.chrom == rhs.chrom && lhs.start == rhs.start && lhs.end < rhs.end)
+      return true;
+  return false;
 }
 
 //The class that does all the annotation
@@ -173,6 +191,13 @@ class JunctionsAnnotator {
             , skip_single_exon_genes_(true)
             , output_file_("NA")
         {}
+        //Default constructor
+        JunctionsAnnotator(string ref1, GtfParser gp1)
+            : ref_(ref1)
+            , skip_single_exon_genes_(true)
+            , gtf_(gp1)
+            , output_file_("NA")
+        {}
         //Get the GTF file
         string gtf_file();
         //Get ostream object to write output to
@@ -188,13 +213,17 @@ class JunctionsAnnotator {
         //Get a single line from the junctions file
         bool get_single_junction(BED & line);
         //Get the anchor bases
-        bool get_splice_site(AnnotatedJunction & line);
+        void get_splice_site(AnnotatedJunction & line);
         //Open junctions file
         void open_junctions();
         //Close junctions file
         void close_junctions();
         //Extract gtf info
-        bool read_gtf();
+        bool load_gtf();
+        //Set the GTF parser
+        void set_gtf_parser(GtfParser gp1) {
+            gtf_ = gp1;
+        }
         //Annotate with gtf
         void annotate_junction_with_gtf(AnnotatedJunction & j1);
         //Adjust the start and end of the junction
@@ -202,4 +231,3 @@ class JunctionsAnnotator {
 };
 
 #endif
-

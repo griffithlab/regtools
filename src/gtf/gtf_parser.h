@@ -110,8 +110,6 @@ class GtfParser {
         string gtffile_;
         //GTF filehandle
         ifstream gtf_fh_;
-        //Number of exons in the gtf
-        int n_exons_;
         //Are exons within transcripts sorted
         bool transcripts_sorted_;
         //Jump from transcript-id to gene-id
@@ -126,9 +124,22 @@ class GtfParser {
     public:
         //Constructor
         GtfParser()
-            : n_exons_(0)
+            : transcripts_sorted_(false)
+        {}
+        //Constructor
+        GtfParser(string gtf1)
+            : gtffile_(gtf1)
             , transcripts_sorted_(false)
         {}
+        //Copy constructor
+        GtfParser(const GtfParser &gp1) {
+            gtffile_ = gp1.gtffile_;
+            transcripts_sorted_ = gp1.transcripts_sorted_;
+            transcript_to_gene_ = gp1.transcript_to_gene_;
+            transcript_map_ = gp1.transcript_map_;
+            transcript_to_bin_ = gp1.transcript_to_bin_;
+            chrbin_to_transcripts_ = gp1.chrbin_to_transcripts_;
+        }
         //Parse an exon line into a gtf struct
         Gtf parse_exon_line(string line);
         //Parse the required field from attributes column
@@ -169,6 +180,10 @@ class GtfParser {
         string get_gene_from_transcript(string transcript_id);
         //Set the gene ID for a trancript ID
         void set_transcript_gene(string transcript_id, string gene_id);
+        //Load all the necessary objects into memory
+        void load();
+        //Assignment operator
+        GtfParser& operator= (const GtfParser& gtf1);
 };
 
 #endif

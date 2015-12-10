@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.  */
 
 //Usage statement for this tool
 int VariantsAnnotator::usage(ostream& out) {
-    out << "\nUsage:\t\t" << "regtools variants annotate [options] variants.vcf annotations.gtf annotated_output.vcf";
+    out << "\nUsage:\t\t" << "regtools variants annotate [options] variants.vcf annotations.gtf";
     out << "\n\t\t" << "-e INT\tMinimum distance from the start/end of an exon "
                        "\n\t\t\tto annotate a variant as relevant to splicing, the variant "
                        "\n\t\t\tis in exonic space, i.e a coding variant. [3]";
@@ -65,7 +65,7 @@ int VariantsAnnotator::parse_options(int argc, char *argv[]) {
                 break;
             case 'h':
                 usage(help_ss);
-                throw cmdline_help_exception(help_ss.str());
+                throw common::cmdline_help_exception(help_ss.str());
             default:
                 usage(std::cout);
                 throw runtime_error("\nError parsing inputs!(1)\n");
@@ -97,11 +97,7 @@ int VariantsAnnotator::parse_options(int argc, char *argv[]) {
 
 //Read gtf info into gtf_
 void VariantsAnnotator::load_gtf() {
-    gtf_.create_transcript_map();
-    gtf_.construct_junctions();
-    gtf_.sort_exons_within_transcripts();
-    gtf_.annotate_transcript_with_bins();
-    //gtf_.print_transcripts();
+    gtf_.load();
 }
 
 //Open input VCF file
@@ -144,7 +140,7 @@ void VariantsAnnotator::open_vcf_out() {
 }
 
 //Free relevant pointers
-void VariantsAnnotator::cleanup_vcf() {
+void VariantsAnnotator::cleanup() {
     if(vcf_header_in_)
         bcf_hdr_destroy(vcf_header_in_);
     if(vcf_fh_in_)
@@ -155,6 +151,81 @@ void VariantsAnnotator::cleanup_vcf() {
         bcf_close(vcf_fh_out_);
     if(vcf_record_)
         bcf_destroy(vcf_record_);
+}
+
+//Set limits on + strand
+inline
+void VariantsAnnotator::set_variant_cis_effect_limits_ps(const vector<BED>& exons,
+                                                      AnnotatedVariant& variant,
+                                                      uint32_t i) {
+    //Check if the cis effect limits have increased.
+    if(i != 0) {
+        if(exons[i-1].start < variant.cis_effect_start) {
+            variant.cis_effect_start = exons[i-1].start;
+        }
+    } else {
+        if(exons[0].start < variant.cis_effect_start) {
+            variant.cis_effect_start = exons[0].start;
+        }
+    }
+    if(i != exons.size() - 1) {
+        if(exons[i+1].end > variant.cis_effect_end) {
+            variant.cis_effect_end = exons[i+1].end;
+        }
+    } else {
+        if(exons[exons.size() - 1].end > variant.cis_effect_end) {
+            variant.cis_effect_end = exons[exons.size() - 1].end;
+        }
+    }
+    return;
+}
+
+//Set limits on - strand
+inline
+void VariantsAnnotator::set_variant_cis_effect_limits_ns(const vector<BED>& exons,
+                                                      AnnotatedVariant& variant,
+                                                      uint32_t i) {
+    if(i != 0) {
+        //Check if the cis effect limits have increased.
+        if(exons[i-1].end > variant.cis_effect_end) {
+            variant.cis_effect_end = exons[i-1].end;
+        }
+    } else {
+        if(exons[0].end > variant.cis_effect_end) {
+            variant.cis_effect_end = exons[0].end;
+        }
+    }
+    if(i != exons.size() -1) {
+        if(exons[i+1].start < variant.cis_effect_start) {
+            variant.cis_effect_start = exons[i+1].start;
+        }
+    } else {
+        if(exons[exons.size() - 1].start < variant.cis_effect_start) {
+            variant.cis_effect_start = exons[exons.size() - 1].start;
+        }
+    }
+    return;
+}
+
+//Get the coordinates which limit the effect of this variant.
+//The cis-splice-effects command uses these fields to pull out
+//junctions which might be related to the presence of this variant.
+//This is set to the nearest acceptor and donor of the neigboring
+//exons. The calculation will vary according to the strand of this
+//transcript.
+inline
+void VariantsAnnotator::set_variant_cis_effect_limits(const vector<BED>& exons,
+                                                      AnnotatedVariant& variant,
+                                                      uint32_t i) {
+    string transcript_strand = exons[0].strand;
+    if(transcript_strand == "+") {
+        set_variant_cis_effect_limits_ps(exons, variant, i);
+        return;
+    }
+    if(transcript_strand == "-") {
+        set_variant_cis_effect_limits_ns(exons, variant, i);
+        return;
+    }
 }
 
 //Given a transcript ID and variant position,
@@ -181,7 +252,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
        exons[0].end + intronic_min_distance_ < variant.start) {
         return;
     }
-    for(std::size_t i = 0; i < exons.size(); i++) {
+    for(uint32_t i = 0; i < exons.size(); i++) {
         //the rest of the exons are outside the junction - ps
         if(transcript_strand == "+" && exons[i].start - intronic_min_distance_ > variant.end) {
             return;
@@ -193,29 +264,45 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
         //exonic near start
         if(variant.end >= exons[i].start &&
                 variant.end <= exons[i].start + exonic_min_distance_) {
-            variant.score =  num_to_str(variant.end - exons[i].start);
+            variant.score =  common::num_to_str(variant.end - exons[i].start);
             variant.annotation = "splicing_exonic";
+            set_variant_cis_effect_limits(exons, variant, i);
             return;
         }
-        //intronic near start
+        //intronic near start (make sure not first/last exon.)
         if(variant.end < exons[i].start &&
                 variant.end >= exons[i].start - intronic_min_distance_) {
-            variant.score = num_to_str(exons[i].start - variant.end);
+            //outside transcript - PS
+            if(i == 0 && transcript_strand == "+")
+                return;
+            //outside transcript - NS
+            if(i == exons.size() - 1  && transcript_strand == "-")
+                return;
+            variant.score = common::num_to_str(exons[i].start - variant.end);
             variant.annotation = "splicing_intronic";
+            set_variant_cis_effect_limits(exons, variant, i);
             return;
         }
         //exonic near end
         if(variant.end <= exons[i].end &&
                 variant.end >= exons[i].end - exonic_min_distance_) {
-            variant.score = num_to_str(exons[i].end - variant.end);
+            variant.score = common::num_to_str(exons[i].end - variant.end);
             variant.annotation = "splicing_exonic";
+            set_variant_cis_effect_limits(exons, variant, i);
             return;
         }
-        //intronic near end
+        //intronic near end (make sure not first/last exon.)
         if(variant.end > exons[i].end &&
                 variant.end <= exons[i].end + intronic_min_distance_) {
-            variant.score = num_to_str(variant.end - exons[i].end);
+            //outside transcript - PS
+            if(i == exons.size() - 1  && transcript_strand == "+")
+                return;
+            //outside transcript - NS
+            if(i == 0  && transcript_strand == "-")
+                return;
+            variant.score = common::num_to_str(variant.end - exons[i].end);
             variant.annotation = "splicing_intronic";
+            set_variant_cis_effect_limits(exons, variant, i);
             return;
         }
     }
@@ -224,12 +311,12 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
 
 //Annotate one line of a VCF
 //The line to be annotated is in vcf_record_
-void VariantsAnnotator::annotate_record_with_transcripts() {
+AnnotatedVariant VariantsAnnotator::annotate_record_with_transcripts() {
     string overlapping_genes = "NA",
            overlapping_transcripts = "NA",
            overlapping_distances = "NA",
            annotations = "NA";
-    map<string, bool> unique_genes;
+    set<string> unique_genes;
     string chr = std::string(bcf_hdr_id2name(vcf_header_in_, vcf_record_->rid));
     AnnotatedVariant variant(chr, vcf_record_->pos, (vcf_record_->pos) + 1);
     //While calculating BINs, incorporate intronic_distance since transcripts
@@ -261,8 +348,11 @@ void VariantsAnnotator::annotate_record_with_transcripts() {
                     string dist_str = variant.score;
                     //Add gene only once for multiple transcripts of the same gene.
                     if(overlapping_transcripts != "NA") {
-                        if(!unique_genes.count(gene_id))
+                        //Check if this gene is new
+                        if(unique_genes.find(gene_id) == unique_genes.end()) {
                             overlapping_genes += "," + gene_id;
+                            unique_genes.insert(gene_id);
+                        }
                         overlapping_distances += "," + dist_str;
                         overlapping_transcripts += "," + transcripts[i];
                         annotations += "," + annotation;
@@ -270,7 +360,7 @@ void VariantsAnnotator::annotate_record_with_transcripts() {
                         overlapping_genes = gene_id;
                         overlapping_distances = dist_str;
                         overlapping_transcripts = transcripts[i];
-                        unique_genes[gene_id] = true;
+                        unique_genes.insert(gene_id);
                         annotations = annotation;
                     }
                 }
@@ -279,17 +369,31 @@ void VariantsAnnotator::annotate_record_with_transcripts() {
         start_bin >>= _binNextShift;
         end_bin >>= _binNextShift;
     }
+    variant.annotation = annotations;
+    variant.overlapping_genes = overlapping_genes;
+    variant.overlapping_transcripts = overlapping_transcripts;
+    variant.overlapping_distances = overlapping_distances;
+    return variant;
+}
+
+//Write annotation output
+void VariantsAnnotator::write_annotation_output(const AnnotatedVariant &v1) {
     if(bcf_update_info_string(vcf_header_out_, vcf_record_,
-                           "genes", overlapping_genes.c_str()) < 0 ||
+                              "genes", v1.overlapping_genes.c_str()) < 0 ||
        bcf_update_info_string(vcf_header_out_, vcf_record_,
-                           "transcripts", overlapping_transcripts.c_str()) < 0 ||
+                              "transcripts", v1.overlapping_transcripts.c_str()) < 0 ||
        bcf_update_info_string(vcf_header_out_, vcf_record_,
-                           "distances", overlapping_distances.c_str()) < 0 ||
+                              "distances", v1.overlapping_distances.c_str()) < 0 ||
        bcf_update_info_string(vcf_header_out_, vcf_record_,
-                           "annotations", annotations.c_str()) < 0) {
+                              "annotations", v1.annotation.c_str()) < 0) {
         throw runtime_error("Unable to update info string");
     }
     bcf_write(vcf_fh_out_, vcf_header_out_, vcf_record_);
+}
+
+//Read in next record
+bool VariantsAnnotator::read_next_record() {
+    return (bcf_read(vcf_fh_in_, vcf_header_in_, vcf_record_) == 0);
 }
 
 //Heavylifting happens here.
@@ -297,7 +401,9 @@ void VariantsAnnotator::annotate_vcf() {
     load_gtf();
     open_vcf_in();
     open_vcf_out();
-    while(bcf_read(vcf_fh_in_, vcf_header_in_, vcf_record_) == 0) {
-        annotate_record_with_transcripts();
+    while(read_next_record()) {
+        AnnotatedVariant v1 = annotate_record_with_transcripts();
+        write_annotation_output(v1);
     }
+    //The close happens in the destructor - see cleanup()
 }

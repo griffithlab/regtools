@@ -61,16 +61,18 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
                 break;
             case 'h':
                 usage(help_ss);
-                throw cmdline_help_exception(help_ss.str());
+                throw common::cmdline_help_exception(help_ss.str());
             case '?':
             default:
                 throw runtime_error("Error parsing inputs!");
         }
     }
-    if(argc == optind) {
+    if(argc - optind >= 1) {
+        bam_ = string(argv[optind++]);
+    }
+    if(optind < argc || bam_ == "NA") {
         throw runtime_error("\nError parsing inputs!");
     }
-    bam_ = string(argv[optind]);
     cerr << endl << "Minimum junction anchor length: " << min_anchor_length_;
     cerr << endl << "Minimum intron length: " << min_intron_length_;
     cerr << endl << "Maximum intron length: " << max_intron_length_;
@@ -141,10 +143,12 @@ int JunctionsExtractor::add_junction(Junction j1) {
     if(!junctions_.count(key)) {
         j1.name = get_new_junction_name();
         j1.read_count = 1;
+        j1.score = common::num_to_str(j1.read_count);
     } else { //existing junction
         Junction j0 = junctions_[key];
         //increment read count
         j1.read_count = j0.read_count + 1;
+        j1.score = common::num_to_str(j1.read_count);
         //Keep the same name
         j1.name = j0.name;
         //Check if thick starts are any better
@@ -170,6 +174,16 @@ void JunctionsExtractor::print_one_junction(const Junction j1, ostream& out) {
         "\t" << j1.color << "\t" << j1.nblocks <<
         "\t" << j1.start - j1.thick_start << "," << j1.thick_end - j1.end <<
         "\t" << "0," << j1.end - j1.thick_start << endl;
+}
+
+//Print all the junctions - this function needs work
+vector<Junction> JunctionsExtractor::get_all_junctions() {
+    //Sort junctions by position
+    if(!junctions_sorted_) {
+        create_junctions_vector();
+        sort_junctions();
+    }
+    return junctions_vector_;
 }
 
 //Print all the junctions - this function needs work

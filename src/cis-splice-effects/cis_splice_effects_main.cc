@@ -1,4 +1,4 @@
-/*  variants_main.cc -- handle the 'variants' commands
+/*  cis_splice_effects_main.cc -- handle the 'cis-splice-effects' commands
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -23,43 +23,47 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
 #include <iostream>
+#include <getopt.h>
 #include <stdexcept>
-#include "common.h"
-#include "variants_annotator.h"
+#include "cis_splice_effects_identifier.h"
 
 using namespace std;
 
-//Usage for variants subcommands
-int variants_usage(ostream &out = cout) {
-    out << "\nUsage:\t\t" << "regtools variants <command> [options]";
-    out << "\nCommand:\t" << "annotate\t\tAnnotate variants with splicing information.";
-    out << "\n";
-    return 0;
-}
-
-//Run 'variants annotate' subcommand
-int variants_annotate(int argc, char *argv[]) {
-    VariantsAnnotator va;
+//Main command for identify
+int cis_splice_effects_identify(int argc, char* argv[]) {
+    CisSpliceEffectsIdentifier csei1;
     try {
-        va.parse_options(argc, argv);
-        va.annotate_vcf();
+        csei1.parse_options(argc, argv);
+        csei1.identify();
     } catch(const common::cmdline_help_exception& e) {
         cerr << e.what();
         return 0;
-    } catch (runtime_error e) {
-        cerr << e.what();
+    } catch (const std::runtime_error &e) {
+        cerr << endl << e.what();
+        return 1;
+    } catch (const std::logic_error &e) {
+        cerr << endl << e.what();
         return 1;
     }
     return 0;
 }
 
-//Parse out subcommands under variants
-int variants_main(int argc, char *argv[]) {
-    if(argc > 1) {
-        string subcmd(argv[1]);
-        if(subcmd == "annotate") {
-            return variants_annotate(argc - 1, argv + 1);
-        }
+//Usage for cis-splice-effects subcommands
+int cis_splice_effects_usage(ostream &out = cout) {
+    out << "\nUsage:\t\t" << "regtools cis-splice-effects <command> [options]";
+    out << "\nCommand:\t" << "identify\t\tIdentify cis splicing effects.";
+    out << "\n";
+    return 0;
+}
+
+//Main command for cis-splice-effects
+int cis_splice_effects_main(int argc, char* argv[]) {
+    if(argc < 2) {
+        return cis_splice_effects_usage(std::cout);
     }
-    return variants_usage();
+    if(string(argv[1]) == "identify") {
+        return cis_splice_effects_identify(argc - 1, argv + 1);
+    }
+    return cis_splice_effects_usage(std::cout);
+    return 0;
 }

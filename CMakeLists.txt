@@ -30,13 +30,15 @@ if(${CMAKE_C_COMPILER_ID} MATCHES "GNU|Clang")
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Werror")
 endif()
 
-add_subdirectory ("${PROJECT_SOURCE_DIR}/src/junctions/")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/gtf/")
+add_subdirectory ("${PROJECT_SOURCE_DIR}/src/junctions/")
+add_subdirectory ("${PROJECT_SOURCE_DIR}/src/cis-splice-effects/")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/variants/")
 
 #The main executable
 add_executable (regtools src/regtools.cc)
-target_link_libraries (regtools junctions variants bedtools gtf htslib)
+target_link_libraries (regtools junctions variants
+                       bedtools gtf htslib cis-splice-effects)
 
 #Testing
 enable_testing()

@@ -29,71 +29,96 @@ DEALINGS IN THE SOFTWARE.  */
 #include <map>
 #include <sstream>
 #include <stdexcept>
+#include <sys/stat.h>
+#include "stdint.h"
+#include "bedFile.h"
 
 using namespace std;
 
-//Convert a number to a string
-template <typename T>
-string num_to_str(T num) {
-    stringstream ss;
-    ss << num;
-    return ss.str();
-}
-
-//Convert a string to a number
-template <typename T>
-string num_to_str(string str) {
-    stringstream ss(str);
-    T num;
-    ss << num;
-    if(!ss.eof())
-        throw "Unable to convert string to number!";
-    return ss.str();
-}
-
-//Reverse complement short DNA seqs
-inline string rev_comp(string s1) {
-    string rc;
-    for(int i = s1.length() - 1; i >= 0; i--) {
-        char rc_char;
-        switch(s1[i]) {
-            case 'A':
-                rc_char = 'T';
-                break;
-            case 'C':
-                rc_char = 'G';
-                break;
-            case 'G':
-                rc_char = 'C';
-                break;
-            case 'T':
-                rc_char = 'A';
-                break;
-            default:
-                rc_char = 'N';
-                break;
-        }
-        rc.insert(rc.end(), rc_char);
+namespace common {
+    //Convert a number to a string
+    template <typename T>
+        string num_to_str(T num) {
+            stringstream ss;
+            ss << num;
+            return ss.str();
     }
-    return rc;
-}
 
-//Remove quotes from strings
-inline void unquote(string & s1) {
-    if(s1.empty())
-        return;
-    if(s1[0] == '"' && s1[s1.length() - 1] == '"') {
-        s1.erase(s1.begin());
-        s1.erase(s1.end() - 1);
+    //Convert a number to a string
+    inline uint32_t str_to_num(string num) {
+            stringstream ss;
+            uint32_t num_uint;
+            ss << num;
+            ss >> num_uint;
+            return num_uint;
+    }
+
+    //Reverse complement short DNA seqs
+    inline string rev_comp(string s1) {
+        string rc;
+        for(int i = s1.length() - 1; i >= 0; i--) {
+            char rc_char;
+            switch(s1[i]) {
+                case 'A':
+                    rc_char = 'T';
+                    break;
+                case 'C':
+                    rc_char = 'G';
+                    break;
+                case 'G':
+                    rc_char = 'C';
+                    break;
+                case 'T':
+                    rc_char = 'A';
+                    break;
+                default:
+                    rc_char = 'N';
+                    break;
+            }
+            rc.insert(rc.end(), rc_char);
+        }
+        return rc;
+    }
+
+    //Remove quotes from strings
+    inline void unquote(string & s1) {
+        if(s1.empty())
+            return;
+        if(s1[0] == '"' && s1[s1.length() - 1] == '"') {
+            s1.erase(s1.begin());
+            s1.erase(s1.end() - 1);
+        }
+    }
+
+    //Define cmdline_help_exception - Thanks tabbott!
+    class cmdline_help_exception : public std::runtime_error {
+        public:
+            cmdline_help_exception(std::string const& msg)
+                : std::runtime_error(msg) {
+                }
+    };
+
+    //Check if file exists
+    inline bool file_exists(const std::string& file) {
+        struct stat buf1;
+        return (stat(file.c_str(), &buf1) == 0);
+    }
+
+    //Difference in CHRPOS coordinates
+    inline uint32_t coordinate_diff(CHRPOS pos1, CHRPOS pos2) {
+        if(pos1 > pos2)
+            return pos1 - pos2;
+        else
+            return pos2 - pos1;
+    }
+
+    //Copy one stream object into another
+    inline void copy_stream(const ostream &source,
+                         ostream &dest) {
+            dest.copyfmt(source);
+            dest.basic_ios<char>::rdbuf(source.rdbuf());
+            dest.clear(source.rdstate());
     }
 }
-
-//Define cmdline_help_exception - Thanks tabbott!
-class cmdline_help_exception : public std::runtime_error {
-    public:
-        cmdline_help_exception(std::string const& msg)
-            : std::runtime_error(msg) {
-        }
-};
 
 #endif

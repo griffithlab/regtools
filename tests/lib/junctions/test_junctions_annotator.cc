@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-
-'''
-test_junctions_annotate.py -- Integration test for `regtools junctions annotate`
+/*  test_junctions_annotator.cc -- Unit-tests for the JunctionsAnnotator class
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -23,23 +20,26 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
 THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-'''
+DEALINGS IN THE SOFTWARE.  */
 
-from integrationtest import IntegrationTest, main
-import unittest
+#include <gtest/gtest.h>
+#include <sstream>
+#include <stdexcept>
+#include "junctions_annotator.h"
 
-class TestAnnotate(IntegrationTest, unittest.TestCase):
-    def test_junctions_annotate(self):
-        junctions = self.inputFiles("bed/test_hcc1395_junctions.bed")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.gtf")[0]
-        fasta = self.inputFiles("fa/test_chr22.fa")[0]
-        output_file = self.tempFile("observed-annotate.out")
-        expected_file = self.inputFiles("junctions-annotate/expected-annotate.out")[0]
-        params = ["junctions", "annotate", "-o", output_file, junctions, fasta, gtf]
-        rv, err = self.execute(params)
-        self.assertEqual(rv, 0)
-        self.assertFilesEqual(expected_file, output_file)
+class JunctionsAnnotatorTest : public ::testing::Test {
+    public:
+        JunctionsAnnotator ja1;
+};
 
-if __name__ == "__main__":
-    main()
+TEST_F(JunctionsAnnotatorTest, ParseInput) {
+    int argc = 4;
+    char * argv[] = {"annotate",
+                     "test.bed",
+                     "test.fa",
+                     "test.gtf"};
+    int ret = ja1.parse_options(argc, argv);
+    string expected_gtf("test.gtf");
+    ASSERT_EQ(expected_gtf, ja1.gtf_file());
+    ASSERT_EQ(0, ret);
+}
