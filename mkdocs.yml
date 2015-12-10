@@ -1,7 +1,8 @@
 site_name: regtools
 pages:
 - Home: 'index.md'
-- Commands: 'commands/commands.md'
+- Commands:
+    - 'Index of commands': 'commands/commands.md'
     - 'junctions extract': 'commands/junctions-extract.md'
     - 'junctions annotate': 'commands/junctions-annotate.md'
     - 'variants annotate': 'commands/variants-annotate.md'
