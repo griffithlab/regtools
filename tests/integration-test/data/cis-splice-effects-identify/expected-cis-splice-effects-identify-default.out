@@ -1,2 +1,2 @@
-chrom	start	end	name	score	strand	splice_site	acceptors_skipped	exons_skipped	donors_skipped	anchor	known_donor	known_acceptor	known_junction	transcripts	genes
-22	93668	97252	JUNC00000001	5	+	GT-AG	2	1	2	NDA	1	1	0	ENST00000263253	EP300
+chrom	start	end	name	score	strand	splice_site	acceptors_skipped	exons_skipped	donors_skipped	anchor	known_donor	known_acceptor	known_junction	genes	transcripts
+22	93668	97252	JUNC00000001	5	+	GT-AG	2	1	2	NDA	1	1	0	EP300	ENST00000263253
