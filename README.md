@@ -46,8 +46,14 @@ Github issues are another option to contact the project about
 potential bugs.
 
 ##Documentation
+
 The documentation for the project is hosted on
 [Read the Docs.](https://regtools.readthedocs.org/en/latest/)
+
+If you would like to build the documentation locally, please install
+[mkdocs](http://www.mkdocs.org/), `pip install mkdocs --user` should
+work on most machines. Then run `mkdocs serve` from within the `regtools`
+base directory.
 
 ##Acknowledgements
 
