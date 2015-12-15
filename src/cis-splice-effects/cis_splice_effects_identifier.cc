@@ -150,14 +150,18 @@ void CisSpliceEffectsIdentifier::annotate_junctions(const GtfParser& gp1) {
     set_ostream();
     //Annotate the junctions in the set and write to file
     AnnotatedJunction::print_header(ofs_);
+    int i = 0;
     //This is ugly, waiting to start using C++11/14
-    for (set<Junction>::iterator j1 = unique_junctions.begin(); j1 != unique_junctions.end(); j1++) {
-        AnnotatedJunction line(*j1);
+    for (set<Junction>::iterator j1 = unique_junctions_.begin(); j1 != unique_junctions_.end(); j1++) {
+        Junction j = *j1;
+        AnnotatedJunction line(j);
         ja1.get_splice_site(line);
         ja1.annotate_junction_with_gtf(line);
         if(line.anchor != "DA") {
-            if(output_junctions_bed_ != "NA")
-                (*j1).print(ofs_junctions_bed_);
+            if(output_junctions_bed_ != "NA") {
+                j.name = get_junction_name(++i);
+                j.print(ofs_junctions_bed_);
+            }
             line.print(ofs_);
         }
     }
