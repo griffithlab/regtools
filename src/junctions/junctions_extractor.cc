@@ -22,7 +22,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
-#include <algorithm>
 #include <getopt.h>
 #include <iostream>
 #include <iomanip>
@@ -170,7 +169,8 @@ vector<Junction> JunctionsExtractor::get_all_junctions() {
     //Sort junctions by position
     if(!junctions_sorted_) {
         create_junctions_vector();
-        sort_junctions();
+        sort_junctions(junctions_vector_);
+        junctions_sorted_ = true;
     }
     return junctions_vector_;
 }
@@ -184,7 +184,8 @@ void JunctionsExtractor::print_all_junctions(ostream& out) {
     //Sort junctions by position
     if(!junctions_sorted_) {
         create_junctions_vector();
-        sort_junctions();
+        sort_junctions(junctions_vector_);
+        junctions_sorted_ = true;
     }
     for(vector<Junction> :: iterator it = junctions_vector_.begin();
         it != junctions_vector_.end(); it++) {
@@ -368,10 +369,4 @@ void JunctionsExtractor::create_junctions_vector() {
         Junction j1 = it->second;
         junctions_vector_.push_back(j1);
     }
-}
-
-//Sort all the junctions by their position
-void JunctionsExtractor::sort_junctions() {
-    sort(junctions_vector_.begin(), junctions_vector_.end(), compare_junctions);
-    junctions_sorted_ = true;
 }

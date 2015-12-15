@@ -25,6 +25,8 @@ DEALINGS IN THE SOFTWARE.  */
 #ifndef JUNCTIONS_EXTRACTOR_H
 #define JUNCTIONS_EXTRACTOR_H
 
+#include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include "bedFile.h"
 #include "sam.h"
@@ -112,6 +114,12 @@ static inline bool compare_junctions(const Junction &j1,
     return j1.thick_start < j2.thick_start;
 }
 
+//Sort a vector of junctions
+template <class CollectionType>
+inline void sort_junctions(CollectionType &junctions) {
+    sort(junctions.begin(), junctions.end(), compare_junctions);
+}
+
 //The class that deals with creating the junctions
 class JunctionsExtractor {
     private:
@@ -175,8 +183,6 @@ class JunctionsExtractor {
         int parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *aln);
         //Check if junction satisfies qc
         bool junction_qc(Junction &j1);
-        //Sort all the junctions by their position
-        void sort_junctions();
         //Create the junctions vector from the map
         void create_junctions_vector();
         //Pull out the cigar string from the read
