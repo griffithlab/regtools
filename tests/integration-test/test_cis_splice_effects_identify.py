@@ -36,13 +36,22 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
         fasta = self.inputFiles("fa/test_chr22.fa")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
-        output_file = self.tempFile("observed-cse-identify.out")
-        expected_file = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default.out")[0]
+        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
+        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
+        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
+        expected_annotatedjunctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-annotatedjunctions.out")[0]
+        expected_annotatedvariants = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-annotatedvariants.out")[0]
+        expected_junctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-junctions.out")[0]
         params = ["cis-splice-effects", "identify",
-                  "-o ", output_file, variants, bam1, fasta, gtf]
+                  "-o ", output_annotatedjunctions,
+                  "-v ", output_annotatedvariants,
+                  "-j ", output_junctions,
+                  variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0, err)
-        self.assertFilesEqual(expected_file, output_file, err)
+        self.assertFilesEqual(expected_annotatedjunctions, output_annotatedjunctions, err)
+        self.assertFilesEqual(expected_annotatedvariants, output_annotatedvariants, err)
+        self.assertFilesEqual(expected_junctions, output_junctions, err)
 
     #Test -h works as expected
     def test_help(self):
