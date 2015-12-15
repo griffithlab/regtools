@@ -129,6 +129,25 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     cerr << endl;
 }
 
+//Call the junctions annotator
+void CisSpliceEffectsIdentifier::annotate_junctions(const set<Junction>& unique_junctions, const GtfParser& gp1) {
+    JunctionsAnnotator ja1(ref_, gp1);
+    ja1.set_gtf_parser(gp1);
+    set_ostream();
+    //Annotate the junctions in the set and write to file
+    AnnotatedJunction::print_header(ofs_);
+    //This is ugly, waiting to start using C++11/14
+    for (set<Junction>::iterator j1 = unique_junctions.begin(); j1 != unique_junctions.end(); j1++) {
+        AnnotatedJunction line(*j1);
+        ja1.get_splice_site(line);
+        ja1.annotate_junction_with_gtf(line);
+        if(line.anchor != "DA") {
+            line.print(ofs_);
+        }
+    }
+    close_ostream();
+}
+
 //The workhorse
 void CisSpliceEffectsIdentifier::identify() {
     //GTF parser object
@@ -140,8 +159,6 @@ void CisSpliceEffectsIdentifier::identify() {
     if(write_annotated_variants_)
         va.open_vcf_out();
     va.set_gtf_parser(gp1);
-    JunctionsAnnotator ja1(ref_, va.gtf());
-    ja1.set_gtf_parser(gp1);
     //Unique set of junctions near splicing variants
     set<Junction> unique_junctions;
     //Annotate each variant and pay attention to splicing related ones
@@ -177,17 +194,5 @@ void CisSpliceEffectsIdentifier::identify() {
             }
         }
     }
-    set_ostream();
-    //Annotate the junctions in the set and write to file
-    AnnotatedJunction::print_header(ofs_);
-    //This is ugly, waiting to start using C++11/14
-    for (set<Junction>::iterator j1 = unique_junctions.begin(); j1 != unique_junctions.end(); j1++) {
-        AnnotatedJunction line(*j1);
-        ja1.get_splice_site(line);
-        ja1.annotate_junction_with_gtf(line);
-        if(line.anchor != "DA") {
-            line.print(ofs_);
-        }
-    }
-    close_ostream();
+    annotate_junctions(unique_junctions, gp1);
 }
