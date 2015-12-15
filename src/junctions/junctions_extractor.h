@@ -80,6 +80,16 @@ struct Junction : BED {
         color = "255,0,0";
         nblocks = 2;
     }
+    //Print junction
+    void print(ostream& out) const {
+        out << chrom <<
+            "\t" << thick_start << "\t" << thick_end <<
+            "\t" << name << "\t" << read_count << "\t" << strand <<
+            "\t" << thick_start << "\t" << thick_end <<
+            "\t" << color << "\t" << nblocks <<
+            "\t" << start - thick_start << "," << thick_end - end <<
+            "\t" << "0," << end - thick_start << endl;
+    }
 };
 
 //Compare two junctions
@@ -155,8 +165,6 @@ class JunctionsExtractor {
         int usage(ostream& out = cerr);
         //Identify exon-exon junctions
         int identify_junctions_from_BAM();
-        //Print one junction
-        void print_one_junction(const Junction j1, ostream& out = cout);
         //Print all the junctions
         void print_all_junctions(ostream& out = cout);
         //Get a vector of all the junctions
