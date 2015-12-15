@@ -101,6 +101,8 @@ class CisSpliceEffectsIdentifier {
         string vcf() { return vcf_; }
         //Call the junctions annotator
         void annotate_junctions(const GtfParser& gtf_p1);
+        //Get junction name given an index
+        string get_junction_name(int i);
 };
 
 const string non_splice_region_annotation_string = "NA";

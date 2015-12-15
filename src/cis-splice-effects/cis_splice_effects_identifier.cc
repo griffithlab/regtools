@@ -164,6 +164,13 @@ void CisSpliceEffectsIdentifier::annotate_junctions(const GtfParser& gp1) {
     close_ostream();
 }
 
+//get name for the junction
+string CisSpliceEffectsIdentifier::get_junction_name(int i) {
+    stringstream name_ss;
+    name_ss << "JUNC" << setfill('0') << setw(8) << i;
+    return name_ss.str();
+}
+
 //The workhorse
 void CisSpliceEffectsIdentifier::identify() {
     //GTF parser object
