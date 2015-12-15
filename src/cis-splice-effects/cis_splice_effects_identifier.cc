@@ -38,6 +38,9 @@ void CisSpliceEffectsIdentifier::usage(ostream& out) {
     out << "\nOptions:";
     out << "\t"   << "-o STR Output file containing the aberrant splice junctions. [STDOUT]";
     out << "\n\t\t" << "-v STR Output file containing variants annotated as splice relevant (VCF format).";
+    out << "\n\t\t" << "-w INT \tWindow size in b.p to identify splicing events in. "
+        << "\n\t\t\t" << "The tool identifies events in variant.start +/- w basepairs."
+        << "\n\t\t\t" << "Default behaviour is to look at the window between previous and next exons.";
     out << "\n";
 }
 

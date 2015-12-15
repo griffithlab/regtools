@@ -3,6 +3,7 @@ pages:
 - Home: 'index.md'
 - Commands:
     - 'Index of commands': 'commands/commands.md'
+    - 'cis-splice-effects identify': 'commands/cis-splice-effects-identify.md'
     - 'junctions extract': 'commands/junctions-extract.md'
     - 'junctions annotate': 'commands/junctions-annotate.md'
     - 'variants annotate': 'commands/variants-annotate.md'

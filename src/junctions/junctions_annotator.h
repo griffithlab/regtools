@@ -70,28 +70,17 @@ struct AnnotatedJunction : BED {
                 "\t" << "exons_skipped" << "\t" << "donors_skipped" <<
                 "\t" << "anchor" <<
                 "\t" << "known_donor" << "\t" << "known_acceptor" << "\t" << "known_junction" <<
-                "\t" << "transcripts" << "\t" << "genes";
+                "\t" << "genes" << "\t" << "transcripts" << "\n";
     }
     //Print out the junction
     void print(ostream &out = std::cout) {
-        out << endl << chrom << "\t" << start <<
+        out << chrom << "\t" << start <<
                 "\t" << end << "\t" << name <<
                 "\t" << score << "\t" << strand <<
                 "\t" << splice_site << "\t" << acceptors_skipped.size() <<
                 "\t" << exons_skipped.size() << "\t" << donors_skipped.size() <<
                 "\t" << anchor <<
                 "\t" << known_donor << "\t" << known_acceptor << "\t" << known_junction;
-        //See if any transcripts overlap the junction
-        if(transcripts_overlap.size()) {
-            out << "\t";
-            for(set<string>::iterator it = transcripts_overlap.begin(); it != transcripts_overlap.end(); ++it) {
-                if(it != transcripts_overlap.begin())
-                    out << ",";
-                out << *it;
-            }
-        } else {
-            out << "\t" << "NA";
-        }
         //See if any genes overlap the junction
         if(genes_overlap.size()) {
             out << "\t";
@@ -103,6 +92,18 @@ struct AnnotatedJunction : BED {
         } else {
             out << "\t" << "NA";
         }
+        //See if any transcripts overlap the junction
+        if(transcripts_overlap.size()) {
+            out << "\t";
+            for(set<string>::iterator it = transcripts_overlap.begin(); it != transcripts_overlap.end(); ++it) {
+                if(it != transcripts_overlap.begin())
+                    out << ",";
+                out << *it;
+            }
+        } else {
+            out << "\t" << "NA";
+        }
+        out << endl;
     }
     //Clear the contents of the junction
     void reset() {
