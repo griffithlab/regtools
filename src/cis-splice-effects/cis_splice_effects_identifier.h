@@ -67,6 +67,15 @@ class CisSpliceEffectsIdentifier {
                                        annotated_variant_file_("NA"),
                                        write_annotated_variants_(false),
                                        window_size_(0) {}
+        //Destructor
+        ~CisSpliceEffectsIdentifier() {
+            if(ofs_.is_open()) {
+                ofs_.close();
+            }
+            if(ofs_junctions_bed_.is_open()) {
+                ofs_junctions_bed_.close();
+            }
+        }
         //Parse command line arguments
         void parse_options(int argc, char* argv[]);
         //Check if files exist
