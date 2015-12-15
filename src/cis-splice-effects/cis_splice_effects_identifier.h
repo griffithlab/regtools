@@ -47,6 +47,8 @@ class CisSpliceEffectsIdentifier {
         string gtf_;
         //File to write output to
         string output_file_;
+        //Aberrant splice junctions in BED12 format
+        string output_junctions_bed_;
         //File to write output to
         string annotated_variant_file_;
         //Flag to indicate whether to write output vcf
@@ -54,11 +56,14 @@ class CisSpliceEffectsIdentifier {
         //Window size to look in
         //Looks at variant.pos +/- window_size
         uint32_t window_size_;
-        //output stream to output file
+        //output stream to output annotated junctions file
         ofstream ofs_;
+        //output stream to output BED12 junctions file
+        ofstream ofs_junctions_bed_;
     public:
         //Constructor
         CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"),
+                                       output_junctions_bed_("NA"),
                                        annotated_variant_file_("NA"),
                                        write_annotated_variants_(false),
                                        window_size_(0) {}

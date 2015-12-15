@@ -59,6 +59,12 @@ void CisSpliceEffectsIdentifier::set_ostream() {
     if(!ofs_.is_open())
         throw runtime_error("Unable to open " +
                             output_file_);
+    if(output_junctions_bed_ != "NA") {
+        ofs_junctions_bed_.open(output_junctions_bed_.c_str());
+        if(!ofs_junctions_bed_.is_open())
+            throw runtime_error("Unable to open " +
+                                output_junctions_bed_);
+    }
 }
 
 //Do QC on files
@@ -79,7 +85,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     stringstream help_ss;
     char c;
-    while((c = getopt(argc, argv, "o:v:w:h")) != -1) {
+    while((c = getopt(argc, argv, "o:w:v:j:h")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
@@ -89,6 +95,9 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
                 break;
             case 'v':
                 annotated_variant_file_ = string(optarg);
+                break;
+            case 'j':
+                output_junctions_bed_ = string(optarg);
                 break;
             case 'h':
                 usage(help_ss);
@@ -122,6 +131,8 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     }
     if(output_file_ != "NA")
         cerr << "\nOutput file: " << output_file_;
+    if(output_junctions_bed_ != "NA")
+        cerr << "\nOutput junctions BED file: " << output_junctions_bed_;
     if(annotated_variant_file_ != "NA") {
         cerr << "\nAnnotated variants file: " << annotated_variant_file_;
         write_annotated_variants_ = true;
@@ -142,6 +153,8 @@ void CisSpliceEffectsIdentifier::annotate_junctions(const set<Junction>& unique_
         ja1.get_splice_site(line);
         ja1.annotate_junction_with_gtf(line);
         if(line.anchor != "DA") {
+            if(output_junctions_bed_ != "NA")
+                (*j1).print(ofs_junctions_bed_);
             line.print(ofs_);
         }
     }
