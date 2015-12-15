@@ -144,7 +144,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
 }
 
 //Call the junctions annotator
-void CisSpliceEffectsIdentifier::annotate_junctions(const set<Junction>& unique_junctions, const GtfParser& gp1) {
+void CisSpliceEffectsIdentifier::annotate_junctions(const GtfParser& gp1) {
     JunctionsAnnotator ja1(ref_, gp1);
     ja1.set_gtf_parser(gp1);
     set_ostream();
@@ -175,8 +175,6 @@ void CisSpliceEffectsIdentifier::identify() {
     if(write_annotated_variants_)
         va.open_vcf_out();
     va.set_gtf_parser(gp1);
-    //Unique set of junctions near splicing variants
-    set<Junction> unique_junctions;
     //Annotate each variant and pay attention to splicing related ones
     while(va.read_next_record()) {
         AnnotatedVariant v1 = va.annotate_record_with_transcripts();
@@ -199,16 +197,16 @@ void CisSpliceEffectsIdentifier::identify() {
                 if(window_size_ == 0) {
                     if(junctions[i].start >= v1.cis_effect_start &&
                        junctions[i].end <= v1.cis_effect_end) {
-                       unique_junctions.insert(junctions[i]);
+                       unique_junctions_.insert(junctions[i]);
                     }
                     continue;
                 }
                 if(common::coordinate_diff(junctions[i].start, v1.start) < window_size_ &&
                    common::coordinate_diff(junctions[i].end, v1.start) <= window_size_) {
-                       unique_junctions.insert(junctions[i]);
+                       unique_junctions_.insert(junctions[i]);
                 }
             }
         }
     }
-    annotate_junctions(unique_junctions, gp1);
+    annotate_junctions(gp1);
 }

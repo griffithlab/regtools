@@ -60,6 +60,8 @@ class CisSpliceEffectsIdentifier {
         ofstream ofs_;
         //output stream to output BED12 junctions file
         ofstream ofs_junctions_bed_;
+        //Unique set of junctions near splicing variants
+        set<Junction> unique_junctions_;
     public:
         //Constructor
         CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"),
@@ -98,8 +100,7 @@ class CisSpliceEffectsIdentifier {
         //Get the Input VCF
         string vcf() { return vcf_; }
         //Call the junctions annotator
-        void annotate_junctions(const set<Junction>& unique_junctions,
-                                const GtfParser& gtf_p1);
+        void annotate_junctions(const GtfParser& gtf_p1);
 };
 
 const string non_splice_region_annotation_string = "NA";
