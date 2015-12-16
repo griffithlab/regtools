@@ -22,7 +22,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
-#include <algorithm>
 #include <getopt.h>
 #include <iostream>
 #include <iomanip>
@@ -165,23 +164,13 @@ int JunctionsExtractor::add_junction(Junction j1) {
     return 0;
 }
 
-//Print one junction
-void JunctionsExtractor::print_one_junction(const Junction j1, ostream& out) {
-    out << j1.chrom <<
-        "\t" << j1.thick_start << "\t" << j1.thick_end <<
-        "\t" << j1.name << "\t" << j1.read_count << "\t" << j1.strand <<
-        "\t" << j1.thick_start << "\t" << j1.thick_end <<
-        "\t" << j1.color << "\t" << j1.nblocks <<
-        "\t" << j1.start - j1.thick_start << "," << j1.thick_end - j1.end <<
-        "\t" << "0," << j1.end - j1.thick_start << endl;
-}
-
 //Print all the junctions - this function needs work
 vector<Junction> JunctionsExtractor::get_all_junctions() {
     //Sort junctions by position
     if(!junctions_sorted_) {
         create_junctions_vector();
-        sort_junctions();
+        sort_junctions(junctions_vector_);
+        junctions_sorted_ = true;
     }
     return junctions_vector_;
 }
@@ -195,16 +184,17 @@ void JunctionsExtractor::print_all_junctions(ostream& out) {
     //Sort junctions by position
     if(!junctions_sorted_) {
         create_junctions_vector();
-        sort_junctions();
+        sort_junctions(junctions_vector_);
+        junctions_sorted_ = true;
     }
     for(vector<Junction> :: iterator it = junctions_vector_.begin();
         it != junctions_vector_.end(); it++) {
         Junction j1 = *it;
         if(j1.has_left_min_anchor && j1.has_right_min_anchor) {
             if(fout.is_open())
-                print_one_junction(j1, fout);
+                j1.print(fout);
             else
-                print_one_junction(j1, out);
+                j1.print(out);
         }
     }
     if(fout.is_open())
@@ -379,10 +369,4 @@ void JunctionsExtractor::create_junctions_vector() {
         Junction j1 = it->second;
         junctions_vector_.push_back(j1);
     }
-}
-
-//Sort all the junctions by their position
-void JunctionsExtractor::sort_junctions() {
-    sort(junctions_vector_.begin(), junctions_vector_.end(), compare_junctions);
-    junctions_sorted_ = true;
 }

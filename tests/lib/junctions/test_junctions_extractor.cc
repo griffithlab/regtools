@@ -92,7 +92,7 @@ TEST_F(JunctionsExtractTest, PrintJunction) {
         "\t" << 10000 - 9500 << "," << 10700 - 10200 <<
         "\t" << "0," << 10200 - 9500  << endl;
 
-    jc1.print_one_junction(j1, ss1);
+    j1.print(ss1);
     ASSERT_EQ(expected.str(), ss1.str());
 }
 

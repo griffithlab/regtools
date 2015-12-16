@@ -47,6 +47,8 @@ class CisSpliceEffectsIdentifier {
         string gtf_;
         //File to write output to
         string output_file_;
+        //Aberrant splice junctions in BED12 format
+        string output_junctions_bed_;
         //File to write output to
         string annotated_variant_file_;
         //Flag to indicate whether to write output vcf
@@ -54,14 +56,28 @@ class CisSpliceEffectsIdentifier {
         //Window size to look in
         //Looks at variant.pos +/- window_size
         uint32_t window_size_;
-        //output stream to output file
+        //output stream to output annotated junctions file
         ofstream ofs_;
+        //output stream to output BED12 junctions file
+        ofstream ofs_junctions_bed_;
+        //Unique set of junctions near splicing variants
+        set<Junction> unique_junctions_;
     public:
         //Constructor
         CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"),
+                                       output_junctions_bed_("NA"),
                                        annotated_variant_file_("NA"),
                                        write_annotated_variants_(false),
                                        window_size_(0) {}
+        //Destructor
+        ~CisSpliceEffectsIdentifier() {
+            if(ofs_.is_open()) {
+                ofs_.close();
+            }
+            if(ofs_junctions_bed_.is_open()) {
+                ofs_junctions_bed_.close();
+            }
+        }
         //Parse command line arguments
         void parse_options(int argc, char* argv[]);
         //Check if files exist
@@ -83,6 +99,10 @@ class CisSpliceEffectsIdentifier {
         string output_file() { return output_file_; }
         //Get the Input VCF
         string vcf() { return vcf_; }
+        //Call the junctions annotator
+        void annotate_junctions(const GtfParser& gtf_p1);
+        //Get junction name given an index
+        string get_junction_name(int i);
 };
 
 const string non_splice_region_annotation_string = "NA";

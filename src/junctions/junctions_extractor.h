@@ -25,6 +25,8 @@ DEALINGS IN THE SOFTWARE.  */
 #ifndef JUNCTIONS_EXTRACTOR_H
 #define JUNCTIONS_EXTRACTOR_H
 
+#include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include "bedFile.h"
 #include "sam.h"
@@ -80,6 +82,16 @@ struct Junction : BED {
         color = "255,0,0";
         nblocks = 2;
     }
+    //Print junction
+    void print(ostream& out) const {
+        out << chrom <<
+            "\t" << thick_start << "\t" << thick_end <<
+            "\t" << name << "\t" << read_count << "\t" << strand <<
+            "\t" << thick_start << "\t" << thick_end <<
+            "\t" << color << "\t" << nblocks <<
+            "\t" << start - thick_start << "," << thick_end - end <<
+            "\t" << "0," << end - thick_start << endl;
+    }
 };
 
 //Compare two junctions
@@ -100,6 +112,12 @@ static inline bool compare_junctions(const Junction &j1,
             return false;
     }
     return j1.thick_start < j2.thick_start;
+}
+
+//Sort a vector of junctions
+template <class CollectionType>
+inline void sort_junctions(CollectionType &junctions) {
+    sort(junctions.begin(), junctions.end(), compare_junctions);
 }
 
 //The class that deals with creating the junctions
@@ -155,8 +173,6 @@ class JunctionsExtractor {
         int usage(ostream& out = cerr);
         //Identify exon-exon junctions
         int identify_junctions_from_BAM();
-        //Print one junction
-        void print_one_junction(const Junction j1, ostream& out = cout);
         //Print all the junctions
         void print_all_junctions(ostream& out = cout);
         //Get a vector of all the junctions
@@ -167,8 +183,6 @@ class JunctionsExtractor {
         int parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *aln);
         //Check if junction satisfies qc
         bool junction_qc(Junction &j1);
-        //Sort all the junctions by their position
-        void sort_junctions();
         //Create the junctions vector from the map
         void create_junctions_vector();
         //Pull out the cigar string from the read
