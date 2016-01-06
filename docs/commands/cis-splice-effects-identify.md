@@ -1,3 +1,5 @@
+[csei]: ../images/csei_examples.png
+
 ###Synopsis
 The `cis-splice-effects identify` command is used to identify splicing misregulation events. This command takes in a list of variants in the VCF format and RNAseq alignments produced with a splice-aware aligner in the BAM format. The tool then proceeds to identify non-canonical splicing junctions near the variant sites.
 
@@ -24,3 +26,6 @@ The `cis-splice-effects identify` command is used to identify splicing misregula
 ###Output
 For an explanation of the annotated junctions that are identified by this command please refer to the output of the `junctions annotate` command [here](junctions-annotate.md#output)
 For an explanation of the annotated variants that are identified by this command when using the -v option, please refer to the output of the `variants annotate` command [here](variants-annotate.md#output)
+
+###Examples
+![cis-splice-effects identify example][csei]
