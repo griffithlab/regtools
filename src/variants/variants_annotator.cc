@@ -26,18 +26,21 @@ DEALINGS IN THE SOFTWARE.  */
 #include "common.h"
 #include "hts.h"
 #include "variants_annotator.h"
+#include <algorithm>
 #include <cstdlib>
 #include <stdexcept>
 
 //Usage statement for this tool
 int VariantsAnnotator::usage(ostream& out) {
     out << "\nUsage:\t\t" << "regtools variants annotate [options] variants.vcf annotations.gtf";
-    out << "\n\t\t" << "-e INT\tMinimum distance from the start/end of an exon "
+    out << "\n\t\t" << "-e INT\tMaximum distance from the start/end of an exon "
                        "\n\t\t\tto annotate a variant as relevant to splicing, the variant "
                        "\n\t\t\tis in exonic space, i.e a coding variant. [3]";
-    out << "\n\t\t" << "-i INT\tMinimum distance from the start/end of an exon "
+    out << "\n\t\t" << "-i INT\tMaximum distance from the start/end of an exon "
                        "\n\t\t\tto annotate a variant as relevant to splicing, the variant "
                        "\n\t\t\tis in intronic space. [2]";
+    out << "\n\t\t" << "-I\tAnnotate variants in intronic space within a transcript(not to be used with -i).";
+    out << "\n\t\t" << "-E\tAnnotate variants in exonic space within a transcript(not to be used with -e).";
     out << "\n\t\t" << "-o\tFile to write output to. [STDOUT]";
     out << "\n\t\t" << "-S\tDon't skip single exon transcripts.";
     out << "\n";
@@ -49,13 +52,19 @@ int VariantsAnnotator::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int16_t c;
     stringstream help_ss;
-    while((c = getopt(argc, argv, "e:hi:o:S")) != -1) {
+    while((c = getopt(argc, argv, "e:Ehi:Io:S")) != -1) {
         switch(c) {
             case 'i':
                 intronic_min_distance_ = atoi(optarg);
                 break;
             case 'e':
                 exonic_min_distance_ = atoi(optarg);
+                break;
+            case 'I':
+                all_intronic_space_ = true;
+                break;
+            case 'E':
+                all_exonic_space_ = true;
                 break;
             case 'o':
                 vcf_out_ = string(optarg);
@@ -85,8 +94,12 @@ int VariantsAnnotator::parse_options(int argc, char *argv[]) {
     cerr << "\nVariant file: " << vcf_;
     cerr << "\nGTF file: " << gtffile_;
     cerr << "\nOutput vcf file: " << vcf_out_;
-    cerr << "\nIntronic min distance: " << intronic_min_distance_;
-    cerr << "\nExonic min distance: " << exonic_min_distance_;
+    if(!all_intronic_space_) {
+        cerr << "\nIntronic min distance: " << intronic_min_distance_;
+    }
+    if(!all_exonic_space_) {
+        cerr << "\nExonic min distance: " << exonic_min_distance_;
+    }
     if(!skip_single_exon_genes_)
         cerr << "\nNot skipping single exon genes.";
     if(vcf_out_ != "NA")
@@ -228,83 +241,182 @@ void VariantsAnnotator::set_variant_cis_effect_limits(const vector<BED>& exons,
     }
 }
 
+//Overlap splice region in the negative strand
+void VariantsAnnotator::get_variant_overlaps_spliceregion_ns(const vector<BED>& exons,
+                                                      AnnotatedVariant& variant) {
+    variant.score = "-1";
+    variant.annotation = "non_splice_region";
+    //check if variant inside transcript coords for negative strand
+    if(exons[exons.size() - 1].start > variant.end ||
+       exons[0].end < variant.end) {
+        return;
+    }
+    for(uint32_t i = 0; i < exons.size(); i++) {
+        if(all_exonic_space_) {
+            if(variant.end >= exons[i].start && variant.end <= exons[i].end) {
+                variant.score =  common::num_to_str(min(variant.end - exons[i].start,
+                                                        exons[i].end - variant.end));
+                variant.annotation = "exonic";
+                return;
+            }
+        }
+        if(all_intronic_space_) {
+            if(i != 0 && variant.end >= exons[i].start && variant.end <= exons[i].end) {
+                variant.score =  common::num_to_str(min(variant.end - exons[i].end,
+                                                        exons[i-1].start - variant.end));
+                variant.annotation = "intronic";
+                return;
+            }
+        }
+        {
+            //the rest of the exons are outside the junction - ns
+            if(exons[i].end + intronic_min_distance_ < variant.end) {
+                return;
+            }
+            //exonic near start
+            if(variant.end >= exons[i].start &&
+            variant.end <= exons[i].end &&
+            variant.end <= exons[i].start + exonic_min_distance_) {
+                variant.score =  common::num_to_str(min(variant.end - exons[i].start,
+                                                        exons[i].end - variant.end));
+                variant.annotation = "splicing_exonic";
+                set_variant_cis_effect_limits(exons, variant, i);
+                return;
+            }
+            //intronic near start (make sure not first/last exon.)
+            //make sure this isn't exonic in next exon
+            if(variant.end < exons[i].start &&
+            variant.end >= exons[i].start - intronic_min_distance_ &&
+            i != exons.size() - 1 && variant.end > exons[i+1].end) {
+                variant.score =  common::num_to_str(min(variant.end - exons[i+1].end,
+                                                        exons[i].start - variant.end));
+                variant.annotation = "splicing_intronic";
+                set_variant_cis_effect_limits(exons, variant, i);
+                return;
+            }
+            //exonic near end
+            if(variant.end <= exons[i].end &&
+            variant.end >= exons[i].start &&
+            variant.end >= exons[i].end - exonic_min_distance_) {
+                variant.score =  common::num_to_str(min(variant.end - exons[i].start,
+                                                        exons[i].end - variant.end));
+                variant.annotation = "splicing_exonic";
+                set_variant_cis_effect_limits(exons, variant, i);
+                return;
+            }
+            //intronic near end (make sure not first/last exon.)
+            //make sure this isn't exonic in prev exon
+            if(variant.end > exons[i].end &&
+            variant.end <= exons[i].end + intronic_min_distance_ &&
+            i != 0 && variant.end < exons[i-1].start) {
+                variant.score =  common::num_to_str(min(variant.end - exons[i].end,
+                                                        exons[i-1].start - variant.end));
+                variant.annotation = "splicing_intronic";
+                set_variant_cis_effect_limits(exons, variant, i);
+                return;
+            }
+        }
+    }
+    return;
+}
+
+//Overlap splice region in the positive strand
+void VariantsAnnotator::get_variant_overlaps_spliceregion_ps(const vector<BED>& exons,
+                                                             AnnotatedVariant& variant) {
+    variant.score = "-1";
+    variant.annotation = "non_splice_region";
+    //check if variant inside transcript coords for positive strand
+    if(exons[0].start > variant.end ||
+       exons[exons.size() - 1].end < variant.end) {
+        return;
+    }
+    for(uint32_t i = 0; i < exons.size(); i++) {
+        if(all_exonic_space_) {
+            if(all_exonic_space_ && variant.end >= exons[i].start &&
+               variant.end <= exons[i].end) {
+                variant.score =  common::num_to_str(min(variant.end - exons[i].start,
+                                                        exons[i].end - variant.end));
+                variant.annotation = "exonic";
+                return;
+            }
+        }
+        if(all_intronic_space_) {
+            if(all_intronic_space_ && i != exons.size() - 1 &&
+               variant.end >= exons[i].end && variant.end <= exons[i+1].start) {
+                variant.score =  common::num_to_str(min(variant.end - exons[i].end,
+                                                        exons[i+1].start - variant.end));
+                variant.annotation = "intronic";
+                return;
+            }
+        }
+        {
+            //the rest of the exons are outside the junction - ps
+            if(exons[i].start - intronic_min_distance_ > variant.end) {
+                return;
+            }
+            //exonic near start
+            if(variant.end >= exons[i].start &&
+            variant.end <= exons[i].end &&
+            variant.end <= exons[i].start + exonic_min_distance_) {
+                variant.score =  common::num_to_str(min(variant.end - exons[i].start,
+                                                        exons[i].end - variant.end));
+                variant.annotation = "splicing_exonic";
+                set_variant_cis_effect_limits(exons, variant, i);
+                return;
+            }
+            //intronic near start (make sure not first/last exon.)
+            //make sure this isn't exonic in prev exon
+            if(variant.end < exons[i].start &&
+            variant.end >= exons[i].start - intronic_min_distance_ &&
+            i != 0 && variant.end > exons[i-1].end) {
+                variant.score =  common::num_to_str(min(variant.end - exons[i-1].end,
+                                                        exons[i].start - variant.end));
+                variant.annotation = "splicing_intronic";
+                set_variant_cis_effect_limits(exons, variant, i);
+                return;
+            }
+            //exonic near end
+            if(variant.end <= exons[i].end &&
+            variant.end >= exons[i].start &&
+            variant.end >= exons[i].end - exonic_min_distance_) {
+                variant.score =  common::num_to_str(min(variant.end - exons[i].start,
+                                                        exons[i].end - variant.end));
+                variant.annotation = "splicing_exonic";
+                set_variant_cis_effect_limits(exons, variant, i);
+                return;
+            }
+            //intronic near end (make sure not first/last exon.)
+            //make sure this isn't exonic in next exon
+            if(variant.end > exons[i].end &&
+            variant.end <= exons[i].end + intronic_min_distance_ &&
+            i != exons.size() - 1 && variant.end < exons[i+1].start) {
+                variant.score =  common::num_to_str(min(variant.end - exons[i].end,
+                                                        exons[i+1].start - variant.end));
+                variant.annotation = "splicing_intronic";
+                set_variant_cis_effect_limits(exons, variant, i);
+                return;
+            }
+        }
+    }
+    return;
+}
+
 //Given a transcript ID and variant position,
 //check if the variant is in a splice relevant region
 //relevance depends on the user params
 //intronic_min_distance_ and exonic_min_distance_
 //The zero-based arithmetic is always fun.
 //The variant object is one-based.
-//GTF is one based
+//GTF i.e the exon is one based
 void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exons,
                                                       AnnotatedVariant& variant) {
-    variant.score = "-1";
-    variant.annotation = "non_splice_region";
     string transcript_strand = exons[0].strand;
-    //check if variant inside transcript coords for positive strand
-    if(transcript_strand == "+" &&
-       exons[0].start - intronic_min_distance_ > variant.start &&
-       exons[exons.size() - 1].end + intronic_min_distance_ < variant.start) {
-        return;
-    }
-    //check if variant inside transcript coords for negative strand
-    if(transcript_strand == "-" &&
-       exons[exons.size() - 1].start - intronic_min_distance_ > variant.start &&
-       exons[0].end + intronic_min_distance_ < variant.start) {
-        return;
-    }
-    for(uint32_t i = 0; i < exons.size(); i++) {
-        //the rest of the exons are outside the junction - ps
-        if(transcript_strand == "+" && exons[i].start - intronic_min_distance_ > variant.end) {
-            return;
-        }
-        //the rest of the exons are outside the junction - ns
-        if(transcript_strand == "-" && exons[i].end + intronic_min_distance_ < variant.end) {
-            return;
-        }
-        //exonic near start
-        if(variant.end >= exons[i].start &&
-                variant.end <= exons[i].start + exonic_min_distance_) {
-            variant.score =  common::num_to_str(variant.end - exons[i].start);
-            variant.annotation = "splicing_exonic";
-            set_variant_cis_effect_limits(exons, variant, i);
-            return;
-        }
-        //intronic near start (make sure not first/last exon.)
-        if(variant.end < exons[i].start &&
-                variant.end >= exons[i].start - intronic_min_distance_) {
-            //outside transcript - PS
-            if(i == 0 && transcript_strand == "+")
-                return;
-            //outside transcript - NS
-            if(i == exons.size() - 1  && transcript_strand == "-")
-                return;
-            variant.score = common::num_to_str(exons[i].start - variant.end);
-            variant.annotation = "splicing_intronic";
-            set_variant_cis_effect_limits(exons, variant, i);
-            return;
-        }
-        //exonic near end
-        if(variant.end <= exons[i].end &&
-                variant.end >= exons[i].end - exonic_min_distance_) {
-            variant.score = common::num_to_str(exons[i].end - variant.end);
-            variant.annotation = "splicing_exonic";
-            set_variant_cis_effect_limits(exons, variant, i);
-            return;
-        }
-        //intronic near end (make sure not first/last exon.)
-        if(variant.end > exons[i].end &&
-                variant.end <= exons[i].end + intronic_min_distance_) {
-            //outside transcript - PS
-            if(i == exons.size() - 1  && transcript_strand == "+")
-                return;
-            //outside transcript - NS
-            if(i == 0  && transcript_strand == "-")
-                return;
-            variant.score = common::num_to_str(variant.end - exons[i].end);
-            variant.annotation = "splicing_intronic";
-            set_variant_cis_effect_limits(exons, variant, i);
-            return;
-        }
+    if(transcript_strand == "+") {
+        get_variant_overlaps_spliceregion_ps(exons, variant);
+    } else if (transcript_strand == "-") {
+        get_variant_overlaps_spliceregion_ns(exons, variant);
+    } else {
+        throw runtime_error("Unknown strand " + transcript_strand);
     }
     return;
 }

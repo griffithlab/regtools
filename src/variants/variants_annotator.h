@@ -69,6 +69,10 @@ class VariantsAnnotator {
         GtfParser gtf_;
         //Output VCF file
         string vcf_out_;
+        //Flag set by the -I option
+        bool all_intronic_space_;
+        //Flag set by the -E option
+        bool all_exonic_space_;
         //Minimum distance of a variant from
         //edge of an exon(intronic) to be considered
         //a splicing variant
@@ -93,6 +97,8 @@ class VariantsAnnotator {
         //Default constructor
         VariantsAnnotator() : vcf_("NA"), gtffile_("NA"),
                               vcf_out_("NA"),
+                              all_intronic_space_(false),
+                              all_exonic_space_(false),
                               intronic_min_distance_(2),
                               exonic_min_distance_(3),
                               skip_single_exon_genes_(true),
@@ -105,6 +111,8 @@ class VariantsAnnotator {
         VariantsAnnotator(string vcf_f, string gtf_f, string vcf_out) : vcf_(vcf_f),
                               gtffile_(gtf_f),
                               vcf_out_(vcf_out),
+                              all_intronic_space_(false),
+                              all_exonic_space_(false),
                               intronic_min_distance_(2),
                               exonic_min_distance_(3),
                               skip_single_exon_genes_(true),
@@ -148,6 +156,12 @@ class VariantsAnnotator {
         //intronic_min_distance_ and exonic_min_distance_
         //stores result in the AnnotatedVariant object
         void get_variant_overlaps_spliceregion(const vector<BED> &exons,
+                                           AnnotatedVariant  &variant);
+        //Same as above for positive strand
+        void get_variant_overlaps_spliceregion_ps(const vector<BED> &exons,
+                                           AnnotatedVariant  &variant);
+        //Same as above for negative strand
+        void get_variant_overlaps_spliceregion_ns(const vector<BED> &exons,
                                            AnnotatedVariant  &variant);
         //Read next record of VCF.
         bool read_next_record();
