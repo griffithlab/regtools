@@ -32,13 +32,14 @@ endif()
 
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/gtf/")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/junctions/")
+add_subdirectory ("${PROJECT_SOURCE_DIR}/src/cis-ase/")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/cis-splice-effects/")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/variants/")
 
 #The main executable
 add_executable (regtools src/regtools.cc)
 target_link_libraries (regtools junctions variants
-                       bedtools gtf htslib cis-splice-effects)
+                       bedtools gtf htslib cis-ase cis-splice-effects)
 
 #Testing
 enable_testing()
