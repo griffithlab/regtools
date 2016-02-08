@@ -25,6 +25,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <iostream>
 #include <getopt.h>
 #include <stdexcept>
+#include "common.h"
 #include "cis_splice_effects_identifier.h"
 
 using namespace std;
