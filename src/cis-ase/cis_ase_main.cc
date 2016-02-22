@@ -25,14 +25,18 @@ DEALINGS IN THE SOFTWARE.  */
 #include <iostream>
 #include <getopt.h>
 #include <stdexcept>
+#include "cis_ase_identifier.h"
 #include "common.h"
 
 using namespace std;
 
 //Main command for identify
 int cis_ase_identify(int argc, char* argv[]) {
+    CisAseIdentifier cai1;
     try {
         cout << "in identify";
+        cai1.parse_options(argc, argv);
+        cai1.run();
     } catch(const common::cmdline_help_exception& e) {
         cerr << e.what();
         return 0;

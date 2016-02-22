@@ -10,4 +10,5 @@ include_directories(../gtf/
                     ../junctions/)
 
 add_library(cis-ase
+    cis_ase_identifier.cc
     cis_ase_main.cc)
