@@ -21,6 +21,7 @@ include_directories("${PROJECT_BINARY_DIR}")
 
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/utils/bedtools/")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/utils/htslib/")
+add_subdirectory ("${PROJECT_SOURCE_DIR}/src/utils/samtools/")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/utils/gtest-1.7.0/")
 
 # Enable warnings after compiling third party dependencies.
@@ -39,7 +40,7 @@ add_subdirectory ("${PROJECT_SOURCE_DIR}/src/variants/")
 #The main executable
 add_executable (regtools src/regtools.cc)
 target_link_libraries (regtools junctions variants
-                       bedtools gtf htslib cis-ase cis-splice-effects)
+                       cis-ase bedtools gtf htslib samtools cis-splice-effects )
 
 #Testing
 enable_testing()

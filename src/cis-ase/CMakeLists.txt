@@ -5,10 +5,13 @@ include_directories(../gtf/
                     ../utils/bedtools/gzstream/
                     ../utils/bedtools/fileType/
                     ../utils/bedtools/stringUtilities/
+                    ../utils/htslib/
                     ../utils/htslib/htslib/
+                    ../utils/samtools/
                     ../variants/
                     ../junctions/)
 
 add_library(cis-ase
     cis_ase_identifier.cc
-    cis_ase_main.cc)
+    cis_ase_main.cc
+    bam_plcmd_regtools.c)
