@@ -36,13 +36,16 @@ DEALINGS IN THE SOFTWARE.  */
 
 using namespace std;
 
-extern "C" void *bed_read(const char *fn);
-extern "C" int mplp_get_ref(mplp_aux_t *ma, int tid,  char **ref, int *ref_len);
-extern "C" void group_smpl(mplp_pileup_t *m, bam_sample_t *sm, kstring_t *buf,
-                           int n, char *const*fn, int *n_plp,
-                           const bam_pileup1_t **plp, int ignore_rg);
-extern "C" int bed_overlap(const void *_h, const char *chr, int beg, int end);
-extern "C" int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn, mplp_aux_t **data, bcf_callaux_t *bca, bcf_callret1_t *bcr, bcf_call_t *bc, mplp_pileup_t *gplp, htsFile *bcf_fp, bcf_hdr_t *bcf_hdr, bam_sample_t *sm, bam_hdr_t **h, mplp_ref_t *mp_ref);
+extern "C" {
+    void *bed_read(const char *fn);
+    void bed_destroy(void *_h);
+    int mplp_get_ref(mplp_aux_t *ma, int tid,  char **ref, int *ref_len);
+    void group_smpl(mplp_pileup_t *m, bam_sample_t *sm, kstring_t *buf,
+            int n, char *const*fn, int *n_plp,
+            const bam_pileup1_t **plp, int ignore_rg);
+    int bed_overlap(const void *_h, const char *chr, int beg, int end);
+    int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn, mplp_aux_t **data, bcf_callaux_t *bca, bcf_callret1_t *bcr, bcf_call_t *bc, mplp_pileup_t *gplp, htsFile *bcf_fp, bcf_hdr_t *bcf_hdr, bam_sample_t *sm, bam_hdr_t **h, mplp_ref_t *mp_ref);
+}
 
 //Workhorse for "cis-ase identify"
 class CisAseIdentifier {
