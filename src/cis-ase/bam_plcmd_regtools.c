@@ -202,36 +202,6 @@ int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn,
             }
         }
     }
-    // clean up
-/*    free(bc.tmp.s);
-    bcf_destroy1(bcf_rec);
-    if (bcf_fp)
-    {
-        hts_close(bcf_fp);
-        bcf_hdr_destroy(bcf_hdr);
-        bcf_call_destroy(bca);
-        free(bc.PL);
-        free(bc.DP4);
-        free(bc.ADR);
-        free(bc.ADF);
-        free(bc.fmt_arr);
-        free(bcr);
-    }
-    if (pileup_fp && conf->output_fname) fclose(pileup_fp);
-    bam_smpl_destroy(sm); free(buf.s);
-    for (i = 0; i < gplp.n; ++i) free(gplp.plp[i]);
-    free(gplp.plp); free(gplp.n_plp); free(gplp.m_plp);
     bcf_call_del_rghash(rghash);
-    bam_mplp_destroy(iter);
-    bam_hdr_destroy(h);
-    for (i = 0; i < n; ++i) {
-        sam_close(data[i]->fp);
-        if (data[i]->iter) hts_itr_destroy(data[i]->iter);
-        free(data[i]);
-    }
-    free(data); free(plp); free(n_plp);
-    free(mp_ref.ref[0]);
-    free(mp_ref.ref[1]);
-    */
     return 0;
 }

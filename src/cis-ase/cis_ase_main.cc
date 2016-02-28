@@ -34,7 +34,6 @@ using namespace std;
 int cis_ase_identify(int argc, char* argv[]) {
     CisAseIdentifier cai1;
     try {
-        cout << "in identify";
         cai1.parse_options(argc, argv);
         cai1.run();
     } catch(const common::cmdline_help_exception& e) {

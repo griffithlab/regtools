@@ -210,6 +210,37 @@ void CisAseIdentifier::run_mpileup() {
             bcf_write1(bcf_fp, bcf_hdr, bcf_rec);
         }
     }
+
+    // clean up
+    if(alignment1)
+        free(alignment1);
+    free(bc.tmp.s);
+    bcf_destroy1(bcf_rec);
+    if (bcf_fp)
+    {
+        hts_close(bcf_fp);
+        bcf_hdr_destroy(bcf_hdr);
+        bcf_call_destroy(bca);
+        free(bc.PL);
+        free(bc.DP4);
+        free(bc.ADR);
+        free(bc.ADF);
+        free(bc.fmt_arr);
+        free(bcr);
+    }
+    bam_smpl_destroy(sm); free(buf.s);
+    for (i = 0; i < gplp.n; ++i) free(gplp.plp[i]);
+    free(gplp.plp); free(gplp.n_plp); free(gplp.m_plp);
+    bam_mplp_destroy(iter);
+    bam_hdr_destroy(h);
+    for (i = 0; i < n_samples; ++i) {
+        sam_close(data[i]->fp);
+        if (data[i]->iter) hts_itr_destroy(data[i]->iter);
+        free(data[i]);
+    }
+    free(data); free(plp); free(n_plp);
+    free(mp_ref.ref[0]);
+    free(mp_ref.ref[1]);
 }
 
 //Free relevant pointers
@@ -220,16 +251,17 @@ void CisAseIdentifier::cleanup() {
         bcf_close(somatic_vcf_fh_);
     if(somatic_vcf_record_)
         bcf_destroy(somatic_vcf_record_);
+    if(mplp_conf_.fai)
+        fai_destroy(mplp_conf_.fai);
+    if (mplp_conf_.bed)
+        bed_destroy(mplp_conf_.bed);
 }
 
 //The workhorse
 void CisAseIdentifier::run() {
-    cout << 1 << endl;
     open_somatic_vcf();
     set_mpileup_conf();
-    cout << 2 << endl;
     run_mpileup();
-    cout << 3 << endl;
     cleanup();
 }
 
