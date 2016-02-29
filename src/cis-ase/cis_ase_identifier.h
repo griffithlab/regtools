@@ -88,6 +88,7 @@ class CisAseIdentifier {
             if(ofs_.is_open()) {
                 ofs_.close();
             }
+            bcf_destroy(somatic_vcf_record_);
         }
         //Parse command line arguments
         void parse_options(int argc, char* argv[]);
