@@ -264,6 +264,7 @@ void CisAseIdentifier::cleanup() {
 
 //The workhorse
 void CisAseIdentifier::run() {
+    somatic_vcf_record_ = bcf_init();
     open_somatic_vcf();
     set_mpileup_conf();
     run_mpileup();

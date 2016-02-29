@@ -80,15 +80,12 @@ class CisAseIdentifier {
                              output_file_("NA"),
                              somatic_vcf_fh_(NULL),
                              somatic_vcf_header_(NULL),
-                             somatic_vcf_record_(NULL) {
-            somatic_vcf_record_ = bcf_init();
-        }
+                             somatic_vcf_record_(NULL) {}
         //Destructor
         ~CisAseIdentifier() {
             if(ofs_.is_open()) {
                 ofs_.close();
             }
-            bcf_destroy(somatic_vcf_record_);
         }
         //Parse command line arguments
         void parse_options(int argc, char* argv[]);
