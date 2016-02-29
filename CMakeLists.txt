@@ -40,7 +40,7 @@ add_subdirectory ("${PROJECT_SOURCE_DIR}/src/variants/")
 #The main executable
 add_executable (regtools src/regtools.cc)
 target_link_libraries (regtools junctions variants
-                       cis-ase bedtools gtf htslib samtools cis-splice-effects )
+                       cis-ase bedtools gtf samtools htslib cis-splice-effects )
 
 #Testing
 enable_testing()
