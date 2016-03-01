@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.  */
 
 #include <stdexcept>
 #include <sstream>
+#include <cmath>
 #include <cstring>
 #include <htslib/sam.h>
 #include "bam2bcf.h"
@@ -39,6 +40,9 @@ DEALINGS IN THE SOFTWARE.  */
 #include "samtools.h"
 
 using namespace std;
+
+//RR, RA1, A1A1, RA2, A1A2, A2A2, RA3, A1A3, A2A3, A3A3, RA4 ..
+bool gt_het[15] = {0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0};
 
 //Usage for this tool
 void CisAseIdentifier::usage(ostream& out) {
@@ -208,9 +212,26 @@ void CisAseIdentifier::run_mpileup() {
             bcf_clear1(bcf_rec);
             bcf_call2bcf(&bc, bcf_rec, bcr, conf->fmt_flag, 0, 0);
 
-            printf(" n_alleles %d ", bc.n_alleles);
-            for (i=0; i< bc.n_alleles * (bc.n_alleles + 1) / 2; i++)
-                printf(" PL %d ", bc.PL[i]);
+            //disregard sites with more than 5 alleles in the VCF
+            double sum_lik = 0, max_het_lik = 0;
+            if(bc.n_alleles <= 5) {
+                for (i=0; i< bc.n_alleles * (bc.n_alleles + 1) / 2; i++) {
+                    //convert back from phred
+                    double lik = pow(10.0, (-1.0 / 10.0 * bc.PL[i]));
+                    //printf(" PL %d lik %f", bc.PL[i], lik);
+                    sum_lik += lik;
+                    if(gt_het[i]) {
+                        if (lik > max_het_lik) {
+                            max_het_lik = lik;
+                        }
+                    }
+                }
+                if(max_het_lik/sum_lik >= 0.5) {
+                    printf("\nchr, position, total, max %s %d %f %f", bcf_hdr_id2name(bcf_hdr, bcf_rec->rid),
+                           pos, sum_lik, max_het_lik);
+                }
+            }
+
             printf("\n");
             bcf_write1(bcf_fp, bcf_hdr, bcf_rec);
         }
