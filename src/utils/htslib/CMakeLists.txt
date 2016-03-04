@@ -10,6 +10,7 @@ set(SOURCES
     kstring.c
     knetfile.c
     md5.c
+    synced_bcf_reader.c
     tbx.c
     vcf.c
     sam.c)

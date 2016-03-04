@@ -52,6 +52,8 @@ class CisAseIdentifier {
     private:
         //VCF file with somatic variants
         string somatic_vcf_;
+        //VCF file with polymorphisms
+        string poly_vcf_;
         //Tumor RNAseq alignments
         string tumor_rna_;
         //Tumor DNA alignments
@@ -101,6 +103,8 @@ class CisAseIdentifier {
         void run_mpileup();
         //Set the configuration for mpileup
         void set_mpileup_conf();
+        //Get the SNPs within relevant window
+        void get_snps_in_window(string window);
         //Free relevant pointers
         void cleanup();
 };

@@ -32,8 +32,10 @@ DEALINGS IN THE SOFTWARE.  */
 #include <cmath>
 #include <cstring>
 #include <htslib/sam.h>
+#include <htslib/synced_bcf_reader.h>
 #include "bam2bcf.h"
 #include "bam_plcmd.h"
+#include "common.h"
 #include "cis_ase_identifier.h"
 #include "hts.h"
 #include "sample.h"
@@ -47,7 +49,7 @@ bool gt_het[15] = {0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0};
 //Usage for this tool
 void CisAseIdentifier::usage(ostream& out) {
     out << "\nUsage:\t\t"
-        << "regtools cis-splice-effects identify [options] somatic_variants.vcf"
+        << "regtools cis-splice-effects identify [options] somatic_variants.vcf polymorphism.vcf"
         << " tumor_dna_alignments.bam tumor_rna_alignments.bam ref.fa annotations.gtf";
     out << "\nOptions:";
     out << "\t"   << "-o STR Output file containing the aberrant splice junctions with annotations. [STDOUT]";
@@ -73,8 +75,9 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
                 throw runtime_error("\nError parsing inputs!(1)");
         }
     }
-    if(argc - optind >= 5) {
+    if(argc - optind >= 6) {
         somatic_vcf_ = string(argv[optind++]);
+        poly_vcf_ = string(argv[optind++]);
         tumor_dna_ = string(argv[optind++]);
         tumor_rna_ = string(argv[optind++]);
         ref_ = string(argv[optind++]);
@@ -90,6 +93,7 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
         throw runtime_error("\nError parsing inputs!(2)\n");
     }
     cerr << "\nSomatic variants: " << somatic_vcf_;
+    cerr << "\nPolymorphisms: " << poly_vcf_;
     cerr << "\nTumor DNA: " << tumor_dna_;
     cerr << "\nTumor RNA: " << tumor_rna_;
     cerr << "\nReference fasta file: " << ref_;
@@ -192,7 +196,7 @@ void CisAseIdentifier::run_mpileup() {
     int ret;
 
     // begin pileup
-    while ( (ret=bam_mplp_auto(iter, &tid, &pos, n_plp, plp)) > 0) {
+    while ((ret=bam_mplp_auto(iter, &tid, &pos, n_plp, plp)) > 0) {
         if (conf->reg && (pos < beg0 || pos >= end0)) continue; // out of the region requested
         if(!h->target_name) printf("\nNot defined target\n");
         if (conf->bed && tid >= 0 && !bed_overlap(conf->bed, h->target_name[tid], pos, pos+1)) { continue; }
@@ -226,14 +230,15 @@ void CisAseIdentifier::run_mpileup() {
                         }
                     }
                 }
+                string window = common::create_region_string(h->target_name[tid], pos - 1000, pos + 1000);
+                cout << endl << " Window is " << window << endl;
+                get_snps_in_window(window);
                 if(max_het_lik/sum_lik >= 0.5) {
                     printf("\nchr, position, total, max %s %d %f %f", bcf_hdr_id2name(bcf_hdr, bcf_rec->rid),
                            pos, sum_lik, max_het_lik);
                 }
             }
-
-            printf("\n");
-            bcf_write1(bcf_fp, bcf_hdr, bcf_rec);
+            //bcf_write1(bcf_fp, bcf_hdr, bcf_rec);
         }
     }
 
@@ -267,6 +272,30 @@ void CisAseIdentifier::run_mpileup() {
     free(data); free(plp); free(n_plp);
     free(mp_ref.ref[0]);
     free(mp_ref.ref[1]);
+}
+
+//Get the SNPs within relevant window
+void CisAseIdentifier::get_snps_in_window(string region) {
+    htsFile *bcf_fp = NULL;
+    bcf_hdr_t *bcf_hdr = NULL;
+    bcf_fp = bcf_open(poly_vcf_.c_str(), "r");
+    if(bcf_fp == NULL) {
+        throw std::runtime_error("Unable to open file.");
+    }
+    bcf_hdr = bcf_hdr_read(bcf_fp);
+    if(bcf_hdr == NULL) {
+        throw std::runtime_error("Unable to read header.");
+    }
+    bcf_srs_t *sr = bcf_sr_init();
+    bcf_sr_set_regions(sr, region.c_str(), 0);
+    bcf_sr_add_reader(sr, poly_vcf_.c_str());
+    std::cout << "chromosome\tposition\tnum_alleles" << std::endl;
+    while (bcf_sr_next_line(sr)) {
+        bcf1_t *line = bcf_sr_get_line(sr, 0);
+        cout << bcf_hdr_id2name(bcf_hdr, line->rid) \
+            << "\t" << line->pos \
+            << "\t" << line->n_allele << endl;
+    }
 }
 
 //Free relevant pointers

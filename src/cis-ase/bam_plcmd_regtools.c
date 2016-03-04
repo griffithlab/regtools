@@ -172,7 +172,9 @@ int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn,
         for (i=0; i<sm->n; i++)
             bcf_hdr_add_sample(bcf_hdr, sm->smpl[i]);
         bcf_hdr_add_sample(bcf_hdr, NULL);
-        bcf_hdr_write(bcf_fp, bcf_hdr);
+        //This needed to be extracted out from the vcf_hdr_write
+        if ( bcf_hdr->dirty ) bcf_hdr_sync(bcf_hdr);
+        //bcf_hdr_write(bcf_fp, bcf_hdr);
 
         // Initialise the calling algorithm
         bca->rghash = rghash;
