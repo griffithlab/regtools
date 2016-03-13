@@ -73,12 +73,14 @@ int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn,
                              bcf_hdr_t *bcf_hdr,
                              bam_sample_t *sm,
                              bam_hdr_t **h,
-                             mplp_ref_t *mp_ref
+                             mplp_ref_t *mp_ref,
+                             int *beg0,
+                             int *end0
                              )
 {
     extern void *bcf_call_add_rg(void *rghash, const char *hdtext, const char *list);
     extern void bcf_call_del_rghash(void *rghash);
-    int i, beg0 = 0, end0 = INT_MAX, max_depth, max_indel_depth;
+    int i, max_depth, max_indel_depth;
     void *rghash = NULL;
 
     if (n == 0) {
@@ -125,7 +127,7 @@ int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn,
                 fprintf(stderr, "[E::%s] fail to parse region '%s' with %s\n", __func__, conf->reg, fn[i]);
                 exit(EXIT_FAILURE);
             }
-            if (i == 0) beg0 = data[i]->iter->beg, end0 = data[i]->iter->end;
+            if (i == 0) *beg0 = data[i]->iter->beg, *end0 = data[i]->iter->end;
             hts_idx_destroy(idx);
         }
         else
@@ -148,6 +150,7 @@ int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn,
     gplp->plp = calloc(sm->n, sizeof(bam_pileup1_t*));
 
     fprintf(stderr, "[%s] %d samples in %d input files\n", __func__, sm->n, n);
+    fprintf(stderr, "[%s]\n", conf->reg);
     // write the VCF header
     if (conf->flag & MPLP_BCF)
     {

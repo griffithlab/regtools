@@ -122,7 +122,7 @@ namespace common {
 
     //Create a region string using chr, start, end
     //this is of the form chr:start-end
-    inline std::string create_region_string(char* chr,
+    inline std::string create_region_string(const char* chr,
                                         int start, int end) {
         stringstream ss1;
         ss1 << chr << ":" << start << "-" << end;
