@@ -53,10 +53,11 @@ bool gt_het[15] = {0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0};
 //Usage for this tool
 void CisAseIdentifier::usage(ostream& out) {
     out << "\nUsage:\t\t"
-        << "regtools cis-splice-effects identify [options] somatic_variants.vcf polymorphism.vcf"
+        << "regtools cis-ase identify [options] somatic_variants.vcf polymorphism.vcf"
         << " tumor_dna_alignments.bam tumor_rna_alignments.bam ref.fa annotations.gtf";
     out << "\nOptions:";
     out << "\t"   << "-o STR Output file containing the aberrant splice junctions with annotations. [STDOUT]";
+    out << "\t"   << "-d INT Minimum read-depth to consider a variant to be somatic/ASE. [10]";
     out << "\n\t\t" << "-v STR Output file containing variants annotated as splice relevant (VCF format).";
     out << "\n\t\t" << "-w INT\tWindow size in b.p to identify splicing events in. "
         << "\n\t\t\t" << "The tool identifies events in variant.start +/- w basepairs."
@@ -73,6 +74,9 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
+                break;
+            case 'd':
+                min_depth_ = atoi(optarg);
                 break;
             default:
                 usage(std::cerr);
@@ -102,6 +106,7 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
     cerr << "\nTumor RNA: " << tumor_rna_;
     cerr << "\nReference fasta file: " << ref_;
     cerr << "\nAnnotation file: " << gtf_;
+    cerr << "\nMinimum read-depth for variants: " << min_depth_;
     cerr << endl;
 }
 
@@ -256,8 +261,10 @@ genotype CisAseIdentifier::call_geno(const bcf_call_t& bc) {
     genotype geno;
     double sum_lik = 0, max_het_lik = 0;
     int n_gt = bc.n_alleles * (bc.n_alleles + 1) / 2;
-    //disregard sites with more than 5 alleles in the VCF
-    if(bc.n_alleles <= 5) {
+    //disregard sites with more than 5 alleles in the VCF &&
+    //Check for minimum coverage
+    geno.n_reads = bc.depth;
+    if(bc.n_alleles <= 5 && bc.depth >= min_depth_) {
         for (int i=0; i < n_gt; i++) {
             //convert back from phred
             double lik = pow(10.0, (-1.0 / 10.0 * bc.PL[i]));
@@ -272,7 +279,6 @@ genotype CisAseIdentifier::call_geno(const bcf_call_t& bc) {
             }
         }
         geno.p_het = max_het_lik/sum_lik;
-        geno.determine_het();
     }
     return geno;
 }
@@ -283,19 +289,32 @@ bool CisAseIdentifier::process_germline_het(bcf_hdr_t* bcf_hdr, int tid, int pos
     germline_variants_[region].is_het_dna = false;
     genotype geno = call_geno(bc);
     germline_variants_[region].p_het_dna = geno.p_het;
-    if(geno.is_het) {
+    if(geno.is_het(min_depth_)) {
         fprintf(stderr, "\ngermline-het-dna chr, position, total, max, als1, als2 %s %d %c %c",
                 bcf_hdr_id2name(bcf_hdr, bcf_rec->rid),
                 pos + 1, bcf_rec->d.als[0], bcf_rec->d.als[1]);
         germline_variants_[region].is_het_dna = true;
     }
-    return geno.is_het;
+    return geno.is_het(min_depth_);
+}
+
+//Callback for hom in RNA(ASE)
+bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
+    genotype geno = call_geno(bc);
+    if(geno.is_hom(min_depth_)) {
+        fprintf(stderr, "\nRNA-hom chr, position, "
+                "total, max %s %d %f %c %c",
+                bcf_hdr_id2name(bcf_hdr, bcf_rec->rid),
+                pos + 1, geno.p_het,
+                bcf_rec->d.als[0], bcf_rec->d.als[1]);
+    }
+    return geno.is_hom(min_depth_);
 }
 
 //Callback for somatic het
 bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
     genotype geno = call_geno(bc);
-    if(geno.is_het) {
+    if(geno.is_het(min_depth_)) {
         fprintf(stderr, "\nsomatic-var chr, position, "
                 "total, max %s %d %f %c %c",
                 bcf_hdr_id2name(bcf_hdr, bcf_rec->rid),
@@ -308,7 +327,7 @@ bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid, int pos,
         cerr << window << endl;
         process_snps_in_window(window);
     }
-    return geno.is_het;
+    return geno.is_het(min_depth_);
 }
 
 //Get the information for SNPs within relevant window
@@ -340,8 +359,13 @@ void CisAseIdentifier::process_snps_in_window(string region) {
             return;
         }
         set_mpileup_conf_region(germline_conf_, snp_region);
-        run_mpileup(tumor_dna_, &germline_conf_,
-                    &CisAseIdentifier::process_germline_het);
+        //Check if het in DNA
+        if(run_mpileup(tumor_dna_, &germline_conf_,
+                    &CisAseIdentifier::process_germline_het)) {
+            //Check if hom in RNA
+            run_mpileup(tumor_rna_, &germline_conf_,
+                    &CisAseIdentifier::process_rna_hom);
+        }
     }
 }
 

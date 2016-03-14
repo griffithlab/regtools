@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.  */
 using namespace std;
 
 extern const double MIN_HET_PROB;
+extern const double MIN_HOM_PROB;
 
 extern "C" {
     void *bed_read(const char *fn);
@@ -52,20 +53,31 @@ extern "C" {
 
 //Results of genotype call
 struct genotype {
-    bool is_het;
     //prob of het
     double p_het;
+    //Read depth at the sites
+    int n_reads;
     genotype() {
-        is_het = false;
         p_het = -1.0;
+        n_reads = -1;
     }
-    void determine_het() {
-        if(p_het == -1.0) {
+    bool is_het(int min_depth) {
+        if(n_reads == -1.0) {
             throw runtime_error("Uninitialized genotype!");
         }
-        if(p_het > MIN_HET_PROB) {
-            is_het = true;
+        if(p_het >= MIN_HET_PROB && n_reads >= min_depth) {
+            return true;
         }
+        return false;
+    }
+    bool is_hom(int min_depth) {
+        if(n_reads == -1.0) {
+            throw runtime_error("Uninitialized genotype!");
+        }
+        if(1 - p_het >= MIN_HOM_PROB && n_reads >= min_depth) {
+            return true;
+        }
+        return false;
     }
 };
 
@@ -75,15 +87,29 @@ struct locus_info {
     bool is_hom_rna;
     //probability of hom genotype in RNA
     double p_hom_rna;
+    //read-depth at the site - RNA
+    int n_reads_rna;
     //Flag for het variants in DNA.
     bool is_het_dna;
     //probability of het variant in DNA.
     double p_het_dna;
+    //read-depth at the site - DNA
+    int n_reads_dna;
+    locus_info() {
+        p_het_dna = -1;
+        p_hom_rna = -1;
+        n_reads_dna = -1;
+        n_reads_rna = -1;
+        is_hom_rna = false;
+        is_het_dna = false;
+    }
 };
 
 //Workhorse for "cis-ase identify"
 class CisAseIdentifier {
     private:
+        //Minimum depth to consider somatic/ASE
+        int min_depth_;
         //VCF file with somatic variants
         string somatic_vcf_;
         //VCF file with polymorphisms
@@ -117,7 +143,8 @@ class CisAseIdentifier {
         map<string, locus_info> germline_variants_;
     public:
         //Constructor
-        CisAseIdentifier() : somatic_vcf_("NA"),
+        CisAseIdentifier() : min_depth_(10),
+                             somatic_vcf_("NA"),
                              tumor_rna_("NA"),
                              tumor_dna_("NA"), ref_("NA"), gtf_("NA"),
                              output_file_("NA"),
@@ -146,6 +173,8 @@ class CisAseIdentifier {
         genotype call_geno(const bcf_call_t& bc);
         //Get the SNPs within relevant window
         void process_snps_in_window(string window);
+        //Process homs in RNA(ASE)
+        bool process_rna_hom(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec);
         //Process somatic variants
         bool process_somatic_het(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec);
         bool process_germline_het(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec);
