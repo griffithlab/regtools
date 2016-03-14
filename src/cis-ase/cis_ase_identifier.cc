@@ -45,6 +45,7 @@ using namespace std;
 
 //Minimum posterior probability to be considered het
 const double MIN_HET_PROB = 0.5;
+const double MIN_HOM_PROB = 0.5;
 
 //RR, RA1, A1A1, RA2, A1A2, A2A2, RA3, A1A3, A2A3, A3A3, RA4 ..
 bool gt_het[15] = {0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0};
