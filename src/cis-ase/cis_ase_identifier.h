@@ -134,6 +134,10 @@ class CisAseIdentifier {
         faidx_t *ref_fai_;
         //Somatic VCF record
         bcf1_t *somatic_vcf_record_;
+        //Polymorphism VCF file handle
+        htsFile *poly_vcf_fh_;
+        //Polymorphism VCF Header
+        bcf_hdr_t *poly_vcf_header_;
         //Configuration for somatic mpileup
         mplp_conf_t somatic_conf_;
         //Configuration for germline mpileup
@@ -150,7 +154,9 @@ class CisAseIdentifier {
                              output_file_("NA"),
                              somatic_vcf_fh_(NULL),
                              somatic_vcf_header_(NULL),
-                             somatic_vcf_record_(NULL) {}
+                             somatic_vcf_record_(NULL),
+                             poly_vcf_fh_(NULL),
+                             poly_vcf_header_(NULL) {}
         //Destructor
         ~CisAseIdentifier() {
             if(ofs_.is_open()) {
@@ -182,17 +188,14 @@ class CisAseIdentifier {
         void set_mpileup_conf_somatic_vcf(mplp_conf_t &mplp_conf);
         //Set the region as the region-string
         void set_mpileup_conf_region(mplp_conf_t & mplp_conf, string region);
+        //Open the polymorphism VCF file
+        void open_poly_vcf();
         //Free relevant pointers
         void cleanup();
         //Load pointer to reference
         void load_reference() {
             ref_fai_ = fai_load(ref_.c_str());
             if (ref_fai_ == NULL) throw runtime_error("Unable to open reference FASTA");
-        }
-        //Destroy pointer to reference
-        void destroy_reference() {
-            if(ref_fai_)
-                fai_destroy(ref_fai_);
         }
         //Set the configuration for mpileup
         mplp_conf_t get_default_mpileup_conf() {

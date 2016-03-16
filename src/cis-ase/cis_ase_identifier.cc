@@ -176,6 +176,7 @@ bool CisAseIdentifier::run_mpileup(string bam, mplp_conf_t *conf, bool (CisAseId
 
     memset(&buf, 0, sizeof(kstring_t));
     memset(&bc, 0, sizeof(bcf_call_t));
+    cerr << 5 << endl;
 
     data = (mplp_aux_t**) calloc(n_samples, sizeof(mplp_aux_t*));
     plp = (const bam_pileup1_t**) calloc(n_samples, sizeof(bam_pileup1_t*));
@@ -188,31 +189,41 @@ bool CisAseIdentifier::run_mpileup(string bam, mplp_conf_t *conf, bool (CisAseId
 
     iter = bam_mplp_init(n_samples, mplp_func, (void**)data);
     bcr = (bcf_callret1_t *) calloc(sm->n, sizeof(bcf_callret1_t));
-    if ( conf->flag & MPLP_SMART_OVERLAPS ) bam_mplp_init_overlaps(iter);
+    if ( conf->flag & MPLP_SMART_OVERLAPS ) {
+        bam_mplp_init_overlaps(iter);
+    }
     max_depth = conf->max_depth;
     max_indel_depth = conf->max_indel_depth * sm->n;
     bam_mplp_set_maxcnt(iter, max_depth);
     bcf1_t *bcf_rec = bcf_init1();
     int ret;
+    cerr << 6 << endl;
 
     if(conf->reg)
         cerr << "\nRegion outside loop within run_mpileup " << conf->reg;
+    cerr << "Smart overlaps " <<  MPLP_SMART_OVERLAPS << endl;
     // begin pileup
     while ((ret=bam_mplp_auto(iter, &tid, &pos, n_plp, plp)) > 0) {
         if (conf->reg && (pos < beg0 || pos >= end0)) continue; // out of the region requested
         if(!h->target_name) printf("\nNot defined target\n");
-        if (conf->bed && tid >= 0 && !bed_overlap(conf->bed, h->target_name[tid], pos, pos+1)) { continue; }
+        if (conf->bed && tid >= 0 && !bed_overlap(conf->bed, h->target_name[tid], pos, pos+1)) {
+            cerr << 7 << "\t" << pos << " continuing" << endl;
+            continue;
+        }
         if(conf->reg)
             cerr << "\nRegion within run_mpileup " << conf->reg;
+        cerr << 7.0 << endl;
         mplp_get_ref(data[0], tid, &ref, &ref_len);
         //printf("tid=%d len=%d ref=%p/%s\n", tid, ref_len, ref, ref);
         if (conf->flag & MPLP_BCF) {
+            cerr << 7.1 << endl;
             int total_depth, _ref0, ref16;
             for (i = total_depth = 0; i < n_samples; ++i) total_depth += n_plp[i];
             group_smpl(&gplp, sm, &buf, n_samples, file_names, n_plp, plp, conf->flag & MPLP_IGNORE_RG);
             _ref0 = (ref && pos < ref_len)? ref[pos] : 'N';
             ref16 = seq_nt16_table[_ref0];
             bcf_callaux_clean(bca, &bc);
+            cerr << 7.2 << endl;
             for (i = 0; i < gplp.n; ++i)
                 bcf_call_glfgen(gplp.n_plp[i], gplp.plp[i], ref16, bca, bcr + i);
             bc.tid = tid; bc.pos = pos;
@@ -220,9 +231,11 @@ bool CisAseIdentifier::run_mpileup(string bam, mplp_conf_t *conf, bool (CisAseId
             bcf_clear1(bcf_rec);
             bcf_call2bcf(&bc, bcf_rec, bcr, conf->fmt_flag, 0, 0);
             result = (this->*f)(bcf_hdr, tid, pos, bc, bcf_rec);
+            cerr << 7.3 << endl;
             //bcf_write1(bcf_fp, bcf_hdr, bcf_rec);
         }
     }
+    cerr << 8 << endl;
 
     // clean up
     if(alignment1)
@@ -325,30 +338,32 @@ bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid, int pos,
             common::create_region_string(bcf_hdr_id2name(bcf_hdr,
                         bcf_rec->rid), pos - 1000, pos + 1000);
         cerr << window << endl;
-        process_snps_in_window(window);
+        //process_snps_in_window(window);
     }
     return geno.is_het(min_depth_);
 }
 
+//Open the polymorphism VCF file
+void CisAseIdentifier::open_poly_vcf() {
+    poly_vcf_fh_ = bcf_open(poly_vcf_.c_str(), "r");
+    if(poly_vcf_fh_ == NULL) {
+        throw std::runtime_error("Unable to open poly-vcf.");
+    }
+    poly_vcf_header_ = bcf_hdr_read(poly_vcf_fh_);
+    if(poly_vcf_header_ == NULL) {
+        throw std::runtime_error("Unable to read poly-vcf header.");
+    }
+}
+
 //Get the information for SNPs within relevant window
 void CisAseIdentifier::process_snps_in_window(string region) {
-    htsFile *bcf_fp = NULL;
-    bcf_hdr_t *bcf_hdr = NULL;
-    bcf_fp = bcf_open(poly_vcf_.c_str(), "r");
-    if(bcf_fp == NULL) {
-        throw std::runtime_error("Unable to open file.");
-    }
-    bcf_hdr = bcf_hdr_read(bcf_fp);
-    if(bcf_hdr == NULL) {
-        throw std::runtime_error("Unable to read header.");
-    }
     bcf_srs_t *sr = bcf_sr_init();
     bcf_sr_set_regions(sr, region.c_str(), 0);
     bcf_sr_add_reader(sr, poly_vcf_.c_str());
     std::cerr << "\nchromosome\tposition\tnum_alleles" << std::endl;
     while (bcf_sr_next_line(sr)) {
         bcf1_t *line = bcf_sr_get_line(sr, 0);
-        string snp_region = common::create_region_string(bcf_hdr_id2name(bcf_hdr, line->rid), line->pos+1, line->pos+1);
+        string snp_region = common::create_region_string(bcf_hdr_id2name(poly_vcf_header_, line->rid), line->pos+1, line->pos+1);
         cerr << endl << "snp region is " << snp_region << endl;
         if(germline_variants_.count(snp_region)) {
             cerr << endl << "Variant in map ";
@@ -366,7 +381,9 @@ void CisAseIdentifier::process_snps_in_window(string region) {
             run_mpileup(tumor_rna_, &germline_conf_,
                     &CisAseIdentifier::process_rna_hom);
         }
+        bcf_destroy(line);
     }
+    bcf_sr_destroy(sr);
 }
 
 //Free relevant pointers
@@ -377,8 +394,15 @@ void CisAseIdentifier::cleanup() {
         bcf_close(somatic_vcf_fh_);
     if(somatic_vcf_record_)
         bcf_destroy(somatic_vcf_record_);
+    if(poly_vcf_header_)
+        bcf_hdr_destroy(poly_vcf_header_);
+    if(poly_vcf_fh_)
+        bcf_close(poly_vcf_fh_);
     free_mpileup_conf(somatic_conf_);
     free_mpileup_conf(germline_conf_);
+    //Destroy pointer to reference
+    if(ref_fai_)
+        fai_destroy(ref_fai_);
 }
 
 //The workhorse
@@ -387,22 +411,15 @@ void CisAseIdentifier::run() {
     somatic_conf_ = get_default_mpileup_conf();
     germline_conf_ = get_default_mpileup_conf();
     somatic_vcf_record_ = bcf_init();
+    cerr << 1 << endl;
     open_somatic_vcf();
+    open_poly_vcf();
+    cerr << 2 << endl;
+    //Set the region of the mpileup conf to the somatic-vcf
     set_mpileup_conf_somatic_vcf(somatic_conf_);
+    cerr << 3 << endl;
     run_mpileup(tumor_dna_, &somatic_conf_,
                 &CisAseIdentifier::process_somatic_het);
+    cerr << 4 << endl;
     cleanup();
 }
-
-/*    cerr << endl << "In Run";
-    for each_dna_somatic_variant {
-        if variant_is_het_in_tumor_dna {
-            for each_nearby_germline_polymorphism {
-                if poly_is_het_tumor_dna and poly_is_not_het_in_tumor_rna {
-                    print dna_somatic_variant "\t" dna_poly "\t" rna_poly "\t" evidence_level"
-                    add_poly_to_list_of_ase_polys();
-                }
-            }
-        }
-    }
-*/
