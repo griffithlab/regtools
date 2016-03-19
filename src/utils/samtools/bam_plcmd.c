@@ -162,6 +162,7 @@ int mplp_get_ref(mplp_aux_t *ma, int tid,  char **ref, int *ref_len) {
 
 int mplp_func(void *data, bam1_t *b)
 {
+    fprintf(stderr, "\ninside mplp_func\n");
     extern int bam_realn(bam1_t *b, const char *ref);
     extern int bam_prob_realn_core(bam1_t *b, const char *ref, int ref_len, int flag);
     extern int bam_cap_mapQ(bam1_t *b, char *ref, int ref_len, int thres);
@@ -169,7 +170,13 @@ int mplp_func(void *data, bam1_t *b)
     mplp_aux_t *ma = (mplp_aux_t*)data;
     int ret, skip = 0, ref_len;
     do {
+        fprintf(stderr, "\ninside mplp_func loop 1\n");
         int has_ref;
+        if(ma->iter) {
+            printf("\nma->iter\n");
+        } else {
+            printf("\n no iter \n");
+        }
         ret = ma->iter? sam_itr_next(ma->fp, ma->iter, b) : sam_read1(ma->fp, ma->h, b);
         if (ret < 0) break;
         // The 'B' cigar operation is not part of the specification, considering as obsolete.
@@ -178,12 +185,15 @@ int mplp_func(void *data, bam1_t *b)
             skip = 1;
             continue;
         }
+        fprintf(stderr, "\ninside mplp_func loop 1.5\n");
         if (ma->conf->rflag_require && !(ma->conf->rflag_require&b->core.flag)) { skip = 1; continue; }
         if (ma->conf->rflag_filter && ma->conf->rflag_filter&b->core.flag) { skip = 1; continue; }
+        fprintf(stderr, "\ninside mplp_func loop 1.55\n");
         if (ma->conf->bed) { // test overlap
             skip = !bed_overlap(ma->conf->bed, ma->h->target_name[b->core.tid], b->core.pos, bam_endpos(b));
             if (skip) continue;
         }
+        fprintf(stderr, "\ninside mplp_func loop 2\n");
         if (ma->conf->rghash) { // exclude read groups
             uint8_t *rg = bam_aux_get(b, "RG");
             skip = (rg && khash_str2int_get(ma->conf->rghash, (const char*)(rg+1), NULL)==0);
@@ -195,6 +205,7 @@ int mplp_func(void *data, bam1_t *b)
             for (i = 0; i < b->core.l_qseq; ++i)
                 qual[i] = qual[i] > 31? qual[i] - 31 : 0;
         }
+        fprintf(stderr, "\ninside mplp_func loop 3\n");
 
         if (ma->conf->fai && b->core.tid >= 0) {
             has_ref = mplp_get_ref(ma, b->core.tid, &ref, &ref_len);
@@ -208,6 +219,7 @@ int mplp_func(void *data, bam1_t *b)
             has_ref = 0;
         }
 
+        fprintf(stderr, "\ninside mplp_func loop 4\n");
         skip = 0;
         if (has_ref && (ma->conf->flag&MPLP_REALN)) bam_prob_realn_core(b, ref, ref_len, (ma->conf->flag & MPLP_REDO_BAQ)? 7 : 3);
         if (has_ref && ma->conf->capQ_thres > 10) {
@@ -215,9 +227,11 @@ int mplp_func(void *data, bam1_t *b)
             if (q < 0) skip = 1;
             else if (b->core.qual > q) b->core.qual = q;
         }
+        fprintf(stderr, "\ninside mplp_func loop 5\n");
         if (b->core.qual < ma->conf->min_mq) skip = 1;
         else if ((ma->conf->flag&MPLP_NO_ORPHAN) && (b->core.flag&BAM_FPAIRED) && !(b->core.flag&BAM_FPROPER_PAIR)) skip = 1;
     } while (skip);
+    fprintf(stderr, "\nleaving mplp_func\n");
     return ret;
 }
 

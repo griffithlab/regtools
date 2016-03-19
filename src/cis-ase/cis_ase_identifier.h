@@ -105,6 +105,91 @@ struct locus_info {
     }
 };
 
+//mpileup config within regtools
+struct regtools_mpileup_conf {
+    bool result;
+    char* alignment1;
+    char* file_names[1];
+    int n_samples;
+    mplp_aux_t **data;
+    int i, tid, pos, *n_plp, beg0, end0, ref_len, max_depth;
+    const bam_pileup1_t **plp;
+    bam_mplp_t iter;
+    bam_hdr_t *h; /* header of first file in input list */
+    char *ref;
+    bcf_callaux_t *bca;
+    bcf_callret1_t *bcr;
+    bcf_call_t bc;
+    htsFile *bcf_fp;
+    const char *mode;
+    bcf_hdr_t *bcf_hdr;
+    kstring_t buf;
+    mplp_pileup_t gplp;
+    bam_sample_t *sm;
+    mplp_ref_t mp_ref;
+    bcf1_t *bcf_rec;
+    regtools_mpileup_conf() {
+        result = false;
+        n_samples = 1;
+        beg0 = 0;
+        end0 = INT_MAX;
+        bca = NULL;
+        bcr = NULL;
+        bcf_fp = NULL;
+        bcf_hdr = bcf_hdr_init("w");
+        sm = bam_smpl_init();
+        mplp_ref_t mp_ref1 = MPLP_REF_INIT;
+        mp_ref = mp_ref1;
+        memset(&buf, 0, sizeof(kstring_t));
+        memset(&bc, 0, sizeof(bcf_call_t));
+        memset(&gplp, 0, sizeof(mplp_pileup_t));
+        plp = (const bam_pileup1_t**) calloc(n_samples, sizeof(bam_pileup1_t*));
+        n_plp = (int *) calloc(n_samples, sizeof(int));
+        data = (mplp_aux_t**) calloc(n_samples, sizeof(mplp_aux_t*));
+        iter = bam_mplp_init(n_samples, mplp_func, (void**)data);
+        bcr = (bcf_callret1_t *) calloc(sm->n, sizeof(bcf_callret1_t));
+        bam_mplp_init_overlaps(iter);
+        bcf_rec = bcf_init1();
+    }
+    void init_file_name(string bam) {
+        file_names[0] = strdup(bam.c_str());
+    }
+    ~regtools_mpileup_conf() {
+        // clean up
+        if(alignment1)
+            free(alignment1);
+        free(bc.tmp.s);
+        bcf_destroy1(bcf_rec);
+        if (bcf_fp) {
+            hts_close(bcf_fp);
+            bcf_hdr_destroy(bcf_hdr);
+            bcf_call_destroy(bca);
+            free(bc.PL);
+            free(bc.DP4);
+            free(bc.ADR);
+            free(bc.ADF);
+            free(bc.fmt_arr);
+            free(bcr);
+        }
+        bam_smpl_destroy(sm); free(buf.s);
+        for (i = 0; i < gplp.n; ++i) free(gplp.plp[i]);
+        free(gplp.plp); free(gplp.n_plp); free(gplp.m_plp);
+        bam_mplp_destroy(iter);
+        bam_hdr_destroy(h);
+        for (i = 0; i < n_samples; ++i) {
+            sam_close(data[i]->fp);
+            if (data[i]->iter) hts_itr_destroy(data[i]->iter);
+            free(data[i]);
+        }
+        free(data); free(plp); free(n_plp);
+        free(mp_ref.ref[0]);
+        free(mp_ref.ref[1]);
+        if(file_names[0]) {
+            free(file_names[0]);
+        }
+    }
+};
+
 //Workhorse for "cis-ase identify"
 class CisAseIdentifier {
     private:
@@ -132,6 +217,10 @@ class CisAseIdentifier {
         bcf_hdr_t *somatic_vcf_header_;
         //Reference FASTA object
         faidx_t *ref_fai_;
+        //mpileup conf for the somatic vcf
+        regtools_mpileup_conf somatic_rmc_;
+        //mpileup conf for the germline vcf
+        regtools_mpileup_conf germline_rmc1_;
         //Somatic VCF record
         bcf1_t *somatic_vcf_record_;
         //Polymorphism VCF file handle
@@ -156,7 +245,8 @@ class CisAseIdentifier {
                              somatic_vcf_header_(NULL),
                              somatic_vcf_record_(NULL),
                              poly_vcf_fh_(NULL),
-                             poly_vcf_header_(NULL) {}
+                             poly_vcf_header_(NULL) {
+        }
         //Destructor
         ~CisAseIdentifier() {
             if(ofs_.is_open()) {
@@ -169,12 +259,15 @@ class CisAseIdentifier {
         void usage(ostream &out);
         //The workhorse
         void run();
+        void run2();
         //Open somatic VCF file
         void open_somatic_vcf();
         //Read in next record
         bool read_somatic_record();
+        //init mpileup
+        void mpileup_init(string bam, mplp_conf_t *conf, regtools_mpileup_conf rmc1);
         //Run mpileup and get the genotype likelihoods
-        bool run_mpileup(string bam, mplp_conf_t *conf, bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*));
+        bool mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*), regtools_mpileup_conf rmc1);
         //Call genotypes using the posterior prob
         genotype call_geno(const bcf_call_t& bc);
         //Get the SNPs within relevant window
