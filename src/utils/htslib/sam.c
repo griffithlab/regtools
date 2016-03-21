@@ -1939,10 +1939,9 @@ int bam_plp_push(bam_plp_t iter, const bam1_t *b)
 
 const bam_pileup1_t *bam_plp_auto(bam_plp_t iter, int *_tid, int *_pos, int *_n_plp)
 {
-    fprintf(stderr, "\nin bam_plp_auto  n \n");
+    fprintf(stderr, "\nin bam_plp_auto\n");
     const bam_pileup1_t *plp;
     if (iter->func == 0 || iter->error) { *_n_plp = -1; return 0; }
-    fprintf(stderr, "\nin bam_plp_auto  2 \n");
     if ((plp = bam_plp_next(iter, _tid, _pos, _n_plp)) != 0) return plp;
     else { // no pileup line can be obtained; read alignments
         *_n_plp = 0;
@@ -2042,6 +2041,7 @@ int bam_mplp_auto(bam_mplp_t iter, int *_tid, int *_pos, int *n_plp, const bam_p
     int i, ret = 0;
     uint64_t new_min = (uint64_t)-1;
     fprintf(stderr, "\nin bam_mplp_auto \n");
+    fprintf(stderr, "\nn is %d \n", iter->n);
     for (i = 0; i < iter->n; ++i) {
         fprintf(stderr, "\nin bam_mplp_auto  n \n");
         if (iter->pos[i] == iter->min) {

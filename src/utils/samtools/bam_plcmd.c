@@ -172,11 +172,6 @@ int mplp_func(void *data, bam1_t *b)
     do {
         fprintf(stderr, "\ninside mplp_func loop 1\n");
         int has_ref;
-        if(ma->iter) {
-            printf("\nma->iter\n");
-        } else {
-            printf("\n no iter \n");
-        }
         ret = ma->iter? sam_itr_next(ma->fp, ma->iter, b) : sam_read1(ma->fp, ma->h, b);
         if (ret < 0) break;
         // The 'B' cigar operation is not part of the specification, considering as obsolete.

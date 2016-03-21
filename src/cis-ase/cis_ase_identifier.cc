@@ -136,8 +136,12 @@ void CisAseIdentifier::set_mpileup_conf_somatic_vcf(mplp_conf_t &mplp_conf) {
 }
 
 //Init mpileup
-bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*), regtools_mpileup_conf rmc1) {
+bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*), regtools_mpileup_conf& rmc1) {
     bool result;
+    //set the iterator to the region amongst other things
+    set_data_iter(conf, rmc1.file_names, rmc1.data, &rmc1.beg0, &rmc1.end0);
+    if(rmc1.data[0] -> iter)
+        fprintf(stderr, "\niter is valid\n");
     // begin pileup
     while (bam_mplp_auto(rmc1.iter, &rmc1.tid, &rmc1.pos, rmc1.n_plp, rmc1.plp) > 0) {
         cerr << "inside bam_mplp_auto loop" << endl;
@@ -174,7 +178,7 @@ bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseId
 }
 
 //This function is ugly, pieces torn by hand from samtools
-void CisAseIdentifier::mpileup_init(string bam, mplp_conf_t *conf, regtools_mpileup_conf rmc1) {
+void CisAseIdentifier::mpileup_init(string bam, mplp_conf_t *conf, regtools_mpileup_conf& rmc1) {
     cerr << "in init";
     if ( conf->flag & MPLP_VCF )
         rmc1.mode = (conf->flag&MPLP_NO_COMP)? "wu" : "wz";   // uncompressed VCF or compressed VCF
@@ -182,9 +186,13 @@ void CisAseIdentifier::mpileup_init(string bam, mplp_conf_t *conf, regtools_mpil
         rmc1.mode = (conf->flag&MPLP_NO_COMP)? "wub" : "wb";  // uncompressed BCF or compressed BCF
     rmc1.bcf_fp = bcf_open(conf->output_fname? conf->output_fname : "-", rmc1.mode);
     rmc1.bca = bcf_call_init(-1., conf->min_baseQ);
-    mpileup_with_likelihoods(conf, 1, rmc1.file_names, rmc1.data, rmc1.bca, rmc1.bcr, &rmc1.bc, &rmc1.gplp, rmc1.bcf_fp, rmc1.bcf_hdr, rmc1.sm, &rmc1.h, &rmc1.mp_ref, &rmc1.beg0, &rmc1.end0);
     rmc1.max_depth = conf->max_depth;
     bam_mplp_set_maxcnt(rmc1.iter, rmc1.max_depth);
+    mpileup_with_likelihoods(conf, rmc1.n_samples, rmc1.file_names, rmc1.data, rmc1.bca, rmc1.bcr, &rmc1.bc, &rmc1.gplp, rmc1.bcf_fp, rmc1.bcf_hdr, rmc1.sm, &rmc1.h, &rmc1.mp_ref);
+    if(rmc1.h) {
+        fprintf(stderr, "header is valid\n");
+    }
+    rmc1.is_initialized = true; //all pointers initialized
 }
 
 //Call genotypes using the posterior prob
@@ -318,7 +326,6 @@ void CisAseIdentifier::cleanup() {
         bcf_hdr_destroy(poly_vcf_header_);
     if(poly_vcf_fh_)
         bcf_close(poly_vcf_fh_);
-    free_mpileup_conf(somatic_conf_);
     free_mpileup_conf(germline_conf_);
     //Destroy pointer to reference
     if(ref_fai_)
@@ -350,13 +357,13 @@ void CisAseIdentifier::run2() {
         free_mpileup_conf(somatic_conf_);
     }
     bcf_hdr_destroy(test_header);
-    bcf_destroy(test_record); 
+    bcf_destroy(test_record);
     bcf_close(test_bcf);
 }
 
 void CisAseIdentifier::run() {
-    germline_rmc1_.init_file_name(tumor_dna_);
-    somatic_rmc_.init_file_name(tumor_dna_);
+    germline_rmc1_.init(tumor_dna_);
+    somatic_rmc_.init(tumor_dna_);
     load_reference();
     somatic_conf_ = get_default_mpileup_conf();
     germline_conf_ = get_default_mpileup_conf();

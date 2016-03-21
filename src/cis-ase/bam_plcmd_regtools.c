@@ -57,6 +57,33 @@ void group_smpl(mplp_pileup_t *m, bam_sample_t *sm, kstring_t *buf,
 int mplp_func(void *data, bam1_t *b);
 int mplp_get_ref(mplp_aux_t *ma, int tid,  char **ref, int *ref_len);
 
+void set_data_iter(mplp_conf_t *conf,
+                  char** fn,
+                  mplp_aux_t **data,
+                  int *beg0,
+                  int *end0
+                  ) {
+    int i = 0;//only one sample
+    bam_hdr_t *h_tmp = data[i]->h;
+    if (conf->reg) {
+        fprintf(stderr, "\nSetting region now\n");
+        fprintf(stderr, "\ni is %d\n", i);
+        hts_idx_t *idx = sam_index_load(data[i]->fp, fn[i]);
+        if (idx == NULL) {
+            fprintf(stderr, "[%s] fail to load index for %s\n", __func__, fn[i]);
+            exit(EXIT_FAILURE);
+        }
+        if ( (data[i]->iter=sam_itr_querys(idx, h_tmp, conf->reg)) == 0) {
+            fprintf(stderr, "[E::%s] fail to parse region '%s' with %s\n", __func__, conf->reg, fn[i]);
+            exit(EXIT_FAILURE);
+        }
+        if (i == 0) *beg0 = data[i]->iter->beg, *end0 = data[i]->iter->end;
+        hts_idx_destroy(idx);
+    }
+    else
+        data[i]->iter = NULL;
+}
+
 /*
  * Performs pileup
  * @param conf configuration for this pileup
@@ -73,9 +100,7 @@ int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn,
                              bcf_hdr_t *bcf_hdr,
                              bam_sample_t *sm,
                              bam_hdr_t **h,
-                             mplp_ref_t *mp_ref,
-                             int *beg0,
-                             int *end0
+                             mplp_ref_t *mp_ref
                              )
 {
     extern void *bcf_call_add_rg(void *rghash, const char *hdtext, const char *list);
@@ -91,7 +116,6 @@ int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn,
     // read the header of each file in the list and initialize data
     for (i = 0; i < n; ++i) {
         bam_hdr_t *h_tmp;
-        data[i] = calloc(1, sizeof(mplp_aux_t));
         data[i]->fp = sam_open_format(fn[i], "rb", &conf->ga.in);
         if ( !data[i]->fp )
         {
@@ -114,24 +138,8 @@ int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn,
             fprintf(stderr,"[%s] fail to read the header of %s\n", __func__, fn[i]);
             exit(EXIT_FAILURE);
         }
-        bam_smpl_add(sm, fn[i], (conf->flag&MPLP_IGNORE_RG)? 0 : h_tmp->text);
         // Collect read group IDs with PL (platform) listed in pl_list (note: fragile, strstr search)
         rghash = bcf_call_add_rg(rghash, h_tmp->text, conf->pl_list);
-        if (conf->reg) {
-            hts_idx_t *idx = sam_index_load(data[i]->fp, fn[i]);
-            if (idx == NULL) {
-                fprintf(stderr, "[%s] fail to load index for %s\n", __func__, fn[i]);
-                exit(EXIT_FAILURE);
-            }
-            if ( (data[i]->iter=sam_itr_querys(idx, h_tmp, conf->reg)) == 0) {
-                fprintf(stderr, "[E::%s] fail to parse region '%s' with %s\n", __func__, conf->reg, fn[i]);
-                exit(EXIT_FAILURE);
-            }
-            if (i == 0) *beg0 = data[i]->iter->beg, *end0 = data[i]->iter->end;
-            hts_idx_destroy(idx);
-        }
-        else
-            data[i]->iter = NULL;
 
         if (i == 0) *h = data[i]->h = h_tmp; // save the header of the first file
         else {
@@ -143,11 +151,6 @@ int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn,
             data[i]->h = *h;
         }
     }
-    // allocate data storage proportionate to number of samples being studied sm->n
-    gplp->n = sm->n;
-    gplp->n_plp = calloc(sm->n, sizeof(int));
-    gplp->m_plp = calloc(sm->n, sizeof(int));
-    gplp->plp = calloc(sm->n, sizeof(bam_pileup1_t*));
 
     fprintf(stderr, "[%s] %d samples in %d input files\n", __func__, sm->n, n);
     fprintf(stderr, "[%s]\n", conf->reg);
@@ -171,14 +174,6 @@ int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn,
             bcf_hdr_append(bcf_hdr, str.s);
         }
         free(str.s);
-        bcf_hdr_append(bcf_hdr,"##FORMAT=<ID=PL,Number=G,Type=Integer,Description=\"List of Phred-scaled genotype likelihoods\">");
-        for (i=0; i<sm->n; i++)
-            bcf_hdr_add_sample(bcf_hdr, sm->smpl[i]);
-        bcf_hdr_add_sample(bcf_hdr, NULL);
-        //This needed to be extracted out from the vcf_hdr_write
-        if ( bcf_hdr->dirty ) bcf_hdr_sync(bcf_hdr);
-        //bcf_hdr_write(bcf_fp, bcf_hdr);
-
         // Initialise the calling algorithm
         bca->rghash = rghash;
         bca->openQ = conf->openQ, bca->extQ = conf->extQ, bca->tandemQ = conf->tandemQ;
@@ -186,19 +181,12 @@ int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn,
         bca->min_support = conf->min_support;
         bca->per_sample_flt = conf->flag & MPLP_PER_SAMPLE;
 
-        bc->bcf_hdr = bcf_hdr;
-        bc->n = sm->n;
-        bc->PL = malloc(15 * sm->n * sizeof(*bc->PL));
         if (conf->fmt_flag)
         {
             assert( sizeof(float)==sizeof(int32_t) );
-            bc->DP4 = malloc(sm->n * sizeof(int32_t) * 4);
-            bc->fmt_arr = malloc(sm->n * sizeof(float)); // all fmt_flag fields
             if ( conf->fmt_flag&(B2B_INFO_DPR|B2B_FMT_DPR|B2B_INFO_AD|B2B_INFO_ADF|B2B_INFO_ADR|B2B_FMT_AD|B2B_FMT_ADF|B2B_FMT_ADR) )
             {
                 // first B2B_MAX_ALLELES fields for total numbers, the rest per-sample
-                bc->ADR = (int32_t*) malloc((sm->n+1)*B2B_MAX_ALLELES*sizeof(int32_t));
-                bc->ADF = (int32_t*) malloc((sm->n+1)*B2B_MAX_ALLELES*sizeof(int32_t));
                 for (i=0; i<sm->n; i++)
                 {
                     bcr[i].ADR = bc->ADR + (i+1)*B2B_MAX_ALLELES;
