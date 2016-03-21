@@ -154,7 +154,6 @@ bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseId
         if(conf->reg)
             cerr << "\nRegion within run_mpileup " << conf->reg;
         mplp_get_ref(rmc1.data[0], rmc1.tid, &rmc1.ref, &rmc1.ref_len);
-        //printf("tid=%d len=%d ref=%p/%s\n", tid, ref_len, ref, ref);
         if (conf->flag & MPLP_BCF) {
             int total_depth, _ref0, ref16;
             for (int i = total_depth = 0; i < rmc1.n_samples; ++i) total_depth += rmc1.n_plp[i];
@@ -170,7 +169,6 @@ bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseId
             bcf_clear1(rmc1.bcf_rec);
             bcf_call2bcf(&rmc1.bc, rmc1.bcf_rec, rmc1.bcr, conf->fmt_flag, 0, 0);
             result = (this->*f)(rmc1.bcf_hdr, rmc1.tid, rmc1.pos, rmc1.bc, rmc1.bcf_rec);
-            //bcf_write1(bcf_fp, bcf_hdr, bcf_rec);
         }
     }
     cerr << 8 << endl;
