@@ -131,7 +131,6 @@ struct regtools_mpileup_conf {
     //set to true once initialized
     bool is_initialized;
     regtools_mpileup_conf() {
-        cerr << "in rmc consturctor\n";
         result = false;
         n_samples = 1;
         beg0 = 0;
@@ -140,13 +139,10 @@ struct regtools_mpileup_conf {
         bcr = NULL;
         bcf_fp = NULL;
         bcf_hdr = NULL;
+        file_names[0] = NULL;
         is_initialized = false;
-    }
-    void init(string bam) {
-        file_names[0] = strdup(bam.c_str());
         bcf_hdr = bcf_hdr_init("w");
         sm = bam_smpl_init();
-        bam_smpl_add(sm, file_names[0], 0);
         bcf_hdr_append(bcf_hdr,"##FORMAT=<ID=PL,Number=G,Type=Integer,Description=\"List of Phred-scaled genotype likelihoods\">");
         for (int i=0; i<sm->n; i++) {
             cerr << "\nAdding sample  " << sm->smpl[i];
@@ -183,6 +179,10 @@ struct regtools_mpileup_conf {
         bc.ADF = (int32_t*) malloc((n_samples+1)*B2B_MAX_ALLELES*sizeof(int32_t));
         bc.bcf_hdr = bcf_hdr;
         bc.n = sm->n;
+    }
+    void init(string bam) {
+        file_names[0] = strdup(bam.c_str());
+        bam_smpl_add(sm, file_names[0], 0);
     }
     ~regtools_mpileup_conf() {
         free(bc.tmp.s);

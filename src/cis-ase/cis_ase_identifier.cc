@@ -57,7 +57,7 @@ void CisAseIdentifier::usage(ostream& out) {
         << " tumor_dna_alignments.bam tumor_rna_alignments.bam ref.fa annotations.gtf";
     out << "\nOptions:";
     out << "\t"   << "-o STR Output file containing the aberrant splice junctions with annotations. [STDOUT]";
-    out << "\n\t\t\t"   << "-d INT Minimum read-depth to consider a variant to be somatic/ASE. [10]";
+    out << "\n\t\t"   << "-d INT Minimum read-depth to consider a variant to be somatic/ASE. [10]";
     out << "\n";
 }
 
