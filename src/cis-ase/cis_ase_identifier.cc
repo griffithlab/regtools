@@ -171,6 +171,10 @@ bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseId
             result = (this->*f)(rmc1.bcf_hdr, rmc1.tid, rmc1.pos, rmc1.bc, rmc1.bcf_rec);
         }
     }
+    //Destroy the iterator for this region
+    for (int i = 0; i < rmc1.n_samples; ++i) {
+        if (rmc1.data[i]->iter) hts_itr_destroy(rmc1.data[i]->iter);
+    }
     cerr << 8 << endl;
     return result;
 }
@@ -186,7 +190,8 @@ void CisAseIdentifier::mpileup_init(string bam, mplp_conf_t *conf, regtools_mpil
     rmc1.bca = bcf_call_init(-1., conf->min_baseQ);
     rmc1.max_depth = conf->max_depth;
     bam_mplp_set_maxcnt(rmc1.iter, rmc1.max_depth);
-    mpileup_with_likelihoods(conf, rmc1.n_samples, rmc1.file_names, rmc1.data, rmc1.bca, rmc1.bcr, &rmc1.bc, &rmc1.gplp, rmc1.bcf_fp, rmc1.bcf_hdr, rmc1.sm, &rmc1.h, &rmc1.mp_ref);
+    mpileup_with_likelihoods(conf, rmc1.n_samples, rmc1.file_names, rmc1.data, rmc1.bca, rmc1.bcr,
+            &rmc1.bc, &rmc1.gplp, rmc1.bcf_fp, rmc1.bcf_hdr, rmc1.sm, &rmc1.h, &rmc1.mp_ref);
     if(rmc1.h) {
         fprintf(stderr, "header is valid\n");
     }
@@ -343,7 +348,6 @@ void CisAseIdentifier::run2() {
     if(test_header == NULL) {
         throw std::runtime_error("Unable to read header.");
     }
-    std::cout << "chromosome\tposition\tnum_alleles" << std::endl;
     mpileup_init(tumor_dna_, &somatic_conf_, somatic_rmc_);
     while(bcf_read(test_bcf, test_header, test_record) == 0) {
         string somatic_region = common::create_region_string(bcf_hdr_id2name(test_header, test_record->rid), test_record->pos+1, test_record->pos+1);

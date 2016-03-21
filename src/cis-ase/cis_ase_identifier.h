@@ -139,6 +139,7 @@ struct regtools_mpileup_conf {
         bca = NULL;
         bcr = NULL;
         bcf_fp = NULL;
+        bcf_hdr = NULL;
         is_initialized = false;
     }
     void init(string bam) {
@@ -184,38 +185,40 @@ struct regtools_mpileup_conf {
         bc.n = sm->n;
     }
     ~regtools_mpileup_conf() {
+        free(bc.tmp.s);
+        bcf_destroy1(bcf_rec);
+        bcf_hdr_destroy(bcf_hdr);
+        free(bc.PL);
+        free(bc.DP4);
+        free(bc.ADR);
+        free(bc.ADF);
+        free(bc.fmt_arr);
+        free(bcr);
+        if (bcf_fp) {
+            hts_close(bcf_fp);
+            bcf_call_destroy(bca);
+        }
+        bam_smpl_destroy(sm); free(buf.s);
+        for (i = 0; i < gplp.n; ++i) free(gplp.plp[i]);
+        free(gplp.plp); free(gplp.n_plp); free(gplp.m_plp);
+        bam_mplp_destroy(iter);
+        //These are allocated within the mpileup_with_likelihoods
         if(is_initialized) {
-            free(bc.tmp.s);
-            bcf_destroy1(bcf_rec);
-            if (bcf_fp) {
-                hts_close(bcf_fp);
-                bcf_hdr_destroy(bcf_hdr);
-                bcf_call_destroy(bca);
-                free(bc.PL);
-                free(bc.DP4);
-                free(bc.ADR);
-                free(bc.ADF);
-                free(bc.fmt_arr);
-                free(bcr);
-            }
-            bam_smpl_destroy(sm); free(buf.s);
-            for (i = 0; i < gplp.n; ++i) free(gplp.plp[i]);
-            free(gplp.plp); free(gplp.n_plp); free(gplp.m_plp);
-            bam_mplp_destroy(iter);
             bam_hdr_destroy(h);
             for (i = 0; i < n_samples; ++i) {
                 sam_close(data[i]->fp);
-                if (data[i]->iter) hts_itr_destroy(data[i]->iter);
-                free(data[i]);
             }
-            free(data); free(plp); free(n_plp);
-            free(mp_ref.ref[0]);
-            free(mp_ref.ref[1]);
-            if(file_names[0]) {
-                free(file_names[0]);
-            }
-            is_initialized = false;
         }
+        for (i = 0; i < n_samples; ++i) {
+            free(data[i]);
+        }
+        free(data); free(plp); free(n_plp);
+        free(mp_ref.ref[0]);
+        free(mp_ref.ref[1]);
+        if(file_names[0]) {
+            free(file_names[0]);
+        }
+        is_initialized = false;
     }
 };
 
