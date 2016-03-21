@@ -67,7 +67,6 @@ void set_data_iter(mplp_conf_t *conf,
     bam_hdr_t *h_tmp = data[i]->h;
     if (conf->reg) {
         fprintf(stderr, "\nSetting region now\n");
-        fprintf(stderr, "\ni is %d\n", i);
         hts_idx_t *idx = sam_index_load(data[i]->fp, fn[i]);
         if (idx == NULL) {
             fprintf(stderr, "[%s] fail to load index for %s\n", __func__, fn[i]);

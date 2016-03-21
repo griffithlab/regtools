@@ -143,6 +143,8 @@ bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseId
     if(rmc1.data[0] -> iter)
         fprintf(stderr, "\niter is valid\n");
     // begin pileup
+    rmc1.iter = bam_mplp_init(rmc1.n_samples, mplp_func, (void**)rmc1.data);
+    bam_mplp_init_overlaps(rmc1.iter);
     while (bam_mplp_auto(rmc1.iter, &rmc1.tid, &rmc1.pos, rmc1.n_plp, rmc1.plp) > 0) {
         cerr << "inside bam_mplp_auto loop" << endl;
         if (conf->reg && (rmc1.pos < rmc1.beg0 || rmc1.pos >= rmc1.end0)) continue; // out of the region requested
@@ -172,6 +174,7 @@ bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseId
         }
     }
     //Destroy the iterator for this region
+    bam_mplp_destroy(rmc1.iter);
     for (int i = 0; i < rmc1.n_samples; ++i) {
         if (rmc1.data[i]->iter) hts_itr_destroy(rmc1.data[i]->iter);
     }
@@ -256,6 +259,7 @@ bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid, int pos, con
 //Callback for somatic het
 bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
     genotype geno = call_geno(bc);
+    fprintf(stderr, "\nin process_somatic_het\n");
     if(geno.is_het(min_depth_)) {
         fprintf(stderr, "\nsomatic-var chr, position, "
                 "total, max %s %d %f %c",

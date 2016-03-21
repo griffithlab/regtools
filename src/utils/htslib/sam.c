@@ -2040,10 +2040,10 @@ int bam_mplp_auto(bam_mplp_t iter, int *_tid, int *_pos, int *n_plp, const bam_p
 {
     int i, ret = 0;
     uint64_t new_min = (uint64_t)-1;
-    fprintf(stderr, "\nin bam_mplp_auto \n");
-    fprintf(stderr, "\nn is %d \n", iter->n);
+    fprintf(stderr, "\nin bam_mplp_auto\n");
+    fprintf(stderr, "\nn is %d\n", iter->n);
     for (i = 0; i < iter->n; ++i) {
-        fprintf(stderr, "\nin bam_mplp_auto  n \n");
+        fprintf(stderr, "\nin bam_mplp_auto  loop\n");
         if (iter->pos[i] == iter->min) {
             int tid, pos;
             iter->plp[i] = bam_plp_auto(iter->iter[i], &tid, &pos, &iter->n_plp[i]);
@@ -2052,6 +2052,7 @@ int bam_mplp_auto(bam_mplp_t iter, int *_tid, int *_pos, int *n_plp, const bam_p
         }
         if (iter->plp[i] && iter->pos[i] < new_min) new_min = iter->pos[i];
     }
+    fprintf(stderr, "\noutside bam_mplp_auto  loop\n");
     iter->min = new_min;
     if (new_min == (uint64_t)-1) return 0;
     *_tid = new_min>>32; *_pos = (uint32_t)new_min;
@@ -2061,6 +2062,7 @@ int bam_mplp_auto(bam_mplp_t iter, int *_tid, int *_pos, int *n_plp, const bam_p
             ++ret;
         } else n_plp[i] = 0, plp[i] = 0;
     }
+    fprintf(stderr, "\nbefore ret\n");
     return ret;
 }
 

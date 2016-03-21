@@ -160,9 +160,7 @@ struct regtools_mpileup_conf {
         for (int i = 0; i < n_samples; ++i) {
             data[i] = (mplp_aux_t *) calloc(1, sizeof(mplp_aux_t));
         }
-        iter = bam_mplp_init(n_samples, mplp_func, (void**)data);
         bcr = (bcf_callret1_t *) calloc(n_samples, sizeof(bcf_callret1_t));
-        bam_mplp_init_overlaps(iter);
         bcf_rec = bcf_init1();
         memset(&gplp, 0, sizeof(mplp_pileup_t));
         // allocate data storage proportionate to number of samples being studied n_samples
@@ -201,7 +199,6 @@ struct regtools_mpileup_conf {
         bam_smpl_destroy(sm); free(buf.s);
         for (i = 0; i < gplp.n; ++i) free(gplp.plp[i]);
         free(gplp.plp); free(gplp.n_plp); free(gplp.m_plp);
-        bam_mplp_destroy(iter);
         //These are allocated within the mpileup_with_likelihoods
         if(is_initialized) {
             bam_hdr_destroy(h);
