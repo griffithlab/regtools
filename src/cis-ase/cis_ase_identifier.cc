@@ -137,13 +137,14 @@ void CisAseIdentifier::set_mpileup_conf_somatic_vcf(mplp_conf_t &mplp_conf) {
 
 //Init mpileup
 bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*), regtools_mpileup_conf& rmc1) {
-    bool result;
+    bool result = false;
     //set the iterator to the region amongst other things
     set_data_iter(conf, rmc1.file_names, rmc1.data, &rmc1.beg0, &rmc1.end0);
     if(rmc1.data[0] -> iter)
         fprintf(stderr, "\niter is valid\n");
     // begin pileup
     rmc1.iter = bam_mplp_init(rmc1.n_samples, mplp_func, (void**)rmc1.data);
+    bam_mplp_set_maxcnt(rmc1.iter, rmc1.max_depth);
     bam_mplp_init_overlaps(rmc1.iter);
     while (bam_mplp_auto(rmc1.iter, &rmc1.tid, &rmc1.pos, rmc1.n_plp, rmc1.plp) > 0) {
         cerr << "inside bam_mplp_auto loop" << endl;
@@ -192,7 +193,6 @@ void CisAseIdentifier::mpileup_init(string bam, mplp_conf_t *conf, regtools_mpil
     rmc1.bcf_fp = bcf_open(conf->output_fname? conf->output_fname : "-", rmc1.mode);
     rmc1.bca = bcf_call_init(-1., conf->min_baseQ);
     rmc1.max_depth = conf->max_depth;
-    bam_mplp_set_maxcnt(rmc1.iter, rmc1.max_depth);
     mpileup_with_likelihoods(conf, rmc1.n_samples, rmc1.file_names, rmc1.data, rmc1.bca, rmc1.bcr,
             &rmc1.bc, &rmc1.gplp, rmc1.bcf_fp, rmc1.bcf_hdr, rmc1.sm, &rmc1.h, &rmc1.mp_ref);
     if(rmc1.h) {
