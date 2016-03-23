@@ -136,7 +136,9 @@ void CisAseIdentifier::set_mpileup_conf_somatic_vcf(mplp_conf_t &mplp_conf) {
 }
 
 //Init mpileup
-bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*), regtools_mpileup_conf& rmc1) {
+bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf,
+        bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*),
+                                    regtools_mpileup_conf& rmc1) {
     bool result = false;
     //set the iterator to the region amongst other things
     set_data_iter(conf, rmc1.file_names, rmc1.data, &rmc1.beg0, &rmc1.end0);
@@ -150,7 +152,8 @@ bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseId
         cerr << "inside bam_mplp_auto loop" << endl;
         if (conf->reg && (rmc1.pos < rmc1.beg0 || rmc1.pos >= rmc1.end0)) continue; // out of the region requested
         if(!rmc1.h->target_name) printf("\nNot defined target\n");
-        if (conf->bed && rmc1.tid >= 0 && !bed_overlap(conf->bed, rmc1.h->target_name[rmc1.tid], rmc1.pos, rmc1.pos+1)) {
+        if (conf->bed && rmc1.tid >= 0 &&
+            !bed_overlap(conf->bed, rmc1.h->target_name[rmc1.tid], rmc1.pos, rmc1.pos+1)) {
             cerr << 7 << "\t" << rmc1.pos << " continuing" << endl;
             continue;
         }
@@ -160,7 +163,8 @@ bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseId
         if (conf->flag & MPLP_BCF) {
             int total_depth, _ref0, ref16;
             for (int i = total_depth = 0; i < rmc1.n_samples; ++i) total_depth += rmc1.n_plp[i];
-            group_smpl(&rmc1.gplp, rmc1.sm, &rmc1.buf, rmc1.n_samples, rmc1.file_names, rmc1.n_plp, rmc1.plp, conf->flag & MPLP_IGNORE_RG);
+            group_smpl(&rmc1.gplp, rmc1.sm, &rmc1.buf, rmc1.n_samples, rmc1.file_names,
+                       rmc1.n_plp, rmc1.plp, conf->flag & MPLP_IGNORE_RG);
             _ref0 = (rmc1.ref && rmc1.pos < rmc1.ref_len)? rmc1.ref[rmc1.pos] : 'N';
             ref16 = seq_nt16_table[_ref0];
             bcf_callaux_clean(rmc1.bca, &rmc1.bc);
@@ -226,7 +230,8 @@ genotype CisAseIdentifier::call_geno(const bcf_call_t& bc) {
 }
 
 //Callback for germline het
-bool CisAseIdentifier::process_germline_het(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
+bool CisAseIdentifier::process_germline_het(bcf_hdr_t* bcf_hdr, int tid,
+                                            int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
     string region = common::create_region_string(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid), pos + 1, pos + 1);
     germline_variants_[region].is_het_dna = false;
     genotype geno = call_geno(bc);
@@ -241,7 +246,8 @@ bool CisAseIdentifier::process_germline_het(bcf_hdr_t* bcf_hdr, int tid, int pos
 }
 
 //Callback for hom in RNA(ASE)
-bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
+bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid,
+                                       int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
     genotype geno = call_geno(bc);
     if(geno.is_hom(min_depth_)) {
         fprintf(stderr, "\nRNA-hom chr, position, "
@@ -254,7 +260,8 @@ bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid, int pos, con
 }
 
 //Callback for somatic het
-bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
+bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid,
+                                           int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
     genotype geno = call_geno(bc);
     fprintf(stderr, "\nin process_somatic_het\n");
     if(geno.is_het(min_depth_)) {
@@ -294,7 +301,8 @@ void CisAseIdentifier::process_snps_in_window(string region) {
     bcf_sr_add_reader(poly_sr_, poly_vcf_.c_str());
     while (bcf_sr_next_line(poly_sr_)) {
         bcf1_t *line = bcf_sr_get_line(poly_sr_, 0);
-        string snp_region = common::create_region_string(bcf_hdr_id2name(poly_vcf_header_, line->rid), line->pos+1, line->pos+1);
+        string snp_region = common::create_region_string(bcf_hdr_id2name(poly_vcf_header_, line->rid),
+                                                         line->pos+1, line->pos+1);
         cerr << endl << "snp region is " << snp_region << endl;
         if(germline_variants_.count(snp_region)) {
             cerr << endl << "Variant in map ";
@@ -357,7 +365,8 @@ void CisAseIdentifier::run2() {
         throw std::runtime_error("Unable to read header.");
     }
     while(bcf_read(test_bcf, test_header, test_record) == 0) {
-        string somatic_region = common::create_region_string(bcf_hdr_id2name(test_header, test_record->rid), test_record->pos+1, test_record->pos+1);
+        string somatic_region = common::create_region_string(bcf_hdr_id2name(test_header, test_record->rid),
+                                                             test_record->pos+1, test_record->pos+1);
         cerr << endl << "somatic region is " << somatic_region << endl;
         set_mpileup_conf_region(somatic_conf_, somatic_region);
         mpileup_run(tumor_dna_, &somatic_conf_,
