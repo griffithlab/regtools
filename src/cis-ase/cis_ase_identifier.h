@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <fstream>
 #include <map>
 #include "htslib/sam.h"
+#include "htslib/synced_bcf_reader.h"
 #include "bam2bcf.h"
 #include "bam_plcmd.h"
 #include "hts.h"
@@ -192,13 +193,13 @@ struct regtools_mpileup_conf {
         free(bc.ADF);
         free(bc.fmt_arr);
         free(bcr);
+        bam_smpl_destroy(sm); free(buf.s);
+        for (i = 0; i < gplp.n; ++i) free(gplp.plp[i]);
+        free(gplp.plp); free(gplp.n_plp); free(gplp.m_plp);
         if (bcf_fp) {
             hts_close(bcf_fp);
             bcf_call_destroy(bca);
         }
-        bam_smpl_destroy(sm); free(buf.s);
-        for (i = 0; i < gplp.n; ++i) free(gplp.plp[i]);
-        free(gplp.plp); free(gplp.n_plp); free(gplp.m_plp);
         //These are allocated within the mpileup_with_likelihoods
         if(is_initialized) {
             bam_hdr_destroy(h);
@@ -223,7 +224,7 @@ struct regtools_mpileup_conf {
 class CisAseIdentifier {
     private:
         //Minimum depth to consider somatic/ASE
-        int min_depth_;
+        uint32_t min_depth_;
         //VCF file with somatic variants
         string somatic_vcf_;
         //VCF file with polymorphisms
@@ -263,6 +264,8 @@ class CisAseIdentifier {
         //Get info about a variant - key is chr:start
         //Bi-allelic assumption
         map<string, locus_info> germline_variants_;
+        //synced-reader for polymorphism vcf
+        bcf_srs_t *poly_sr_;
     public:
         //Constructor
         CisAseIdentifier() : min_depth_(10),

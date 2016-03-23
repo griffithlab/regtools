@@ -185,7 +185,7 @@ bool CisAseIdentifier::mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseId
 
 //This function is ugly, pieces torn by hand from samtools
 void CisAseIdentifier::mpileup_init(string bam, mplp_conf_t *conf, regtools_mpileup_conf& rmc1) {
-    cerr << "in init";
+    cerr << "in mpileup_init()";
     if ( conf->flag & MPLP_VCF )
         rmc1.mode = (conf->flag&MPLP_NO_COMP)? "wu" : "wz";   // uncompressed VCF or compressed VCF
     else
@@ -195,9 +195,6 @@ void CisAseIdentifier::mpileup_init(string bam, mplp_conf_t *conf, regtools_mpil
     rmc1.max_depth = conf->max_depth;
     mpileup_with_likelihoods(conf, rmc1.n_samples, rmc1.file_names, rmc1.data, rmc1.bca, rmc1.bcr,
             &rmc1.bc, &rmc1.gplp, rmc1.bcf_fp, rmc1.bcf_hdr, rmc1.sm, &rmc1.h, &rmc1.mp_ref);
-    if(rmc1.h) {
-        fprintf(stderr, "header is valid\n");
-    }
     rmc1.is_initialized = true; //all pointers initialized
 }
 
@@ -271,7 +268,7 @@ bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid, int pos,
             common::create_region_string(bcf_hdr_id2name(bcf_hdr,
                         bcf_rec->rid), pos - 1000, pos + 1000);
         cerr << window << endl;
-        //process_snps_in_window(window);
+        process_snps_in_window(window);
     }
     return geno.is_het(min_depth_);
 }
@@ -290,13 +287,13 @@ void CisAseIdentifier::open_poly_vcf() {
 
 //Get the information for SNPs within relevant window
 void CisAseIdentifier::process_snps_in_window(string region) {
-    bcf_srs_t *sr = bcf_sr_init();
-    bcf_sr_set_regions(sr, region.c_str(), 0);
-    bcf_sr_add_reader(sr, poly_vcf_.c_str());
+    std::cerr << "\ninside process_snps " << region << endl;
     std::cerr << "\nchromosome\tposition\tnum_alleles" << std::endl;
-    mpileup_init(tumor_dna_, &germline_conf_, germline_rmc1_);
-    while (bcf_sr_next_line(sr)) {
-        bcf1_t *line = bcf_sr_get_line(sr, 0);
+    poly_sr_ = bcf_sr_init();
+    bcf_sr_set_regions(poly_sr_, region.c_str(), 0);
+    bcf_sr_add_reader(poly_sr_, poly_vcf_.c_str());
+    while (bcf_sr_next_line(poly_sr_)) {
+        bcf1_t *line = bcf_sr_get_line(poly_sr_, 0);
         string snp_region = common::create_region_string(bcf_hdr_id2name(poly_vcf_header_, line->rid), line->pos+1, line->pos+1);
         cerr << endl << "snp region is " << snp_region << endl;
         if(germline_variants_.count(snp_region)) {
@@ -305,20 +302,28 @@ void CisAseIdentifier::process_snps_in_window(string region) {
             cerr << "\t";
             cerr << germline_variants_[snp_region].p_het_dna;
             cerr << endl;
-            return;
+            break;
         }
+        cerr << endl << "running dna snp-mpileup" << endl;
         set_mpileup_conf_region(germline_conf_, snp_region);
         //Check if het in DNA
         if(mpileup_run(tumor_dna_, &germline_conf_,
                     &CisAseIdentifier::process_germline_het,
                     germline_rmc1_)) {
+            cerr << endl << "running dna snp-mpileup" << endl;
             //Check if hom in RNA
-            mpileup_run(tumor_rna_, &germline_conf_,
-                    &CisAseIdentifier::process_rna_hom, germline_rmc1_);
+            if(mpileup_run(tumor_rna_, &germline_conf_,
+                    &CisAseIdentifier::process_rna_hom, germline_rmc1_)) {
+                cerr << "\npotential ASE " << snp_region << endl;
+            }
+        } else {
+            cerr << endl << "dna snp-mpileup not het" << endl;
         }
-        bcf_destroy(line);
+        free_mpileup_conf(germline_conf_);
+        //bcf_destroy(line);
     }
-    bcf_sr_destroy(sr);
+    cerr << "\ndestroying sr\n";
+    bcf_sr_destroy(poly_sr_);
 }
 
 //Free relevant pointers
@@ -333,7 +338,6 @@ void CisAseIdentifier::cleanup() {
         bcf_hdr_destroy(poly_vcf_header_);
     if(poly_vcf_fh_)
         bcf_close(poly_vcf_fh_);
-    free_mpileup_conf(germline_conf_);
     //Destroy pointer to reference
     if(ref_fai_)
         fai_destroy(ref_fai_);
@@ -352,7 +356,6 @@ void CisAseIdentifier::run2() {
     if(test_header == NULL) {
         throw std::runtime_error("Unable to read header.");
     }
-    mpileup_init(tumor_dna_, &somatic_conf_, somatic_rmc_);
     while(bcf_read(test_bcf, test_header, test_record) == 0) {
         string somatic_region = common::create_region_string(bcf_hdr_id2name(test_header, test_record->rid), test_record->pos+1, test_record->pos+1);
         cerr << endl << "somatic region is " << somatic_region << endl;
@@ -380,6 +383,8 @@ void CisAseIdentifier::run() {
     cerr << 2 << endl;
     //Set the region of the mpileup conf to the somatic-vcf
     cerr << 3 << endl;
+    mpileup_init(tumor_dna_, &germline_conf_, germline_rmc1_);
+    mpileup_init(tumor_dna_, &somatic_conf_, somatic_rmc_);
     run2();
     cerr << 4 << endl;
     cleanup();
