@@ -154,7 +154,7 @@ bool CisAseIdentifier::mpileup_run(mplp_conf_t *conf,
             continue;
         }
         if(conf->reg)
-            cerr << "Region within run_mpileup " << conf->reg;
+            cerr << "Region within run_mpileup " << conf->reg << endl;
         mplp_get_ref(rmc1.data[0], rmc1.tid, &rmc1.ref, &rmc1.ref_len);
         if (conf->flag & MPLP_BCF) {
             int total_depth, _ref0, ref16;
@@ -234,7 +234,7 @@ bool CisAseIdentifier::process_germline_het(bcf_hdr_t* bcf_hdr, int tid,
     } else {
         cerr << "Germline poly is hom" << endl;
     }
-    cerr << endl << "total, max " <<
+    cerr << "total, max " <<
         bcf_hdr_id2name(bcf_hdr, bcf_rec->rid) << " " <<
         pos + 1 << " " << geno.p_het << " " <<
         bcf_rec->d.als[0] << endl;
@@ -246,11 +246,11 @@ bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid,
                                        int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
     genotype geno = call_geno(bc);
     if(geno.is_hom(min_depth_)) {
-        cerr << endl << "RNA-hom" << endl;
+        cerr << "RNA-hom" << endl;
     } else {
         cerr << "RNA variant is het" << endl;
     }
-    cerr << endl << "total, max " <<
+    cerr << "total, max " <<
         bcf_hdr_id2name(bcf_hdr, bcf_rec->rid) << " " <<
         pos + 1 << " " << geno.p_het << " " <<
         bcf_rec->d.als[0] << endl;
@@ -263,6 +263,10 @@ bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid,
     genotype geno = call_geno(bc);
     if(geno.is_het(min_depth_)) {
         cerr << endl << "Somatic het. Window is ";
+        cerr << "total, max " <<
+            bcf_hdr_id2name(bcf_hdr, bcf_rec->rid) << " " <<
+            pos + 1 << " " << geno.p_het << " " <<
+            bcf_rec->d.als[0] << endl;
         string window =
             common::create_region_string(bcf_hdr_id2name(bcf_hdr,
                         bcf_rec->rid), pos - 1000, pos + 1000);
@@ -271,10 +275,6 @@ bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid,
     } else {
         cerr << "Somatic variant is hom" << endl;
     }
-    cerr << endl << "total, max " <<
-        bcf_hdr_id2name(bcf_hdr, bcf_rec->rid) << " " <<
-        pos + 1 << " " << geno.p_het << " " <<
-        bcf_rec->d.als[0] << endl;
     return geno.is_het(min_depth_);
 }
 
@@ -292,7 +292,7 @@ void CisAseIdentifier::open_poly_vcf() {
 
 //Get the information for SNPs within relevant window
 void CisAseIdentifier::process_snps_in_window(string region) {
-    std::cerr << "\ninside process_snps " << region << endl;
+    std::cerr << "\nInside process_snps " << region << endl;
     poly_sr_ = bcf_sr_init();
     bcf_sr_set_regions(poly_sr_, region.c_str(), 0);
     bcf_sr_add_reader(poly_sr_, poly_vcf_.c_str());
@@ -315,7 +315,7 @@ void CisAseIdentifier::process_snps_in_window(string region) {
         if(mpileup_run(&germline_conf_,
                     &CisAseIdentifier::process_germline_het,
                     germline_dna_rmc_)) {
-            cerr << "dna is het, now running rna snp-mpileup" << endl;
+            cerr << "dna is het, now running RNA snp-mpileup" << endl;
             //Check if hom in RNA
             if(mpileup_run(&germline_conf_,
                     &CisAseIdentifier::process_rna_hom, germline_rna_rmc_)) {
