@@ -1856,8 +1856,6 @@ const bam_pileup1_t *bam_plp_next(bam_plp_t iter, int *_tid, int *_pos, int *_n_
     *_n_plp = 0;
     if (iter->is_eof && iter->head->next == 0) return 0;
     while (iter->is_eof || iter->max_tid > iter->tid || (iter->max_tid == iter->tid && iter->max_pos > iter->pos)) {
-        fprintf(stderr, "\nin plp_next  loop \n");
-        fprintf(stderr, "\nin plp_next loop pos: %d\n", iter->pos);
         int n_plp = 0;
         lbnode_t *p, *q;
         // write iter->plp at iter->pos
@@ -1939,7 +1937,6 @@ int bam_plp_push(bam_plp_t iter, const bam1_t *b)
 
 const bam_pileup1_t *bam_plp_auto(bam_plp_t iter, int *_tid, int *_pos, int *_n_plp)
 {
-    fprintf(stderr, "\nin bam_plp_auto\n");
     const bam_pileup1_t *plp;
     if (iter->func == 0 || iter->error) { *_n_plp = -1; return 0; }
     if ((plp = bam_plp_next(iter, _tid, _pos, _n_plp)) != 0) return plp;
@@ -1947,9 +1944,7 @@ const bam_pileup1_t *bam_plp_auto(bam_plp_t iter, int *_tid, int *_pos, int *_n_
         *_n_plp = 0;
         if (iter->is_eof) return 0;
         int ret;
-        fprintf(stderr, "\njust out of bam_plp_auto  loop \n");
         while ( (ret=iter->func(iter->data, iter->b)) >= 0) {
-            fprintf(stderr, "\nin bam_plp_auto  loop \n");
             if (bam_plp_push(iter, iter->b) < 0) {
                 *_n_plp = -1;
                 return 0;
@@ -2040,10 +2035,7 @@ int bam_mplp_auto(bam_mplp_t iter, int *_tid, int *_pos, int *n_plp, const bam_p
 {
     int i, ret = 0;
     uint64_t new_min = (uint64_t)-1;
-    fprintf(stderr, "\nin bam_mplp_auto\n");
-    fprintf(stderr, "\nn is %d\n", iter->n);
     for (i = 0; i < iter->n; ++i) {
-        fprintf(stderr, "\nin bam_mplp_auto  loop\n");
         if (iter->pos[i] == iter->min) {
             int tid, pos;
             iter->plp[i] = bam_plp_auto(iter->iter[i], &tid, &pos, &iter->n_plp[i]);
@@ -2052,7 +2044,6 @@ int bam_mplp_auto(bam_mplp_t iter, int *_tid, int *_pos, int *n_plp, const bam_p
         }
         if (iter->plp[i] && iter->pos[i] < new_min) new_min = iter->pos[i];
     }
-    fprintf(stderr, "\noutside bam_mplp_auto  loop\n");
     iter->min = new_min;
     if (new_min == (uint64_t)-1) return 0;
     *_tid = new_min>>32; *_pos = (uint32_t)new_min;
@@ -2062,7 +2053,6 @@ int bam_mplp_auto(bam_mplp_t iter, int *_tid, int *_pos, int *n_plp, const bam_p
             ++ret;
         } else n_plp[i] = 0, plp[i] = 0;
     }
-    fprintf(stderr, "\nbefore ret\n");
     return ret;
 }
 

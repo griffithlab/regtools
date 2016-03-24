@@ -247,10 +247,12 @@ class CisAseIdentifier {
         bcf_hdr_t *somatic_vcf_header_;
         //Reference FASTA object
         faidx_t *ref_fai_;
-        //mpileup conf for the somatic vcf
-        regtools_mpileup_conf somatic_rmc_;
-        //mpileup conf for the germline vcf
-        regtools_mpileup_conf germline_rmc1_;
+        //mpileup conf for the somatic dna BAM
+        regtools_mpileup_conf somatic_dna_rmc_;
+        //mpileup conf for the germline dna BAM
+        regtools_mpileup_conf germline_dna_rmc_;
+        //mpileup conf for the germline rna BAM
+        regtools_mpileup_conf germline_rna_rmc_;
         //Somatic VCF record
         bcf1_t *somatic_vcf_record_;
         //Polymorphism VCF file handle
@@ -299,7 +301,7 @@ class CisAseIdentifier {
         //init mpileup
         void mpileup_init(string bam, mplp_conf_t *conf, regtools_mpileup_conf& rmc1);
         //Run mpileup and get the genotype likelihoods
-        bool mpileup_run(string bam, mplp_conf_t *conf, bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*), regtools_mpileup_conf& rmc1);
+        bool mpileup_run(mplp_conf_t *conf, bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*), regtools_mpileup_conf& rmc1);
         //Call genotypes using the posterior prob
         genotype call_geno(const bcf_call_t& bc);
         //Get the SNPs within relevant window

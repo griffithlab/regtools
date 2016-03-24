@@ -66,7 +66,6 @@ void set_data_iter(mplp_conf_t *conf,
     int i = 0;//only one sample
     bam_hdr_t *h_tmp = data[i]->h;
     if (conf->reg) {
-        fprintf(stderr, "\nSetting region now\n");
         hts_idx_t *idx = sam_index_load(data[i]->fp, fn[i]);
         if (idx == NULL) {
             fprintf(stderr, "[%s] fail to load index for %s\n", __func__, fn[i]);
@@ -151,8 +150,6 @@ int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn,
         }
     }
 
-    fprintf(stderr, "[%s] %d samples in %d input files\n", __func__, sm->n, n);
-    fprintf(stderr, "[%s]\n", conf->reg);
     // write the VCF header
     if (conf->flag & MPLP_BCF)
     {
