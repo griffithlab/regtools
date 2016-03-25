@@ -32,8 +32,8 @@ DEALINGS IN THE SOFTWARE.  */
 #include "htslib/synced_bcf_reader.h"
 #include "bam2bcf.h"
 #include "bam_plcmd.h"
-#include "hts.h"
-#include "vcf.h"
+#include "htslib/hts.h"
+#include "htslib/vcf.h"
 #include "sample.h"
 
 using namespace std;

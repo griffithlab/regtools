@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <string>
 #include "common.h"
 #include "junctions_annotator.h"
-#include "faidx.h"
+#include "htslib/faidx.h"
 
 using namespace std;
 

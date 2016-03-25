@@ -37,7 +37,6 @@ DEALINGS IN THE SOFTWARE.  */
 #include "bam_plcmd.h"
 #include "common.h"
 #include "cis_ase_identifier.h"
-#include "hts.h"
 #include "sample.h"
 #include "samtools.h"
 
@@ -292,14 +291,17 @@ void CisAseIdentifier::open_poly_vcf() {
 
 //Get the information for SNPs within relevant window
 void CisAseIdentifier::process_snps_in_window(string region) {
-    std::cerr << "\nInside process_snps " << region << endl;
+    std::cerr << "\ninside process_snps " << region << endl;
+    if(!common::check_tabix_index(poly_vcf_)) {
+        throw runtime_error("Tabix index does not exist for poly_vcf");
+    }
     poly_sr_ = bcf_sr_init();
     bcf_sr_set_regions(poly_sr_, region.c_str(), 0);
     bcf_sr_add_reader(poly_sr_, poly_vcf_.c_str());
     while (bcf_sr_next_line(poly_sr_)) {
         bcf1_t *line = bcf_sr_get_line(poly_sr_, 0);
         string snp_region = common::create_region_string(bcf_hdr_id2name(poly_vcf_header_, line->rid),
-                                                         line->pos+1, line->pos+1);
+                line->pos+1, line->pos+1);
         cerr << endl << "snp region is " << snp_region << endl;
         if(germline_variants_.count(snp_region)) {
             cerr << endl << "Variant exists in map ";
@@ -318,7 +320,7 @@ void CisAseIdentifier::process_snps_in_window(string region) {
             cerr << "dna is het, now running RNA snp-mpileup" << endl;
             //Check if hom in RNA
             if(mpileup_run(&germline_conf_,
-                    &CisAseIdentifier::process_rna_hom, germline_rna_rmc_)) {
+                        &CisAseIdentifier::process_rna_hom, germline_rna_rmc_)) {
                 cerr << "potential ASE " << snp_region << endl;
             }
         } else {

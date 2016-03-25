@@ -1,4 +1,5 @@
 include_directories(../utils/
+                    ../utils/htslib/
                     ../utils/bedtools/lineFileUtilities/
                     ../utils/bedtools/fileType/
                     ../utils/bedtools/gzstream/

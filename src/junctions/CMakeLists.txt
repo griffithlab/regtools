@@ -1,11 +1,11 @@
 include_directories(../gtf/
                     ../utils/
+                    ../utils/htslib/
                     ../utils/bedtools/bedFile/
                     ../utils/bedtools/lineFileUtilities/
                     ../utils/bedtools/gzstream/
                     ../utils/bedtools/fileType/
-                    ../utils/bedtools/stringUtilities/
-                    ../utils/htslib/htslib/)
+                    ../utils/bedtools/stringUtilities/)
 
 add_library(junctions
     junctions_main.cc

@@ -5,7 +5,7 @@ include_directories(../gtf/
                     ../utils/bedtools/gzstream/
                     ../utils/bedtools/fileType/
                     ../utils/bedtools/stringUtilities/
-                    ../utils/htslib/htslib/
+                    ../utils/htslib/
                     ../variants/
                     ../junctions/)
 

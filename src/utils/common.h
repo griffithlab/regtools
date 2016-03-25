@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.  */
 #include <sys/stat.h>
 #include "stdint.h"
 #include "bedFile.h"
+#include "htslib/hts.h"
+#include "htslib/tbx.h"
 
 using namespace std;
 
