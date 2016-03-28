@@ -352,7 +352,6 @@ int mpileup(mplp_conf_t *conf, int n, char **fn)
     gplp.m_plp = calloc(sm->n, sizeof(int));
     gplp.plp = calloc(sm->n, sizeof(bam_pileup1_t*));
 
-    fprintf(stderr, "[%s] %d samples in %d input files\n", __func__, sm->n, n);
     // write the VCF header
     if (conf->flag & MPLP_BCF)
     {
