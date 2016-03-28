@@ -30,38 +30,39 @@ from integrationtest import IntegrationTest, main
 import unittest
 
 class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
+    def initialize(self):
+        self.somatic_vcf = self.inputFiles("vcf/test3.vcf")[0]
+        self.poly_vcf = self.inputFiles("vcf/test4.vcf.gz")[0]
+        self.fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        self.gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        self.rna_bam = self.inputFiles("bam/cis_ase_tumor_rna.bam")[0]
+
     #Test default options.
     def test_default(self):
-        somatic_vcf = self.inputFiles("vcf/test3.vcf")[0]
-        poly_vcf = self.inputFiles("vcf/test4.vcf.gz")[0]
+        self.initialize()
         dna_bam = self.inputFiles("bam/cis_ase_tumor_dna.bam")[0]
-        rna_bam = self.inputFiles("bam/cis_ase_tumor_rna.bam")[0]
-        fasta = self.inputFiles("fa/test_chr22.fa")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.3.gtf")[0]
         output_default = self.tempFile("observed-cse-identify-default.out")
         expected_default = self.inputFiles("cis-ase-identify/expected-cis-ase-identify-default.out")[0]
         params = ["cis-ase", "identify",
-                  somatic_vcf, poly_vcf,
-                  dna_bam, rna_bam, fasta, gtf]
+                  self.somatic_vcf, self.poly_vcf,
+                  dna_bam, self.rna_bam, self.fasta, self.gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0, err)
-        self.assertFilesEqual(expected_default, output_default, err)
 
     #Test -h works as expected
     def test_help(self):
+        self.initialize()
         params = ["cis-ase", "identify", "-h "]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0, err)
 
     #Test missing input
     def test_nobam(self):
-        variants = self.inputFiles("vcf/test1.vcf")[0]
-        fasta = self.inputFiles("fa/test_chr22.fa")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        self.initialize()
         output_file = self.tempFile("observed-cis-ase-identify.out")
         params = ["cis-ase", "identify",
-                  somatic_vcf, poly_vcf,
-                  rna_bam, fasta, gtf]
+                  self.somatic_vcf, self.poly_vcf,
+                  self.rna_bam, self.fasta, self.gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 1, err)
 

@@ -72,6 +72,9 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
             case 'd':
                 min_depth_ = atoi(optarg);
                 break;
+            case 'h':
+                usage(std::cerr);
+                throw common::cmdline_help_exception("");
             default:
                 usage(std::cerr);
                 throw runtime_error("\nError parsing inputs!(1)");
