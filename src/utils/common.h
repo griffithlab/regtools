@@ -119,6 +119,15 @@ namespace common {
             dest.basic_ios<char>::rdbuf(source.rdbuf());
             dest.clear(source.rdstate());
     }
+
+    //Create a region string using chr, start, end
+    //this is of the form chr:start-end
+    inline std::string create_region_string(const char* chr,
+                                        int start, int end) {
+        stringstream ss1;
+        ss1 << chr << ":" << start << "-" << end;
+        return ss1.str();
+    }
 }
 
 #endif

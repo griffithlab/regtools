@@ -58,6 +58,16 @@ struct AnnotatedVariant : public BED {
                          cis_effect_end(0) {}
 };
 
+inline bool operator<(const AnnotatedVariant& lhs, const AnnotatedVariant& rhs) {
+  if(lhs.chrom < rhs.chrom )
+      return true;
+  if(lhs.chrom == rhs.chrom && lhs.start < rhs.start)
+      return true;
+  if(lhs.chrom == rhs.chrom && lhs.start == rhs.start && lhs.end < rhs.end)
+      return true;
+  return false;
+}
+
 //The class that does all the annotation
 class VariantsAnnotator {
     private:
@@ -180,5 +190,15 @@ class VariantsAnnotator {
                                               AnnotatedVariant& variant1,
                                               uint32_t i);
 };
+
+inline string variant_set_to_string(const set<AnnotatedVariant> &av1) {
+    string variant_string;
+    for(set<AnnotatedVariant>::iterator i = av1.begin();
+            i != av1.end(); i++) {
+        variant_string += common::create_region_string(i->chrom.c_str(), i->start, i->end) + ",";
+    }
+    variant_string.erase(variant_string.end() - 1);
+    return variant_string;
+}
 
 #endif
