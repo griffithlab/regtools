@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <limits>
 #include <stdint.h>
 #include "bedFile.h"
+#include "common.h"
 #include "gtf_parser.h"
 #include "hts.h"
 #include "junctions_annotator.h"
