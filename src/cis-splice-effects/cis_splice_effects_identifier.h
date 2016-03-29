@@ -62,6 +62,8 @@ class CisSpliceEffectsIdentifier {
         ofstream ofs_junctions_bed_;
         //Unique set of junctions near splicing variants
         set<Junction> unique_junctions_;
+        //Store the variants that mark a junction
+        map<Junction, set<AnnotatedVariant> > junction_to_variant_;
     public:
         //Constructor
         CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"),

@@ -61,8 +61,10 @@ struct AnnotatedJunction : BED {
     bool known_junction;
     //Annotation - Exonic/Intronic etc.
     string annotation;
+    //Variant related to the junction
+    string variant_info;
     //Print the header line
-    static void print_header(ostream& out = std::cout) {
+    static void print_header(ostream& out = std::cout, bool variant_info_exists = false) {
         out << "chrom" << "\t" << "start" <<
                 "\t" << "end" << "\t" << "name" <<
                 "\t" << "score" << "\t" << "strand" <<
@@ -70,10 +72,14 @@ struct AnnotatedJunction : BED {
                 "\t" << "exons_skipped" << "\t" << "donors_skipped" <<
                 "\t" << "anchor" <<
                 "\t" << "known_donor" << "\t" << "known_acceptor" << "\t" << "known_junction" <<
-                "\t" << "genes" << "\t" << "transcripts" << "\n";
+                "\t" << "genes" << "\t" << "transcripts";
+        if(variant_info_exists) {
+            out << "\t" << "variant_info";
+        }
+        out << "\n";
     }
     //Print out the junction
-    void print(ostream &out = std::cout) {
+    void print(ostream &out = std::cout, bool variant_info_exists = false) {
         out << chrom << "\t" << start <<
                 "\t" << end << "\t" << name <<
                 "\t" << score << "\t" << strand <<
@@ -102,6 +108,9 @@ struct AnnotatedJunction : BED {
             }
         } else {
             out << "\t" << "NA";
+        }
+        if(variant_info_exists) {
+            out << "\t" << variant_info;
         }
         out << endl;
     }
