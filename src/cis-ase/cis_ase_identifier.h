@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <iostream>
 #include <fstream>
 #include <map>
+#include "gtf_parser.h"
 #include "htslib/sam.h"
 #include "htslib/synced_bcf_reader.h"
 #include "bam2bcf.h"
@@ -223,8 +224,12 @@ struct regtools_mpileup_conf {
 //Workhorse for "cis-ase identify"
 class CisAseIdentifier {
     private:
+        //GTF parser object - holds the GTF in memory
+        GtfParser gtf_parser_;
         //Minimum depth to consider somatic/ASE
         uint32_t min_depth_;
+        //Window around somatic variants to look for transcripts
+        uint32_t transcript_window_;
         //VCF file with somatic variants
         string somatic_vcf_;
         //VCF file with polymorphisms
@@ -271,6 +276,7 @@ class CisAseIdentifier {
     public:
         //Constructor
         CisAseIdentifier() : min_depth_(10),
+                             transcript_window_(1000),
                              somatic_vcf_("NA"),
                              tumor_rna_("NA"),
                              tumor_dna_("NA"), ref_("NA"), gtf_("NA"),
@@ -287,6 +293,9 @@ class CisAseIdentifier {
                 ofs_.close();
             }
         }
+        //True if transcript within the variants transcript_window_
+        bool transcript_within_window(const vector<BED> &exons, uint32_t pos,
+                                      string transcript_strand);
         //Parse command line arguments
         void parse_options(int argc, char* argv[]);
         //Usage for this tool
@@ -342,12 +351,15 @@ class CisAseIdentifier {
             mplp_conf.fai_fname = (char*)ref_.c_str();
             return mplp_conf;
         }
+        //Free the mplp_conf_t object members
         void free_mpileup_conf(mplp_conf_t conf) {
             if (conf.bed)
                 bed_destroy(conf.bed);
             if (conf.reg)
                 free(conf.reg);
         }
+        //Get the region of interest for a somatic variant
+        string get_relevant_window(const char* chr, int pos);
 };
 
 #endif //CIS_ASE_IDENTIFIER_

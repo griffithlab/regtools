@@ -56,7 +56,9 @@ void CisAseIdentifier::usage(ostream& out) {
         << " tumor_dna_alignments.bam tumor_rna_alignments.bam ref.fa annotations.gtf";
     out << "\nOptions:";
     out << "\t"   << "-o STR Output file containing the aberrant splice junctions with annotations. [STDOUT]";
-    out << "\n\t\t"   << "-d INT Minimum read-depth to consider a variant to be somatic/ASE. [10]";
+    out << "\n\t\t"   << "-d INT Minimum total read-depth for a somatic/ASE variant. [10]";
+    out << "\n\t\t"   << "-w INT Window around a somatic variant to look for transcripts. ASE variants "
+        << "will be in these transcripts[1000]";
     out << "\n";
 }
 
@@ -64,13 +66,16 @@ void CisAseIdentifier::usage(ostream& out) {
 void CisAseIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     char c;
-    while((c = getopt(argc, argv, "d:o:w:v:j:h")) != -1) {
+    while((c = getopt(argc, argv, "d:o:w:h")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
                 break;
             case 'd':
                 min_depth_ = atoi(optarg);
+                break;
+            case 'w':
+                transcript_window_ = atoi(optarg);
                 break;
             case 'h':
                 usage(std::cerr);
@@ -87,6 +92,7 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
         tumor_rna_ = string(argv[optind++]);
         ref_ = string(argv[optind++]);
         gtf_ = string(argv[optind++]);
+        gtf_parser_.set_gtffile(gtf_);
     }
     if(optind < argc ||
        somatic_vcf_ == "NA" ||
@@ -259,19 +265,99 @@ bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid,
     return geno.is_hom(min_depth_);
 }
 
+//True if transcript within the variants transcript_window_
+bool CisAseIdentifier::transcript_within_window(const vector<BED> &exons, uint32_t pos,
+                                                string transcript_strand) {
+    int n_exons = exons.size();
+    if(transcript_strand == "+") {
+        //variant inside transcript
+        if(pos >= exons[0].start && pos <= exons[n_exons - 1].end) {
+            return true;
+        }
+        //variant outside transcript
+        if(exons[0].start - pos <= transcript_window_ &&
+           exons[n_exons -1].start > pos) {
+            return true;
+        }
+        //variant outside transcript
+        if(pos - exons[n_exons - 1].end <= transcript_window_ &&
+           exons[0].end < pos) {
+            return true;
+        }
+    } else if(transcript_strand == "-") {
+        //variant inside transcript
+        if(pos >= exons[n_exons - 1].start && pos <= exons[0].end) {
+            return true;
+        }
+        //variant outside transcript
+        if(pos - exons[0].end <= transcript_window_ &&
+           exons[n_exons -1].end < pos) {
+            return true;
+        }
+        //variant outside transcript
+        if(exons[n_exons - 1].start - pos <= transcript_window_ &&
+           exons[0].start > pos) {
+            return true;
+        }
+    } else {
+        throw runtime_error("Unknown transcript strand.");
+    }
+    return false;
+}
+
+//Get the window pertinent to this variant
+//Get the transcripts within a certain window
+//Return the window that encompasses all these transcripts.
+string CisAseIdentifier::get_relevant_window(const char* chr, int pos) {
+    CHRPOS min_start = pos;
+    CHRPOS max_end = pos;
+    BIN start_bin = pos >> _binFirstShift;
+    BIN end_bin = pos >> _binFirstShift;
+    for (BINLEVEL i = 0; i < _binLevels; ++i) {
+        BIN offset = _binOffsetsExtended[i];
+        for (BIN b = (start_bin + offset); b <= (end_bin + offset); ++b) {
+            vector<string> transcripts = gtf_parser_.transcripts_from_bin(chr, b);
+            for(std::size_t i = 0; i < transcripts.size(); i++) {
+                const vector<BED> & exons =
+                    gtf_parser_.get_exons_from_transcript(transcripts[i]);
+                //check if transcript within the window
+                string transcript_strand = exons[0].strand;
+                if(transcript_within_window(exons, pos, transcript_strand)) {
+                    int n_exons = exons.size() - 1;
+                    if(exons[0].start < min_start) {
+                        min_start = exons[0].start;
+                    }
+                    if(exons[n_exons - 1].start < min_start) {
+                        min_start = exons[n_exons - 1].start;
+                    }
+                    if(exons[exons.size() - 1].end > max_end) {
+                        max_end = exons[exons.size() - 1].end;
+                    }
+                    if(exons[0].end > max_end) {
+                        max_end = exons[0].end;
+                    }
+                }
+            }
+        }
+        start_bin >>= _binNextShift;
+        end_bin >>= _binNextShift;
+    }
+    return common::create_region_string(chr, min_start, max_end);
+}
+
 //Callback for somatic het
 bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid,
                                            int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
     genotype geno = call_geno(bc);
     if(geno.is_het(min_depth_)) {
-        cerr << endl << "Somatic het. Window is ";
+        cerr << endl << "Somatic het. ";
         cerr << "total, max " <<
             bcf_hdr_id2name(bcf_hdr, bcf_rec->rid) << " " <<
             pos + 1 << " " << geno.p_het << " " <<
-            bcf_rec->d.als[0] << endl;
+            bcf_rec->d.als[0];
         string window =
-            common::create_region_string(bcf_hdr_id2name(bcf_hdr,
-                        bcf_rec->rid), pos - 1000, pos + 1000);
+            get_relevant_window(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid), pos);
+        cerr << endl << "Window is ";
         cerr << window << endl;
         process_snps_in_window(window);
     } else {
@@ -385,6 +471,8 @@ void CisAseIdentifier::run() {
     somatic_dna_rmc_.init(tumor_dna_);
     germline_rna_rmc_.init(tumor_rna_);
     load_reference();
+    //Load gene annotations
+    gtf_parser_.load();
     somatic_conf_ = get_default_mpileup_conf();
     germline_conf_ = get_default_mpileup_conf();
     somatic_vcf_record_ = bcf_init();
