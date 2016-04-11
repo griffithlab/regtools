@@ -400,20 +400,22 @@ void CisAseIdentifier::process_snps_in_window(string region) {
             cerr << endl;
             break;
         }
-        cerr << "running dna snp-mpileup" << endl;
+        cerr << "running rna mpileup" << endl;
         set_mpileup_conf_region(germline_conf_, snp_region);
-        //Check if het in DNA
+        //Check if hom in RNA
         if(mpileup_run(&germline_conf_,
-                    &CisAseIdentifier::process_germline_het,
-                    germline_dna_rmc_)) {
-            cerr << "dna is het, now running RNA snp-mpileup" << endl;
-            //Check if hom in RNA
+                    &CisAseIdentifier::process_rna_hom, germline_rna_rmc_)) {
+            cerr << "rna is hom, now running RNA snp-mpileup" << endl;
+            //Check if het in DNA
             if(mpileup_run(&germline_conf_,
-                        &CisAseIdentifier::process_rna_hom, germline_rna_rmc_)) {
-                cerr << "potential ASE " << snp_region << endl;
+                        &CisAseIdentifier::process_germline_het,
+                        germline_dna_rmc_)) {
+                cerr << "DNA is het. potential ASE " << snp_region << endl;
+            } else {
+                cerr << "DNA not het" << endl;
             }
         } else {
-            cerr << "dna not het" << endl;
+            cerr << "rna not hom" << endl;
         }
         free_mpileup_conf(germline_conf_);
         //bcf_destroy(line);
