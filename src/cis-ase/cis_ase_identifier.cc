@@ -125,17 +125,26 @@ void CisAseIdentifier::open_somatic_vcf() {
     }
 }
 
-//Read in next record
-bool CisAseIdentifier::read_somatic_record() {
-    return (bcf_read(somatic_vcf_fh_, somatic_vcf_header_, somatic_vcf_record_) == 0);
-}
-
 //Set the region as the region-string
 void CisAseIdentifier::set_mpileup_conf_region(mplp_conf_t &mplp_conf, string region) {
     mplp_conf.reg = strdup(region.c_str());
 }
 
-//Init mpileup
+//This function is ugly, pieces torn by hand from samtools
+void CisAseIdentifier::mpileup_init(string bam, mplp_conf_t *conf, regtools_mpileup_conf& rmc1) {
+    if ( conf->flag & MPLP_VCF )
+        rmc1.mode = (conf->flag&MPLP_NO_COMP)? "wu" : "wz";   // uncompressed VCF or compressed VCF
+    else
+        rmc1.mode = (conf->flag&MPLP_NO_COMP)? "wub" : "wb";  // uncompressed BCF or compressed BCF
+    rmc1.bcf_fp = bcf_open(conf->output_fname? conf->output_fname : "-", rmc1.mode);
+    rmc1.bca = bcf_call_init(-1., conf->min_baseQ);
+    rmc1.max_depth = conf->max_depth;
+    mpileup_with_likelihoods(conf, rmc1.n_samples, rmc1.file_names, rmc1.data, rmc1.bca, rmc1.bcr,
+            &rmc1.bc, &rmc1.gplp, rmc1.bcf_fp, rmc1.bcf_hdr, rmc1.sm, &rmc1.h, &rmc1.mp_ref);
+    rmc1.is_initialized = true; //all pointers initialized
+}
+
+//Run mpileup
 bool CisAseIdentifier::mpileup_run(mplp_conf_t *conf,
         bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*),
                                     regtools_mpileup_conf& rmc1) {
@@ -179,20 +188,6 @@ bool CisAseIdentifier::mpileup_run(mplp_conf_t *conf,
         if (rmc1.data[i]->iter) hts_itr_destroy(rmc1.data[i]->iter);
     }
     return result;
-}
-
-//This function is ugly, pieces torn by hand from samtools
-void CisAseIdentifier::mpileup_init(string bam, mplp_conf_t *conf, regtools_mpileup_conf& rmc1) {
-    if ( conf->flag & MPLP_VCF )
-        rmc1.mode = (conf->flag&MPLP_NO_COMP)? "wu" : "wz";   // uncompressed VCF or compressed VCF
-    else
-        rmc1.mode = (conf->flag&MPLP_NO_COMP)? "wub" : "wb";  // uncompressed BCF or compressed BCF
-    rmc1.bcf_fp = bcf_open(conf->output_fname? conf->output_fname : "-", rmc1.mode);
-    rmc1.bca = bcf_call_init(-1., conf->min_baseQ);
-    rmc1.max_depth = conf->max_depth;
-    mpileup_with_likelihoods(conf, rmc1.n_samples, rmc1.file_names, rmc1.data, rmc1.bca, rmc1.bcr,
-            &rmc1.bc, &rmc1.gplp, rmc1.bcf_fp, rmc1.bcf_hdr, rmc1.sm, &rmc1.h, &rmc1.mp_ref);
-    rmc1.is_initialized = true; //all pointers initialized
 }
 
 //Call genotypes using the posterior prob
