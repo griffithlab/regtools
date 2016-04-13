@@ -130,6 +130,7 @@ namespace common {
         ss1 << chr << ":" << start << "-" << end;
         return ss1.str();
     }
+
     //Check if tabix index exists
     //Throws runtime_error if index does not exist
     inline bool check_tabix_index(string file) {

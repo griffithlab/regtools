@@ -150,7 +150,7 @@ void CisSpliceEffectsIdentifier::annotate_junctions(const GtfParser& gp1) {
     ja1.set_gtf_parser(gp1);
     set_ostream();
     //Annotate the junctions in the set and write to file
-    AnnotatedJunction::print_header(ofs_);
+    AnnotatedJunction::print_header(ofs_, true);
     int i = 0;
     //This is ugly, waiting to start using C++11/14
     for (set<Junction>::iterator j1 = unique_junctions_.begin(); j1 != unique_junctions_.end(); j1++) {
@@ -163,7 +163,8 @@ void CisSpliceEffectsIdentifier::annotate_junctions(const GtfParser& gp1) {
                 j.name = get_junction_name(++i);
                 j.print(ofs_junctions_bed_);
             }
-            line.print(ofs_);
+            line.variant_info = variant_set_to_string(junction_to_variant_[j]);
+            line.print(ofs_, true);
         }
     }
     close_ostream();
@@ -210,12 +211,16 @@ void CisSpliceEffectsIdentifier::identify() {
                     if(junctions[i].start >= v1.cis_effect_start &&
                        junctions[i].end <= v1.cis_effect_end) {
                        unique_junctions_.insert(junctions[i]);
+                       //add to the map of junctions to variants
+                       junction_to_variant_[junctions[i]].insert(v1);
                     }
                     continue;
                 }
                 if(common::coordinate_diff(junctions[i].start, v1.start) < window_size_ &&
                    common::coordinate_diff(junctions[i].end, v1.start) <= window_size_) {
                        unique_junctions_.insert(junctions[i]);
+                       //add to the map of junctions to variants
+                       junction_to_variant_[junctions[i]].insert(v1);
                 }
             }
         }
