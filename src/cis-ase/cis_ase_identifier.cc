@@ -135,14 +135,6 @@ void CisAseIdentifier::set_mpileup_conf_region(mplp_conf_t &mplp_conf, string re
     mplp_conf.reg = strdup(region.c_str());
 }
 
-//Set the region as the somatic-vcf
-void CisAseIdentifier::set_mpileup_conf_somatic_vcf(mplp_conf_t &mplp_conf) {
-    mplp_conf.bed = bed_read(somatic_vcf_.c_str());
-    if (!mplp_conf.bed) {
-        throw runtime_error("Could not read file \"%s\"" + somatic_vcf_);
-    }
-}
-
 //Init mpileup
 bool CisAseIdentifier::mpileup_run(mplp_conf_t *conf,
         bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*),

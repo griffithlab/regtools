@@ -320,8 +320,6 @@ class CisAseIdentifier {
         //Process somatic variants
         bool process_somatic_het(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec);
         bool process_germline_het(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec);
-        //Set the region as the somatic-vcf
-        void set_mpileup_conf_somatic_vcf(mplp_conf_t &mplp_conf);
         //Set the region as the region-string
         void set_mpileup_conf_region(mplp_conf_t & mplp_conf, string region);
         //Open the polymorphism VCF file
