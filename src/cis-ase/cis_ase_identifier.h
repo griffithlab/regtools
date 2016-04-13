@@ -293,9 +293,6 @@ class CisAseIdentifier {
                 ofs_.close();
             }
         }
-        //True if transcript within the variants transcript_variant_window_
-        bool transcript_within_window(const vector<BED> &exons, uint32_t pos,
-                                      string transcript_strand, uint32_t window_size);
         //Parse command line arguments
         void parse_options(int argc, char* argv[]);
         //Usage for this tool
