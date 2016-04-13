@@ -229,7 +229,7 @@ class CisAseIdentifier {
         //Minimum depth to consider somatic/ASE
         uint32_t min_depth_;
         //Window around somatic variants to look for transcripts
-        uint32_t transcript_window_;
+        uint32_t transcript_variant_window_;
         //VCF file with somatic variants
         string somatic_vcf_;
         //VCF file with polymorphisms
@@ -276,7 +276,7 @@ class CisAseIdentifier {
     public:
         //Constructor
         CisAseIdentifier() : min_depth_(10),
-                             transcript_window_(1000),
+                             transcript_variant_window_(1000),
                              somatic_vcf_("NA"),
                              tumor_rna_("NA"),
                              tumor_dna_("NA"), ref_("NA"), gtf_("NA"),
@@ -293,9 +293,9 @@ class CisAseIdentifier {
                 ofs_.close();
             }
         }
-        //True if transcript within the variants transcript_window_
+        //True if transcript within the variants transcript_variant_window_
         bool transcript_within_window(const vector<BED> &exons, uint32_t pos,
-                                      string transcript_strand);
+                                      string transcript_strand, uint32_t window_size);
         //Parse command line arguments
         void parse_options(int argc, char* argv[]);
         //Usage for this tool

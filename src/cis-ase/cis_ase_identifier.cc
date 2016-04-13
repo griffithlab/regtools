@@ -75,7 +75,7 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
                 min_depth_ = atoi(optarg);
                 break;
             case 'w':
-                transcript_window_ = atoi(optarg);
+                transcript_variant_window_ = atoi(optarg);
                 break;
             case 'h':
                 usage(std::cerr);
@@ -252,9 +252,10 @@ bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid,
     return geno.is_hom(min_depth_);
 }
 
-//True if transcript within the variants transcript_window_
+//True if variant within a certain window from the transcript
 bool CisAseIdentifier::transcript_within_window(const vector<BED> &exons, uint32_t pos,
-                                                string transcript_strand) {
+                                                string transcript_strand,
+                                                uint32_t window_size) {
     int n_exons = exons.size();
     if(transcript_strand == "+") {
         //variant inside transcript
@@ -262,12 +263,12 @@ bool CisAseIdentifier::transcript_within_window(const vector<BED> &exons, uint32
             return true;
         }
         //variant outside transcript
-        if(exons[0].start - pos <= transcript_window_ &&
+        if(exons[0].start - pos <= window_size &&
            exons[n_exons -1].start > pos) {
             return true;
         }
         //variant outside transcript
-        if(pos - exons[n_exons - 1].end <= transcript_window_ &&
+        if(pos - exons[n_exons - 1].end <= window_size &&
            exons[0].end < pos) {
             return true;
         }
@@ -277,12 +278,12 @@ bool CisAseIdentifier::transcript_within_window(const vector<BED> &exons, uint32
             return true;
         }
         //variant outside transcript
-        if(pos - exons[0].end <= transcript_window_ &&
+        if(pos - exons[0].end <= window_size &&
            exons[n_exons -1].end < pos) {
             return true;
         }
         //variant outside transcript
-        if(exons[n_exons - 1].start - pos <= transcript_window_ &&
+        if(exons[n_exons - 1].start - pos <= window_size &&
            exons[0].start > pos) {
             return true;
         }
@@ -309,7 +310,8 @@ string CisAseIdentifier::get_relevant_window(const char* chr, int pos) {
                     gtf_parser_.get_exons_from_transcript(transcripts[i]);
                 //check if transcript within the window
                 string transcript_strand = exons[0].strand;
-                if(transcript_within_window(exons, pos, transcript_strand)) {
+                if(transcript_within_window(exons, pos, transcript_strand,
+                                            transcript_variant_window_)) {
                     int n_exons = exons.size() - 1;
                     if(exons[0].start < min_start) {
                         min_start = exons[0].start;
