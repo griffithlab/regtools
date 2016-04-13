@@ -305,8 +305,6 @@ class CisAseIdentifier {
         void run2();
         //Open somatic VCF file
         void open_somatic_vcf();
-        //Read in next record
-        bool read_somatic_record();
         //init mpileup
         void mpileup_init(string bam, mplp_conf_t *conf, regtools_mpileup_conf& rmc1);
         //Run mpileup and get the genotype likelihoods
