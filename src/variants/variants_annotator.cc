@@ -275,10 +275,10 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ns(const vector<BED>& 
             if(exons[i].end + intronic_min_distance_ < variant.end) {
                 return;
             }
-            //exonic near start
-            if(variant.end >= exons[i].start &&
-            variant.end <= exons[i].end &&
-            variant.end <= exons[i].start + exonic_min_distance_) {
+            //exonic near start and not last exon
+            if(i != exons.size() - 1 && variant.end >= exons[i].start &&
+               variant.end <= exons[i].end &&
+               variant.end <= exons[i].start + exonic_min_distance_) {
                 variant.score =  common::num_to_str(min(variant.end - exons[i].start,
                                                         exons[i].end - variant.end));
                 variant.annotation = "splicing_exonic";
@@ -296,10 +296,11 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ns(const vector<BED>& 
                 set_variant_cis_effect_limits(exons, variant, i);
                 return;
             }
-            //exonic near end
-            if(variant.end <= exons[i].end &&
-            variant.end >= exons[i].start &&
-            variant.end >= exons[i].end - exonic_min_distance_) {
+            //exonic near end and not first exon
+            if(i != 0 &&
+               variant.end <= exons[i].end &&
+               variant.end >= exons[i].start &&
+               variant.end >= exons[i].end - exonic_min_distance_) {
                 variant.score =  common::num_to_str(min(variant.end - exons[i].start,
                                                         exons[i].end - variant.end));
                 variant.annotation = "splicing_exonic";
@@ -358,10 +359,11 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ps(const vector<BED>& 
             if(exons[i].start - intronic_min_distance_ > variant.end) {
                 return;
             }
-            //exonic near start
-            if(variant.end >= exons[i].start &&
-            variant.end <= exons[i].end &&
-            variant.end <= exons[i].start + exonic_min_distance_) {
+            //exonic near start and not first exon
+            if(i != 0 &&
+               variant.end >= exons[i].start &&
+               variant.end <= exons[i].end &&
+               variant.end <= exons[i].start + exonic_min_distance_) {
                 variant.score =  common::num_to_str(min(variant.end - exons[i].start,
                                                         exons[i].end - variant.end));
                 variant.annotation = "splicing_exonic";
@@ -380,9 +382,10 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ps(const vector<BED>& 
                 return;
             }
             //exonic near end
-            if(variant.end <= exons[i].end &&
-            variant.end >= exons[i].start &&
-            variant.end >= exons[i].end - exonic_min_distance_) {
+            if(i != exons.size() - 1 &&
+               variant.end <= exons[i].end &&
+               variant.end >= exons[i].start &&
+               variant.end >= exons[i].end - exonic_min_distance_) {
                 variant.score =  common::num_to_str(min(variant.end - exons[i].start,
                                                         exons[i].end - variant.end));
                 variant.annotation = "splicing_exonic";
