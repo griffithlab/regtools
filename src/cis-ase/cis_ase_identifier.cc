@@ -370,8 +370,8 @@ void CisAseIdentifier::process_snps_in_window(string region) {
         set_mpileup_conf_region(germline_conf_, snp_region);
         //Check if hom in RNA
         if(mpileup_run(&germline_conf_,
-                    &CisAseIdentifier::process_rna_hom, germline_rna_mmc_)) {
-            cerr << "rna is hom, now running RNA snp-mpileup" << endl;
+                    &CisAseIdentifier::process_rna_hom, germline_rna_rmc_)) {
+            cerr << "rna is hom, now running DNA snp-mpileup" << endl;
             //Check if het in DNA
             if(mpileup_run(&germline_conf_,
                         &CisAseIdentifier::process_germline_het,
