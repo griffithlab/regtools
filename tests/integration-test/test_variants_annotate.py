@@ -30,6 +30,11 @@ from integrationtest import IntegrationTest, main
 import unittest
 
 class TestAnnotate(IntegrationTest, unittest.TestCase):
+    def test_variants_annotate_help(self):
+        params = ["variants", "annotate",
+                  "-h"]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 0, err)
     def test_variants_annotate_default(self):
         variants = self.inputFiles("vcf/test1.vcf")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
