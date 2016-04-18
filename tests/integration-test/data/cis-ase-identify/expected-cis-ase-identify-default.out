@@ -1,0 +1,62 @@
+
+Program:	regtools
+Version:	0.2.0
+Somatic variants: ../tests/integration-test/data/vcf/test3.vcf
+Polymorphisms: ../tests/integration-test/data/vcf/test4.vcf.gz
+Tumor DNA: ../tests/integration-test/data/bam/cis_ase_tumor_dna.bam
+Tumor RNA: ../tests/integration-test/data/bam/cis_ase_tumor_rna.bam
+Reference fasta file: ../tests/integration-test/data/fa/test_chr22.fa
+Annotation file: ../tests/integration-test/data/gtf/test_ensemble_chr22.3.gtf
+Minimum read-depth for variants: 10
+Warning: The index file is older than the data file: ../tests/integration-test/data/vcf/test4.vcf.gz.tbi
+
+somatic region is 22:1950-1950
+Region within run_mpileup 22:1950-1950
+
+Somatic het. Window is total, max 22 1950 0.759021 C
+22:949-2949
+
+inside process_snps 22:949-2949
+Warning: The index file is older than the data file: ../tests/integration-test/data/vcf/test4.vcf.gz.tbi
+Warning: The index file is older than the data file: ../tests/integration-test/data/vcf/test4.vcf.gz.tbi
+Warning: The index file is older than the data file: ../tests/integration-test/data/vcf/test4.vcf.gz.tbi
+
+snp region is 22:1050-1050
+running dna snp-mpileup
+Region within run_mpileup 22:1050-1050
+total, max 22 1050 0.665255 A
+dna is het, now running RNA snp-mpileup
+Region within run_mpileup 22:1050-1050
+RNA-hom
+total, max 22 1050 3.16228e-26 A
+potential ASE 22:1050-1050
+
+snp region is 22:1550-1550
+running dna snp-mpileup
+Region within run_mpileup 22:1550-1550
+total, max 22 1550 0.991995 C
+dna is het, now running RNA snp-mpileup
+Region within run_mpileup 22:1550-1550
+RNA-hom
+total, max 22 1550 3.16228e-26 C
+potential ASE 22:1550-1550
+
+snp region is 22:2050-2050
+running dna snp-mpileup
+Region within run_mpileup 22:2050-2050
+total, max 22 2050 0.984205 C
+dna is het, now running RNA snp-mpileup
+Region within run_mpileup 22:2050-2050
+RNA-hom
+total, max 22 2050 3.16228e-26 C
+potential ASE 22:2050-2050
+
+snp region is 22:2550-2550
+running dna snp-mpileup
+Region within run_mpileup 22:2550-2550
+total, max 22 2550 0.984205 C
+dna is het, now running RNA snp-mpileup
+Region within run_mpileup 22:2550-2550
+RNA-hom
+total, max 22 2550 3.16228e-26 C
+potential ASE 22:2550-2550
