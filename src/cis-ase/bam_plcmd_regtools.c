@@ -88,7 +88,7 @@ void set_data_iter(mplp_conf_t *conf,
  * @param n number of files specified in fn
  * @param fn filenames
  */
-int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn,
+int init_likelihoods(mplp_conf_t *conf, int n, char **fn,
                              mplp_aux_t **data,
                              bcf_callaux_t *bca,
                              bcf_callret1_t *bcr,

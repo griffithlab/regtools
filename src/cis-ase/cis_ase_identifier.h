@@ -50,7 +50,7 @@ extern "C" {
             int n, char *const*fn, int *n_plp,
             const bam_pileup1_t **plp, int ignore_rg);
     int bed_overlap(const void *_h, const char *chr, int beg, int end);
-    int mpileup_with_likelihoods(mplp_conf_t *conf, int n, char **fn, mplp_aux_t **data, bcf_callaux_t *bca, bcf_callret1_t *bcr, bcf_call_t *bc, mplp_pileup_t *gplp, htsFile *bcf_fp, bcf_hdr_t *bcf_hdr, bam_sample_t *sm, bam_hdr_t **h, mplp_ref_t *mp_ref);
+    int init_likelihoods(mplp_conf_t *conf, int n, char **fn, mplp_aux_t **data, bcf_callaux_t *bca, bcf_callret1_t *bcr, bcf_call_t *bc, mplp_pileup_t *gplp, htsFile *bcf_fp, bcf_hdr_t *bcf_hdr, bam_sample_t *sm, bam_hdr_t **h, mplp_ref_t *mp_ref);
     void set_data_iter(mplp_conf_t *conf, char** fn, mplp_aux_t **data, int *beg0, int *end0);
 }
 
@@ -108,8 +108,12 @@ struct locus_info {
     }
 };
 
-//mpileup config within regtools
-struct regtools_mpileup_conf {
+//shared config variables for calling mpileup
+//Doing this allows us to initialize these
+//only once for a file and run on multiple
+//positions. More efficient than the -r option
+//which seems to iterate through the entire file
+struct mpileup_conf_misc {
     bool result;
     char* file_names[1];
     int n_samples;
@@ -132,7 +136,7 @@ struct regtools_mpileup_conf {
     bcf1_t *bcf_rec;
     //set to true once initialized
     bool is_initialized;
-    regtools_mpileup_conf() {
+    mpileup_conf_misc() {
         result = false;
         n_samples = 1;
         beg0 = 0;
@@ -184,7 +188,7 @@ struct regtools_mpileup_conf {
         file_names[0] = strdup(bam.c_str());
         bam_smpl_add(sm, file_names[0], 0);
     }
-    ~regtools_mpileup_conf() {
+    ~mpileup_conf_misc() {
         free(bc.tmp.s);
         bcf_destroy1(bcf_rec);
         bcf_hdr_destroy(bcf_hdr);
@@ -221,6 +225,33 @@ struct regtools_mpileup_conf {
     }
 };
 
+//Set the configuration for mpileup
+inline mplp_conf_t get_default_mpileup_conf(string ref, faidx_t *ref_fai) {
+    mplp_conf_t mplp_conf;
+    memset(&mplp_conf, 0, sizeof(mplp_conf_t));
+    mplp_conf.min_baseQ = 13;
+    mplp_conf.capQ_thres = 0;
+    mplp_conf.max_depth = 250;
+    mplp_conf.max_indel_depth = 250;
+    mplp_conf.openQ = 40;
+    mplp_conf.extQ = 20; mplp_conf.tandemQ = 100;
+    mplp_conf.min_frac = 0.002; mplp_conf.min_support = 1;
+    mplp_conf.flag = MPLP_NO_ORPHAN | MPLP_REALN | MPLP_SMART_OVERLAPS;
+    //uncompressed VCF
+    mplp_conf.flag |= MPLP_BCF | MPLP_VCF | MPLP_NO_COMP;
+    mplp_conf.fai = ref_fai;
+    mplp_conf.fai_fname = (char*)ref.c_str();
+    return mplp_conf;
+}
+
+//Free the mplp_conf_t object members
+inline void free_mpileup_conf(mplp_conf_t conf) {
+    if (conf.bed)
+        bed_destroy(conf.bed);
+    if (conf.reg)
+        free(conf.reg);
+}
+
 //Workhorse for "cis-ase identify"
 class CisAseIdentifier {
     private:
@@ -253,21 +284,21 @@ class CisAseIdentifier {
         //Reference FASTA object
         faidx_t *ref_fai_;
         //mpileup conf for the somatic dna BAM
-        regtools_mpileup_conf somatic_dna_rmc_;
+        mpileup_conf_misc somatic_dna_mmc_;
         //mpileup conf for the germline dna BAM
-        regtools_mpileup_conf germline_dna_rmc_;
+        mpileup_conf_misc germline_dna_mmc_;
         //mpileup conf for the germline rna BAM
-        regtools_mpileup_conf germline_rna_rmc_;
+        mpileup_conf_misc germline_rna_mmc_;
+        //Configuration for somatic mpileup
+        mplp_conf_t somatic_conf_;
+        //Configuration for germline mpileup
+        mplp_conf_t germline_conf_;
         //Somatic VCF record
         bcf1_t *somatic_vcf_record_;
         //Polymorphism VCF file handle
         htsFile *poly_vcf_fh_;
         //Polymorphism VCF Header
         bcf_hdr_t *poly_vcf_header_;
-        //Configuration for somatic mpileup
-        mplp_conf_t somatic_conf_;
-        //Configuration for germline mpileup
-        mplp_conf_t germline_conf_;
         //Get info about a variant - key is chr:start
         //Bi-allelic assumption
         map<string, locus_info> germline_variants_;
@@ -299,13 +330,14 @@ class CisAseIdentifier {
         void usage(ostream &out);
         //The workhorse
         void run();
-        void run2();
+        //ASE identification starts here
+        void identify_ase();
         //Open somatic VCF file
         void open_somatic_vcf();
-        //init mpileup
-        void mpileup_init(string bam, mplp_conf_t *conf, regtools_mpileup_conf& rmc1);
+        //init mpileup misc conf
+        void mpileup_init1(string bam, mplp_conf_t *conf, mpileup_conf_misc& mmc1);
         //Run mpileup and get the genotype likelihoods
-        bool mpileup_run(mplp_conf_t *conf, bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*), regtools_mpileup_conf& rmc1);
+        bool mpileup_run(mplp_conf_t *conf, bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*), mpileup_conf_misc& mmc1);
         //Call genotypes using the posterior prob
         genotype call_geno(const bcf_call_t& bc);
         //Get the SNPs within relevant window
@@ -314,6 +346,7 @@ class CisAseIdentifier {
         bool process_rna_hom(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec);
         //Process somatic variants
         bool process_somatic_het(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec);
+        //Process hets in DNA
         bool process_germline_het(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec);
         //Set the region as the region-string
         void set_mpileup_conf_region(mplp_conf_t & mplp_conf, string region);
@@ -326,33 +359,13 @@ class CisAseIdentifier {
             ref_fai_ = fai_load(ref_.c_str());
             if (ref_fai_ == NULL) throw runtime_error("Unable to open reference FASTA");
         }
-        //Set the configuration for mpileup
-        mplp_conf_t get_default_mpileup_conf() {
-            mplp_conf_t mplp_conf;
-            memset(&mplp_conf, 0, sizeof(mplp_conf_t));
-            mplp_conf.min_baseQ = 13;
-            mplp_conf.capQ_thres = 0;
-            mplp_conf.max_depth = 250;
-            mplp_conf.max_indel_depth = 250;
-            mplp_conf.openQ = 40;
-            mplp_conf.extQ = 20; mplp_conf.tandemQ = 100;
-            mplp_conf.min_frac = 0.002; mplp_conf.min_support = 1;
-            mplp_conf.flag = MPLP_NO_ORPHAN | MPLP_REALN | MPLP_SMART_OVERLAPS;
-            //uncompressed VCF
-            mplp_conf.flag |= MPLP_BCF | MPLP_VCF | MPLP_NO_COMP;
-            mplp_conf.fai = ref_fai_;
-            mplp_conf.fai_fname = (char*)ref_.c_str();
-            return mplp_conf;
-        }
-        //Free the mplp_conf_t object members
-        void free_mpileup_conf(mplp_conf_t conf) {
-            if (conf.bed)
-                bed_destroy(conf.bed);
-            if (conf.reg)
-                free(conf.reg);
-        }
         //Get the region of interest for a somatic variant
+        //This depends on the transcripts in the region
         string get_relevant_window(const char* chr, int pos);
+        //Open BAM file-pointers
+        void mpileup_init_all();
+        //init mmcs
+        void mmc_init_all();
 };
 
 #endif //CIS_ASE_IDENTIFIER_
