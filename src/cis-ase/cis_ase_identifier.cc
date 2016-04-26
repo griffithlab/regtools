@@ -405,20 +405,10 @@ void CisAseIdentifier::process_snps_in_window(string region) {
 
 //ASE identification starts here
 void CisAseIdentifier::identify_ase() {
-    htsFile *test_bcf = NULL;
-    bcf_hdr_t *test_header = NULL;
-    bcf1_t *test_record = bcf_init();
-    test_bcf = bcf_open(somatic_vcf_.c_str(), "r");
-    if(test_bcf == NULL) {
-        throw std::runtime_error("Unable to open file.");
-    }
-    test_header = bcf_hdr_read(test_bcf);
-    if(test_header == NULL) {
-        throw std::runtime_error("Unable to read header.");
-    }
-    while(bcf_read(test_bcf, test_header, test_record) == 0) {
-        string somatic_region = common::create_region_string(bcf_hdr_id2name(test_header, test_record->rid),
-                                                             test_record->pos+1, test_record->pos+1);
+    while(bcf_read(somatic_vcf_fh_,
+                   somatic_vcf_header_, somatic_vcf_record_) == 0) {
+        string somatic_region = common::create_region_string(bcf_hdr_id2name(somatic_vcf_header_, somatic_vcf_record_->rid),
+                                                             somatic_vcf_record_->pos+1, somatic_vcf_record_->pos+1);
         cerr << endl << "somatic region is " << somatic_region << endl;
         set_mpileup_conf_region(somatic_conf_, somatic_region);
         mpileup_run(&somatic_conf_,
@@ -426,9 +416,6 @@ void CisAseIdentifier::identify_ase() {
            somatic_dna_mmc_);//The workhorse
         free_mpileup_conf(somatic_conf_);
     }
-    bcf_hdr_destroy(test_header);
-    bcf_destroy(test_record);
-    bcf_close(test_bcf);
 }
 
 //Free relevant pointers
