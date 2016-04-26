@@ -289,15 +289,15 @@ string CisAseIdentifier::get_relevant_window(const char* chr, int pos) {
                 string transcript_strand = exons[0].strand;
                 if(is_variant_within_transcript_window(exons, pos, transcript_strand,
                                             transcript_variant_window_)) {
-                    int n_exons = exons.size() - 1;
+                    int last_exon = exons.size() - 1;
                     if(exons[0].start < min_start) {
                         min_start = exons[0].start;
                     }
-                    if(exons[n_exons - 1].start < min_start) {
-                        min_start = exons[n_exons - 1].start;
+                    if(exons[last_exon].start < min_start) {
+                        min_start = exons[last_exon].start;
                     }
-                    if(exons[exons.size() - 1].end > max_end) {
-                        max_end = exons[exons.size() - 1].end;
+                    if(exons[last_exon].end > max_end) {
+                        max_end = exons[last_exon].end;
                     }
                     if(exons[0].end > max_end) {
                         max_end = exons[0].end;
