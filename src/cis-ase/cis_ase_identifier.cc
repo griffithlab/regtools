@@ -384,12 +384,12 @@ void CisAseIdentifier::process_snps_in_window(string region) {
         //Check if hom in RNA
         if(mpileup_run(&germline_conf_,
                        &CisAseIdentifier::process_rna_hom,
-                       germline_rna_rmc_)) {
+                       germline_rna_mmc_)) {
             cerr << "rna is hom, now running DNA snp-mpileup" << endl;
             //Check if het in DNA
             if(mpileup_run(&germline_conf_,
                            &CisAseIdentifier::process_germline_het,
-                           germline_dna_rmc_)) {
+                           germline_dna_mmc_)) {
                 cerr << "DNA is het. potential ASE " << snp_region << endl;
             } else {
                 cerr << "DNA not het" << endl;
