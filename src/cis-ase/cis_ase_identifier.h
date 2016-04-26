@@ -299,9 +299,10 @@ class CisAseIdentifier {
         htsFile *poly_vcf_fh_;
         //Polymorphism VCF Header
         bcf_hdr_t *poly_vcf_header_;
-        //Get info about a variant - key is chr:start
-        //Bi-allelic assumption
-        map<string, locus_info> germline_variants_;
+        //processed DNA snps - helps to pileup only once
+        map<string, locus_info> dna_snps_;
+        //processed RNA snps - helps to pileup only once
+        map<string, locus_info> rna_snps_;
         //synced-reader for polymorphism vcf
         bcf_srs_t *poly_sr_;
     public:

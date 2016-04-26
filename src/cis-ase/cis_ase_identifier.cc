@@ -239,11 +239,11 @@ genotype CisAseIdentifier::call_geno(const bcf_call_t& bc) {
 bool CisAseIdentifier::process_germline_het(bcf_hdr_t* bcf_hdr, int tid,
                                             int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
     string region = common::create_region_string(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid), pos + 1, pos + 1);
-    germline_variants_[region].is_het_dna = false;
     genotype geno = call_geno(bc);
-    germline_variants_[region].p_het_dna = geno.p_het;
+    dna_snps_[region].p_het_dna = geno.p_het;
+    dna_snps_[region].is_het_dna = false;
     if(geno.is_het(min_depth_)) {
-        germline_variants_[region].is_het_dna = true;
+        dna_snps_[region].is_het_dna = true;
     } else {
         cerr << "Germline poly is hom" << endl;
     }
@@ -257,8 +257,12 @@ bool CisAseIdentifier::process_germline_het(bcf_hdr_t* bcf_hdr, int tid,
 //Callback for hom in RNA(ASE)
 bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid,
                                        int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
+    string region = common::create_region_string(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid), pos + 1, pos + 1);
     genotype geno = call_geno(bc);
+    rna_snps_[region].p_het_dna = geno.p_het;
+    rna_snps_[region].is_het_dna = true;
     if(geno.is_hom(min_depth_)) {
+        rna_snps_[region].is_het_dna = false;
         cerr << "RNA-hom" << endl;
     } else {
         cerr << "RNA variant is het" << endl;
@@ -358,12 +362,21 @@ void CisAseIdentifier::process_snps_in_window(string region) {
         string snp_region = common::create_region_string(bcf_hdr_id2name(poly_vcf_header_, line->rid),
                 line->pos+1, line->pos+1);
         cerr << endl << "snp region is " << snp_region << endl;
-        if(germline_variants_.count(snp_region)) {
-            cerr << endl << "Variant exists in map ";
-            cerr << germline_variants_[snp_region].is_het_dna;
-            cerr << "\t";
-            cerr << germline_variants_[snp_region].p_het_dna;
-            cerr << endl;
+        //Check if SNP analyzed in RNA before
+        if(rna_snps_.count(snp_region)) {
+            cerr << endl << "Variant in map - already analyzed";
+            if(!rna_snps_[snp_region].is_het_dna) {
+                cerr << "rna is hom, now running DNA snp-mpileup" << endl;
+                if(dna_snps_.count(snp_region)) {
+                    if(dna_snps_[snp_region].is_het_dna) {
+                        cerr << "DNA is het. potential ASE " << snp_region << endl;
+                    } else {
+                        cerr << "DNA not het" << endl;
+                    }
+                }
+            } else {
+                cerr << "rna not hom" << endl;
+            }
             break;
         }
         cerr << "running rna mpileup" << endl;
