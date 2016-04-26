@@ -111,6 +111,8 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
     cerr << "\nReference fasta file: " << ref_;
     cerr << "\nAnnotation file: " << gtf_;
     cerr << "\nMinimum read-depth for variants: " << min_depth_;
+    cerr << "\nWindow around somatic-variants to look for transcripts: " <<
+            transcript_variant_window_;
     cerr << endl;
 }
 
@@ -275,7 +277,7 @@ bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid,
 }
 
 //Get the window pertinent to this variant
-//Get the transcripts within a certain window
+//Get the transcripts within a certain distance from the somatic variant
 //Return the window that encompasses all these transcripts.
 string CisAseIdentifier::get_relevant_window(const char* chr, int pos) {
     CHRPOS min_start = pos;
