@@ -16,7 +16,7 @@ include_directories("${PROJECT_SOURCE_DIR}/src/gtf/"
                     "${PROJECT_SOURCE_DIR}/src/utils/bedtools/gzstream/"
                     "${PROJECT_SOURCE_DIR}/src/utils/bedtools/fileType/"
                     "${PROJECT_SOURCE_DIR}/src/utils/bedtools/stringUtilities/"
-                    "${PROJECT_SOURCE_DIR}/src/utils/htslib/htslib/")
+                    "${PROJECT_SOURCE_DIR}/src/utils/htslib/")
 add_executable(${test_name} ${TEST_SOURCES})
 target_link_libraries(${test_name} gtest gtest_main junctions bedtools gtf htslib)
 set(NOSTRING_FLAG "-Wno-write-strings")

@@ -31,9 +31,9 @@ DEALINGS IN THE SOFTWARE.  */
 #include "bedFile.h"
 #include "common.h"
 #include "gtf_parser.h"
-#include "hts.h"
+#include "htslib/hts.h"
 #include "junctions_annotator.h"
-#include "vcf.h"
+#include "htslib/vcf.h"
 
 using namespace std;
 

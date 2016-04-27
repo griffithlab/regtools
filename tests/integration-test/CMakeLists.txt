@@ -1,4 +1,5 @@
 def_integration_test(regtools regtools_main test_regtools_main.py)
+def_integration_test(regtools cis_ase_identify test_cis_ase_identify.py)
 def_integration_test(regtools cis_splice_effects_identify
     test_cis_splice_effects_identify.py)
 def_integration_test(regtools cis_splice_effects_main

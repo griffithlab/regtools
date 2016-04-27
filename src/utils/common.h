@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.  */
 #include <sys/stat.h>
 #include "stdint.h"
 #include "bedFile.h"
+#include "htslib/hts.h"
+#include "htslib/tbx.h"
 
 using namespace std;
 
@@ -127,6 +129,25 @@ namespace common {
         stringstream ss1;
         ss1 << chr << ":" << start << "-" << end;
         return ss1.str();
+    }
+
+    //Check if tabix index exists
+    //Throws runtime_error if index does not exist
+    inline bool check_tabix_index(string file) {
+        htsFile *fp = hts_open(file.c_str(), "rb");
+        if(!fp) {
+            std::cerr << "Unable to open " << file;
+            throw runtime_error("Unable to open file.");
+        }
+        tbx_t *idx = tbx_index_load(fp->fn);
+        if(!idx) {
+            stringstream ss;
+            ss << "Unable to open tabix index for " << file << endl;
+            throw runtime_error(ss.str());
+        }
+        hts_close(fp);
+        tbx_destroy(idx);
+        return true;
     }
 }
 

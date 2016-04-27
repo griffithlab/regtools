@@ -2,6 +2,7 @@ include_directories(../utils/htslib/htslib/
                     ../utils/bedtools/lineFileUtilities/
                     ../gtf/
                     ../utils/
+                    ../utils/htslib/
                     ../utils/bedtools/fileType/
                     ../utils/bedtools/gzstream/
                     ../utils/bedtools/bedFile/

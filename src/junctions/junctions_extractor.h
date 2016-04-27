@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <iomanip>
 #include <iostream>
 #include "bedFile.h"
-#include "sam.h"
+#include "htslib/sam.h"
 
 using namespace std;
 

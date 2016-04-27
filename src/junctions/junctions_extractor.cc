@@ -29,10 +29,10 @@ DEALINGS IN THE SOFTWARE.  */
 #include <stdexcept>
 #include "common.h"
 #include "junctions_extractor.h"
-#include "sam.h"
-#include "hts.h"
-#include "faidx.h"
-#include "kstring.h"
+#include "htslib/sam.h"
+#include "htslib/hts.h"
+#include "htslib/faidx.h"
+#include "htslib/kstring.h"
 
 using namespace std;
 

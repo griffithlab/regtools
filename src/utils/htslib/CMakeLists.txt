@@ -6,8 +6,11 @@ set(SOURCES
     hts.c
     hfile.c
     hfile_net.c
+    kfunc.c
     kstring.c
     knetfile.c
+    md5.c
+    synced_bcf_reader.c
     tbx.c
     vcf.c
     sam.c)
