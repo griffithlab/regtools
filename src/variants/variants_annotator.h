@@ -37,6 +37,8 @@ DEALINGS IN THE SOFTWARE.  */
 
 using namespace std;
 
+const string non_splice_region_annotation_string = "NA";
+
 //Hold annotations
 struct AnnotatedVariant : public BED {
     string overlapping_genes;

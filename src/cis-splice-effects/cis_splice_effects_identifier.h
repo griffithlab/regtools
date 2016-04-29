@@ -107,6 +107,4 @@ class CisSpliceEffectsIdentifier {
         string get_junction_name(int i);
 };
 
-const string non_splice_region_annotation_string = "NA";
-
 #endif
