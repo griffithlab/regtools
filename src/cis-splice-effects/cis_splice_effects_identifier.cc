@@ -183,11 +183,10 @@ void CisSpliceEffectsIdentifier::identify() {
     GtfParser gp1(gtf_);
     gp1.load();
     //variant annotator
-    VariantsAnnotator va(vcf_, gtf_, annotated_variant_file_);
+    VariantsAnnotator va(vcf_, gp1, annotated_variant_file_);
     va.open_vcf_in();
     if(write_annotated_variants_)
         va.open_vcf_out();
-    va.set_gtf_parser(gp1);
     //Annotate each variant and pay attention to splicing related ones
     while(va.read_next_record()) {
         AnnotatedVariant v1 = va.annotate_record_with_transcripts();

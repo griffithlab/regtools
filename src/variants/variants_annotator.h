@@ -121,8 +121,8 @@ class VariantsAnnotator {
             vcf_record_ = bcf_init();
         }
         //constructor
-        VariantsAnnotator(string vcf_f, string gtf_f, string vcf_out) : vcf_(vcf_f),
-                              gtffile_(gtf_f),
+        VariantsAnnotator(string vcf_f, GtfParser gp1, string vcf_out) : vcf_(vcf_f),
+                              gtf_(gp1),
                               vcf_out_(vcf_out),
                               all_intronic_space_(false),
                               all_exonic_space_(false),
@@ -133,7 +133,21 @@ class VariantsAnnotator {
                               vcf_fh_out_(NULL), vcf_header_out_(NULL),
                               vcf_record_(NULL) {
             vcf_record_ = bcf_init();
-            gtf_.set_gtffile(gtffile_);
+        }
+        //constructor
+        VariantsAnnotator(string vcf_f, GtfParser gp1,
+                          bool all_exonic, bool all_intronic) : vcf_(vcf_f),
+                              gtf_(gp1),
+                              vcf_out_("NA"),
+                              intronic_min_distance_(2),
+                              exonic_min_distance_(3),
+                              skip_single_exon_genes_(true),
+                              vcf_fh_in_(NULL), vcf_header_in_(NULL),
+                              vcf_fh_out_(NULL), vcf_header_out_(NULL),
+                              vcf_record_(NULL) {
+            vcf_record_ = bcf_init();
+            all_exonic_space_ = all_exonic;
+            all_intronic_space_ = all_intronic;
         }
         //Destructor
         ~VariantsAnnotator() {
@@ -153,10 +167,6 @@ class VariantsAnnotator {
         void open_vcf_out();
         //Cleanup VCF file data structures
         void cleanup();
-        //Set the GTF parser
-        void set_gtf_parser(GtfParser gp1) {
-            gtf_ = gp1;
-        }
         //Return GTF parser
         GtfParser gtf() {
             return gtf_;
