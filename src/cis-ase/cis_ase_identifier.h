@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include "htslib/hts.h"
 #include "htslib/vcf.h"
 #include "sample.h"
+#include "variants_annotator.h"
 
 using namespace std;
 
@@ -275,6 +276,8 @@ class CisAseIdentifier {
         string gtf_;
         //File to write output to
         string output_file_;
+        //Which polymorphisms to look at
+        string relevant_poly_annot_;
         //output stream to output annotated junctions file
         ofstream ofs_;
         //Somatic VCF file handle
@@ -305,6 +308,8 @@ class CisAseIdentifier {
         map<string, locus_info> rna_snps_;
         //synced-reader for polymorphism vcf
         bcf_srs_t *poly_sr_;
+        //list of exonic variants indexed by "chr:BIN"
+        map<string, vector<AnnotatedVariant> > bin_to_exonic_variants_;
     public:
         //Constructor
         CisAseIdentifier() : min_depth_(10),
@@ -313,6 +318,7 @@ class CisAseIdentifier {
                              tumor_rna_("NA"),
                              tumor_dna_("NA"), ref_("NA"), gtf_("NA"),
                              output_file_("NA"),
+                             relevant_poly_annot_("exonic"),
                              somatic_vcf_fh_(NULL),
                              somatic_vcf_header_(NULL),
                              somatic_vcf_record_(NULL),
@@ -342,7 +348,7 @@ class CisAseIdentifier {
         //Call genotypes using the posterior prob
         genotype call_geno(const bcf_call_t& bc);
         //Get the SNPs within relevant window
-        void process_snps_in_window(string window);
+        void process_snps_in_window(BED window);
         //Process homs in RNA(ASE)
         bool process_rna_hom(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec);
         //Process somatic variants
@@ -362,11 +368,14 @@ class CisAseIdentifier {
         }
         //Get the region of interest for a somatic variant
         //This depends on the transcripts in the region
-        string get_relevant_window(const char* chr, int pos);
+        BED get_relevant_window(const char* chr, int pos);
         //Open BAM file-pointers
         void mpileup_init_all();
         //init mmcs
         void mmc_init_all();
+        //create the map, where list of exonic variants are
+        //indexed by "chr:bin"
+        void annotate_exonic_polymorphisms();
 };
 
 #endif //CIS_ASE_IDENTIFIER_
