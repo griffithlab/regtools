@@ -74,7 +74,7 @@ void CisAseIdentifier::usage(ostream& out) {
 void CisAseIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     char c;
-    while((c = getopt(argc, argv, "d:o:w:h")) != -1) {
+    while((c = getopt(argc, argv, "d:Eo:w:h")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
