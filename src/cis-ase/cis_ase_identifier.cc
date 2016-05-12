@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <htslib/synced_bcf_reader.h>
 #include "bam2bcf.h"
 #include "bam_plcmd.h"
+#include "beta_model.h"
 #include "binomial_model.h"
 #include "common.h"
 #include "cis_ase_identifier.h"

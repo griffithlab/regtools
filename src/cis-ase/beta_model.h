@@ -22,21 +22,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
-#ifndef BINOMIAL_MODEL_H
-#define BINOMIAL_MODEL_H
+#ifndef BETA_MODEL_H
+#define BETA_MODEL_H
 
 #include "cis_ase_identifier.h"
 #include "Rmath/Rmath.h"
 
 //parameters for no ASE model
-N_alpha = 2000;
-N_beta = 2000;
+int N_alpha = 2000;
+int N_beta = 2000;
 //parameters for the moderate ASE model
-M_alpha = 36;
-M_beta = 12;
+int M_alpha = 36;
+int M_beta = 12;
 //parameters for the strong ASE model
-S_alpha = 80;
-S_beta = 1;
+int S_alpha = 80;
+int S_beta = 1;
 
 
 class BetaModel {
@@ -44,11 +44,11 @@ class BetaModel {
         int ref_count_;
         int alt_count_;
         //likelihood under no ASE
-        float lik_N;
+        float lik_N_;
         //likelihood under moderate ASE
-        float lik_M;
+        float lik_M_;
         //likelihood under strong ASE
-        float lik_S;
+        float lik_S_;
     public:
         BetaModel() {
             ref_count_ = -1;
@@ -62,16 +62,37 @@ class BetaModel {
             ref_count_ = bc.anno[0] + bc.anno[1];
             alt_count_ = bc.anno[2] + bc.anno[3];
         }
-        calculate_beta_phet(genotype geno) {
-            if(ref_count_ + alt_count_ == 0) {
+        void calculate_beta_phet(genotype geno) {
+            if(ref_count_ + alt_count_ <= 0) {
                 geno.p_het = -1;
+                return;
             }
-            geno.p_het = max_het_lik/sum_lik;
+            calc_S_lik();
+            calc_M_lik();
+            calc_N_lik();
+            geno.p_het = lik_S_/(lik_S_ + lik_M_ + lik_N_);
         }
-        calc_S_lik() {
+        //Calculate likelihood under the S model
+        void calc_S_lik() {
             float AF = alt_count_/(ref_count_ + alt_count_);
-            lik_S = 0.5 * (pbeta(
+            bool log_density = false;
+            lik_S_ = 0.5 * (dbeta(AF, S_alpha, S_beta, log_density) +
+                           dbeta(AF, S_beta, S_alpha, log_density));
         }
-}
+        //Calculate likelihood under the M model
+        void calc_M_lik() {
+            float AF = alt_count_/(ref_count_ + alt_count_);
+            bool log_density = false;
+            lik_S_ = 0.5 * (dbeta(AF, M_alpha, M_beta, log_density) +
+                           dbeta(AF, M_beta, M_alpha, log_density));
+        }
+        //Calculate likelihood under the N model
+        void calc_N_lik() {
+            float AF = alt_count_/(ref_count_ + alt_count_);
+            bool log_density = false;
+            lik_S_ = 0.5 * (dbeta(AF, N_alpha, N_beta, log_density) +
+                           dbeta(AF, N_beta, N_alpha, log_density));
+        }
+};
 
 #endif
