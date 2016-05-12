@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.  */
 
 #include "cis_ase_identifier.h"
 #include "Rmath/Rmath.h"
+#include <algorithm>
 
 //parameters for no ASE model
 int N_alpha = 2000;
@@ -49,20 +50,33 @@ class BetaModel {
         float lik_M_;
         //likelihood under strong ASE
         float lik_S_;
+        //Posterior prob for the S model
+        float pp_S_;
+        //Posterior prob for the N model
+        float pp_N_;
+        //Posterior prob for the M model
+        float pp_M_;
     public:
         BetaModel() {
             ref_count_ = -1;
             alt_count_ = -1;
+            lik_N_ = lik_M_ = lik_S_ = 0;
+            pp_N_ = pp_M_ = pp_S_ = 0;
         }
         BetaModel(int ref_count, int alt_count) {
             ref_count_ = ref_count;
             alt_count_ = alt_count;
+            lik_N_ = lik_M_ = lik_S_ = 0;
+            pp_N_ = pp_M_ = pp_S_ = 0;
         }
         BetaModel(const bcf_call_t& bc) {
             ref_count_ = bc.anno[0] + bc.anno[1];
             alt_count_ = bc.anno[2] + bc.anno[3];
+            lik_N_ = lik_M_ = lik_S_ = 0;
+            pp_N_ = pp_M_ = pp_S_ = 0;
         }
-        void calculate_beta_phet(genotype geno) {
+        //Calculate prob of het
+        void calculate_beta_phet(genotype& geno) {
             if(ref_count_ + alt_count_ <= 0) {
                 geno.p_het = -1;
                 return;
@@ -70,7 +84,20 @@ class BetaModel {
             calc_S_lik();
             calc_M_lik();
             calc_N_lik();
-            geno.p_het = lik_S_/(lik_S_ + lik_M_ + lik_N_);
+            calculate_posteriors();
+            cout << "pp_S_ " << pp_S_;
+            cout << " pp_M_ " << pp_M_;
+            cout << " pp_N_ " << pp_N_;
+            cout << endl;
+            if(pp_M_ > 0.5) {
+                geno.het_type = "MODASE";
+            } else if(pp_S_ > 0.5) {
+                geno.het_type = "STRONGASE";
+            } else if(pp_N_ > 0.5) {
+                geno.het_type = "NOASE";
+            }
+            //Assign p_het to max of MOD/STRONG
+            geno.p_het = std::max(pp_M_, pp_S_);
         }
         //Calculate likelihood under the S model
         void calc_S_lik() {
@@ -83,15 +110,26 @@ class BetaModel {
         void calc_M_lik() {
             float AF = alt_count_/(ref_count_ + alt_count_);
             bool log_density = false;
-            lik_S_ = 0.5 * (dbeta(AF, M_alpha, M_beta, log_density) +
+            lik_M_ = 0.5 * (dbeta(AF, M_alpha, M_beta, log_density) +
                            dbeta(AF, M_beta, M_alpha, log_density));
         }
         //Calculate likelihood under the N model
         void calc_N_lik() {
             float AF = alt_count_/(ref_count_ + alt_count_);
             bool log_density = false;
-            lik_S_ = 0.5 * (dbeta(AF, N_alpha, N_beta, log_density) +
+            lik_N_ = 0.5 * (dbeta(AF, N_alpha, N_beta, log_density) +
                            dbeta(AF, N_beta, N_alpha, log_density));
+        }
+        //Calculate pp_S, pp_M, pp_N
+        void calculate_posteriors() {
+            if(lik_S_ + lik_M_ + lik_N_ == 0) {
+                throw runtime_error("All likelihoods zero, unable to calculate "
+                                    "posterior for beta model\n");
+            }
+            float total_lik = lik_M_ + lik_N_ + lik_S_;
+            pp_M_ = lik_M_/total_lik;
+            pp_N_ = lik_N_/total_lik;
+            pp_S_ = lik_S_/total_lik;
         }
 };
 
