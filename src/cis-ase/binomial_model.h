@@ -27,11 +27,10 @@ DEALINGS IN THE SOFTWARE.  */
 
 #include "cis_ase_identifier.h"
 
-//RR, RA1, A1A1, RA2, A1A2, A2A2, RA3, A1A3, A2A3, A3A3, RA4 ..
-bool gt_het[15] = {0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0};
-
 //Calculate binomial p_het
-void calculate_binomial_phet(const bcf_call_t& bc, genotype& geno) {
+inline void calculate_binomial_phet(const bcf_call_t& bc, genotype& geno) {
+    //RR, RA1, A1A1, RA2, A1A2, A2A2, RA3, A1A3, A2A3, A3A3, RA4 ..
+    bool gt_het[15] = {0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0};
     double sum_lik = 0, max_het_lik = 0;
     int n_gt = bc.n_alleles * (bc.n_alleles + 1) / 2;
     for (int i=0; i < n_gt; i++) {

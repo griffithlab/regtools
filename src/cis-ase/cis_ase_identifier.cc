@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <htslib/synced_bcf_reader.h>
 #include "bam2bcf.h"
 #include "bam_plcmd.h"
+#include "binomial_model.h"
 #include "common.h"
 #include "cis_ase_identifier.h"
 #include "gtf_utils.h"
@@ -46,9 +47,6 @@ using namespace std;
 //Minimum posterior probability to be considered het
 const double MIN_HET_PROB = 0.5;
 const double MIN_HOM_PROB = 0.5;
-
-//RR, RA1, A1A1, RA2, A1A2, A2A2, RA3, A1A3, A2A3, A3A3, RA4 ..
-bool gt_het[15] = {0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0};
 
 //Usage for this tool
 void CisAseIdentifier::usage(ostream& out) {
@@ -213,26 +211,11 @@ bool CisAseIdentifier::mpileup_run(mplp_conf_t *conf,
 //Call genotypes using the posterior prob
 genotype CisAseIdentifier::call_geno(const bcf_call_t& bc) {
     genotype geno;
-    double sum_lik = 0, max_het_lik = 0;
-    int n_gt = bc.n_alleles * (bc.n_alleles + 1) / 2;
     //disregard sites with more than 5 alleles in the VCF &&
     //Check for minimum coverage
     geno.n_reads = bc.depth;
     if(bc.n_alleles <= 5 && bc.depth >= min_depth_) {
-        for (int i=0; i < n_gt; i++) {
-            //convert back from phred
-            double lik = pow(10.0, (-1.0 / 10.0 * bc.PL[i]));
-            //printf(" PL %d lik %f", bc.PL[i], lik);
-            sum_lik += lik;
-            //True if GT is het
-            if(gt_het[i]) {
-                //perhaps switch from max to sum
-                if (lik > max_het_lik) {
-                    max_het_lik = lik;
-                }
-            }
-        }
-        geno.p_het = max_het_lik/sum_lik;
+        calculate_binomial_phet(bc, geno);
     }
     return geno;
 }
