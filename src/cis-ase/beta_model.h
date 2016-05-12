@@ -97,7 +97,7 @@ class BetaModel {
                 geno.het_type = "NOASE";
             }
             //Assign p_het to max of MOD/STRONG
-            geno.p_het = std::max(pp_M_, pp_S_);
+            geno.p_het = pp_N_;
         }
         //Calculate likelihood under the S model
         void calc_S_lik() {
