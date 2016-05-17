@@ -55,6 +55,11 @@ extern "C" {
     void set_data_iter(mplp_conf_t *conf, char** fn, mplp_aux_t **data, int *beg0, int *end0);
 }
 
+//Return a string which is "chr:bin"
+inline string construct_chrom_bin_index(string chrom, BIN bin1) {
+    return chrom + ":" + common::num_to_str(bin1);
+}
+
 //Results of genotype call
 struct genotype {
     //prob of het
