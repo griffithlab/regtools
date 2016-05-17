@@ -40,6 +40,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include "gtf_utils.h"
 #include "sample.h"
 #include "samtools.h"
+#include "variants_annotator.h"
 
 using namespace std;
 
@@ -49,6 +50,11 @@ const double MIN_HOM_PROB = 0.5;
 
 //RR, RA1, A1A1, RA2, A1A2, A2A2, RA3, A1A3, A2A3, A3A3, RA4 ..
 bool gt_het[15] = {0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0};
+
+//Return a string which is "chr:bin"
+string construct_chrom_bin_index(string chrom, BIN bin1) {
+    return chrom + ":" + common::num_to_str(bin1);
+}
 
 //Usage for this tool
 void CisAseIdentifier::usage(ostream& out) {
@@ -60,6 +66,7 @@ void CisAseIdentifier::usage(ostream& out) {
     out << "\n\t\t"   << "-d INT Minimum total read-depth for a somatic/ASE variant. [10]";
     out << "\n\t\t"   << "-w INT Window around a somatic variant to look for transcripts. ASE variants "
         << "will be in these transcripts[1000]";
+    out << "\n\t\t"   << "-E Look at all polymorphisms for ASE, not just exonic.";
     out << "\n";
 }
 
@@ -67,13 +74,17 @@ void CisAseIdentifier::usage(ostream& out) {
 void CisAseIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     char c;
-    while((c = getopt(argc, argv, "d:o:w:h")) != -1) {
+    while((c = getopt(argc, argv, "d:Eo:w:h")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
                 break;
             case 'd':
                 min_depth_ = atoi(optarg);
+                break;
+            case 'E':
+                //This is "exonic" unless -E
+                relevant_poly_annot_ = "NA";
                 break;
             case 'w':
                 transcript_variant_window_ = atoi(optarg);
@@ -279,7 +290,7 @@ bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid,
 //Get the window pertinent to this variant
 //Get the transcripts within a certain distance from the somatic variant
 //Return the window that encompasses all these transcripts.
-string CisAseIdentifier::get_relevant_window(const char* chr, int pos) {
+BED CisAseIdentifier::get_relevant_window(const char* chr, int pos) {
     CHRPOS min_start = pos;
     CHRPOS max_end = pos;
     BIN start_bin = pos >> _binFirstShift;
@@ -314,7 +325,7 @@ string CisAseIdentifier::get_relevant_window(const char* chr, int pos) {
         start_bin >>= _binNextShift;
         end_bin >>= _binNextShift;
     }
-    return common::create_region_string(chr, min_start, max_end);
+    return BED(chr, min_start, max_end);
 }
 
 //Callback for somatic het
@@ -327,11 +338,11 @@ bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid,
             bcf_hdr_id2name(bcf_hdr, bcf_rec->rid) << " " <<
             pos + 1 << " " << geno.p_het << " " <<
             bcf_rec->d.als[0];
-        string window =
+        BED relevant_bed =
             get_relevant_window(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid), pos);
         cerr << endl << "Window is ";
-        cerr << window << endl;
-        process_snps_in_window(window);
+        cerr << relevant_bed << endl;
+        process_snps_in_window(relevant_bed);
     } else {
         cerr << "Somatic variant is hom" << endl;
     }
@@ -350,59 +361,72 @@ void CisAseIdentifier::open_poly_vcf() {
     }
 }
 
-//Get the information for SNPs within relevant window
-void CisAseIdentifier::process_snps_in_window(string region) {
-    std::cerr << "\ninside process_snps " << region << endl;
-    if(!common::check_tabix_index(poly_vcf_)) {
-        throw runtime_error("Tabix index does not exist for poly_vcf");
+//Given a chr,start,end get all the level7 bins
+vector<BIN> get_bins_in_region(CHRPOS start, CHRPOS end) {
+    vector<BIN> bins;
+    BIN start_bin = start >> _binFirstShift;
+    BIN end_bin = end >> _binFirstShift;
+    BINLEVEL i = 0;
+    BIN offset = _binOffsetsExtended[i];
+    for (BIN b = (start_bin + offset); b <= (end_bin + offset); ++b) {
+        bins.push_back(b);
     }
-    poly_sr_ = bcf_sr_init();
-    bcf_sr_set_regions(poly_sr_, region.c_str(), 0);
-    bcf_sr_add_reader(poly_sr_, poly_vcf_.c_str());
-    while (bcf_sr_next_line(poly_sr_)) {
-        bcf1_t *line = bcf_sr_get_line(poly_sr_, 0);
-        string snp_region = common::create_region_string(bcf_hdr_id2name(poly_vcf_header_, line->rid),
-                line->pos+1, line->pos+1);
-        cerr << endl << "snp region is " << snp_region << endl;
-        //Check if SNP analyzed in RNA before
-        if(rna_snps_.count(snp_region)) {
-            cerr << endl << "Variant in map - already analyzed";
-            if(!rna_snps_[snp_region].is_het_dna) {
-                cerr << "rna is hom, now running DNA snp-mpileup" << endl;
-                if(dna_snps_.count(snp_region)) {
-                    if(dna_snps_[snp_region].is_het_dna) {
+    return bins;
+}
+
+//Get the information for SNPs within relevant window
+void CisAseIdentifier::process_snps_in_window(BED region) {
+    std::cerr << "\ninside process_snps " << region << endl;
+    vector<BIN> bins = get_bins_in_region(region.start, region.end);
+    for(vector<BIN>::iterator bin_it = bins.begin(); bin_it != bins.end(); ++bin_it) {
+        string index = construct_chrom_bin_index(region.chrom, *bin_it);
+        if(bin_to_exonic_variants_.find(index) != bin_to_exonic_variants_.end()) {
+            vector<AnnotatedVariant> variants = bin_to_exonic_variants_[index];
+            for(vector<AnnotatedVariant>::iterator variant_it = variants.begin();
+                    variant_it != variants.end(); ++variant_it) {
+                AnnotatedVariant variant = *variant_it;
+                string snp_region = common::create_region_string(variant.chrom.c_str(), variant.start, variant.end);
+                cerr << endl << "snp region is " << snp_region << endl;
+                //Check if SNP analyzed in RNA before
+                if(rna_snps_.count(snp_region)) {
+                    cerr << endl << "Variant in map - already analyzed";
+                    if(!rna_snps_[snp_region].is_het_dna) {
+                        cerr << "rna is hom, now running DNA snp-mpileup" << endl;
+                        if(dna_snps_.count(snp_region)) {
+                            if(dna_snps_[snp_region].is_het_dna) {
+                                cerr << "DNA is het. potential ASE " << snp_region << endl;
+                            } else {
+                                cerr << "DNA not het" << endl;
+                            }
+                        }
+                    } else {
+                        cerr << "rna not hom" << endl;
+                    }
+                    break;
+                }
+                cerr << "running rna mpileup" << endl;
+                set_mpileup_conf_region(germline_conf_, snp_region);
+                //Check if hom in RNA
+                if(mpileup_run(&germline_conf_,
+                            &CisAseIdentifier::process_rna_hom,
+                            germline_rna_mmc_)) {
+                    cerr << "rna is hom, now running DNA snp-mpileup" << endl;
+                    //Check if het in DNA
+                    if(mpileup_run(&germline_conf_,
+                                &CisAseIdentifier::process_germline_het,
+                                germline_dna_mmc_)) {
                         cerr << "DNA is het. potential ASE " << snp_region << endl;
                     } else {
                         cerr << "DNA not het" << endl;
                     }
+                } else {
+                    cerr << "rna not hom" << endl;
                 }
-            } else {
-                cerr << "rna not hom" << endl;
+                free_mpileup_conf(germline_conf_);
+                //bcf_destroy(line);
             }
-            break;
         }
-        cerr << "running rna mpileup" << endl;
-        set_mpileup_conf_region(germline_conf_, snp_region);
-        //Check if hom in RNA
-        if(mpileup_run(&germline_conf_,
-                       &CisAseIdentifier::process_rna_hom,
-                       germline_rna_mmc_)) {
-            cerr << "rna is hom, now running DNA snp-mpileup" << endl;
-            //Check if het in DNA
-            if(mpileup_run(&germline_conf_,
-                           &CisAseIdentifier::process_germline_het,
-                           germline_dna_mmc_)) {
-                cerr << "DNA is het. potential ASE " << snp_region << endl;
-            } else {
-                cerr << "DNA not het" << endl;
-            }
-        } else {
-            cerr << "rna not hom" << endl;
-        }
-        free_mpileup_conf(germline_conf_);
-        //bcf_destroy(line);
     }
-    bcf_sr_destroy(poly_sr_);
 }
 
 //ASE identification starts here
@@ -437,16 +461,40 @@ void CisAseIdentifier::cleanup() {
         fai_destroy(ref_fai_);
 }
 
+//create the map, where list of exonic variants are
+//indexed by "chr:bin"
+//map<bin, vector<AnnotatedVariant>> bin_to_exonic_variants_;
+void CisAseIdentifier::annotate_exonic_polymorphisms() {
+    bool all_exonic = true;
+    bool all_intronic = false;
+    VariantsAnnotator va(poly_vcf_, gtf_parser_,
+                         all_exonic, all_intronic);
+    va.open_vcf_in();
+    //Annotate each variant and look at relevant ones(exonic unless -E)
+    while(va.read_next_record()) {
+        AnnotatedVariant v1 = va.annotate_record_with_transcripts();
+        if(relevant_poly_annot_ == "NA" ||
+           v1.annotation.find(relevant_poly_annot_) != string::npos) {
+            BIN bin1 = getBin(v1.start, v1.start);
+            string index = construct_chrom_bin_index(v1.chrom, bin1);
+            bin_to_exonic_variants_[index].push_back(v1);
+            /*cerr << endl << "Variant is " << v1.chrom << " " << v1.start
+                 << " " << v1.end << " " << v1.annotation
+                 << " BIN: " << bin1 << " index " << index;*/
+        }
+    }
+    cerr << "Size of vector is " << bin_to_exonic_variants_.size();
+}
+
 //The workflow starts here
 void CisAseIdentifier::run() {
     mmc_init_all(); //load all the mmcs
     load_reference(); //load reference genome
     gtf_parser_.load(); //load gene annotations
+    annotate_exonic_polymorphisms();
     open_somatic_vcf();
     open_poly_vcf();
     mpileup_init_all();
-    //Start running the pileups and looking at GTs
-    identify_ase();
-    //Cleanup file handles
-    cleanup();
+    identify_ase();//Start running the pileups and looking at GTs
+    cleanup();//Cleanup file handles
 }
