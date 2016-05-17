@@ -66,7 +66,7 @@ void CisAseIdentifier::usage(ostream& out) {
     out << "\n\t\t"   << "-d INT Minimum total read-depth for a somatic/ASE variant. [10]";
     out << "\n\t\t"   << "-w INT Window around a somatic variant to look for transcripts. ASE variants "
         << "will be in these transcripts[1000]";
-    out << "\n\t\t"   << "-E Don't only look at exonic polymorphisms for ASE.";
+    out << "\n\t\t"   << "-E Look at all polymorphisms for ASE, not just exonic.";
     out << "\n";
 }
 
@@ -83,6 +83,7 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
                 min_depth_ = atoi(optarg);
                 break;
             case 'E':
+                //This is "exonic" unless -E
                 relevant_poly_annot_ = "NA";
                 break;
             case 'w':
@@ -467,7 +468,7 @@ void CisAseIdentifier::annotate_exonic_polymorphisms() {
     VariantsAnnotator va(poly_vcf_, gtf_parser_,
                          all_exonic, all_intronic);
     va.open_vcf_in();
-    //Annotate each variant and pay attention to splicing related ones
+    //Annotate each variant and look at relevant ones(exonic unless -E)
     while(va.read_next_record()) {
         AnnotatedVariant v1 = va.annotate_record_with_transcripts();
         if(relevant_poly_annot_ == "NA" ||
