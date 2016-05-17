@@ -50,7 +50,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         self.assertEqual(rv, 0, err)
 
     #Test -E option
-    def test_default(self):
+    def test_E(self):
         self.initialize()
         dna_bam = self.inputFiles("bam/cis_ase_tumor_dna.bam")[0]
         output_default = self.tempFile("observed-cse-identify-default.out")
@@ -62,7 +62,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         self.assertEqual(rv, 0, err)
 
     #Test -B option
-    def test_default(self):
+    def test_B(self):
         self.initialize()
         dna_bam = self.inputFiles("bam/cis_ase_tumor_dna.bam")[0]
         output_default = self.tempFile("observed-cse-identify-default.out")
