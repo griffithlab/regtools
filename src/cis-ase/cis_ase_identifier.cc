@@ -35,6 +35,8 @@ DEALINGS IN THE SOFTWARE.  */
 #include <htslib/synced_bcf_reader.h>
 #include "bam2bcf.h"
 #include "bam_plcmd.h"
+#include "beta_model.h"
+#include "binomial_model.h"
 #include "common.h"
 #include "cis_ase_identifier.h"
 #include "gtf_utils.h"
@@ -48,14 +50,6 @@ using namespace std;
 const double MIN_HET_PROB = 0.5;
 const double MIN_HOM_PROB = 0.5;
 
-//RR, RA1, A1A1, RA2, A1A2, A2A2, RA3, A1A3, A2A3, A3A3, RA4 ..
-bool gt_het[15] = {0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0};
-
-//Return a string which is "chr:bin"
-string construct_chrom_bin_index(string chrom, BIN bin1) {
-    return chrom + ":" + common::num_to_str(bin1);
-}
-
 //Usage for this tool
 void CisAseIdentifier::usage(ostream& out) {
     out << "\nUsage:\t\t"
@@ -66,6 +60,7 @@ void CisAseIdentifier::usage(ostream& out) {
     out << "\n\t\t"   << "-d INT Minimum total read-depth for a somatic/ASE variant. [10]";
     out << "\n\t\t"   << "-w INT Window around a somatic variant to look for transcripts. ASE variants "
         << "will be in these transcripts[1000]";
+    out << "\n\t\t"   << "-B Use the binomial model for modeling ASE in RNAseq(uses the beta model by default)";
     out << "\n\t\t"   << "-E Look at all polymorphisms for ASE, not just exonic.";
     out << "\n";
 }
@@ -74,10 +69,13 @@ void CisAseIdentifier::usage(ostream& out) {
 void CisAseIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     char c;
-    while((c = getopt(argc, argv, "d:Eo:w:h")) != -1) {
+    while((c = getopt(argc, argv, "Bd:Eo:w:h")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
+                break;
+            case 'B':
+                use_binomial_model_ = true;
                 break;
             case 'd':
                 min_depth_ = atoi(optarg);
@@ -124,6 +122,9 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
     cerr << "\nMinimum read-depth for variants: " << min_depth_;
     cerr << "\nWindow around somatic-variants to look for transcripts: " <<
             transcript_variant_window_;
+    if(use_binomial_model_) {
+        cerr << "\nUsing the binomial model for modeling RNAseq ASE";
+    }
     cerr << endl;
 }
 
@@ -221,29 +222,31 @@ bool CisAseIdentifier::mpileup_run(mplp_conf_t *conf,
     return result;
 }
 
-//Call genotypes using the posterior prob
-genotype CisAseIdentifier::call_geno(const bcf_call_t& bc) {
+//Call genotypes using the posterior prob under the beta/binomial model for RNA
+genotype CisAseIdentifier::call_genotype_rna(const bcf_call_t& bc) {
     genotype geno;
-    double sum_lik = 0, max_het_lik = 0;
-    int n_gt = bc.n_alleles * (bc.n_alleles + 1) / 2;
     //disregard sites with more than 5 alleles in the VCF &&
     //Check for minimum coverage
     geno.n_reads = bc.depth;
     if(bc.n_alleles <= 5 && bc.depth >= min_depth_) {
-        for (int i=0; i < n_gt; i++) {
-            //convert back from phred
-            double lik = pow(10.0, (-1.0 / 10.0 * bc.PL[i]));
-            //printf(" PL %d lik %f", bc.PL[i], lik);
-            sum_lik += lik;
-            //True if GT is het
-            if(gt_het[i]) {
-                //perhaps switch from max to sum
-                if (lik > max_het_lik) {
-                    max_het_lik = lik;
-                }
-            }
+        if(use_binomial_model_) {
+            calculate_binomial_phet(bc, geno);
+        } else {
+            BetaModel bm(bc);
+            bm.calculate_beta_phet(geno);
         }
-        geno.p_het = max_het_lik/sum_lik;
+    }
+    return geno;
+}
+
+//Call genotypes using the posterior prob under the binomial model for DNA hets
+genotype CisAseIdentifier::call_genotype_dna(const bcf_call_t& bc) {
+    genotype geno;
+    //disregard sites with more than 5 alleles in the VCF &&
+    //Check for minimum coverage
+    geno.n_reads = bc.depth;
+    if(bc.n_alleles <= 5 && bc.depth >= min_depth_) {
+        calculate_binomial_phet(bc, geno);
     }
     return geno;
 }
@@ -252,7 +255,7 @@ genotype CisAseIdentifier::call_geno(const bcf_call_t& bc) {
 bool CisAseIdentifier::process_germline_het(bcf_hdr_t* bcf_hdr, int tid,
                                             int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
     string region = common::create_region_string(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid), pos + 1, pos + 1);
-    genotype geno = call_geno(bc);
+    genotype geno = call_genotype_dna(bc);
     dna_snps_[region].p_het_dna = geno.p_het;
     dna_snps_[region].is_het_dna = false;
     if(geno.is_het(min_depth_)) {
@@ -271,7 +274,7 @@ bool CisAseIdentifier::process_germline_het(bcf_hdr_t* bcf_hdr, int tid,
 bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid,
                                        int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
     string region = common::create_region_string(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid), pos + 1, pos + 1);
-    genotype geno = call_geno(bc);
+    genotype geno = call_genotype_rna(bc);
     rna_snps_[region].p_het_dna = geno.p_het;
     rna_snps_[region].is_het_dna = true;
     if(geno.is_hom(min_depth_)) {
@@ -282,7 +285,7 @@ bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid,
     }
     cerr << "total, max " <<
         bcf_hdr_id2name(bcf_hdr, bcf_rec->rid) << " " <<
-        pos + 1 << " " << geno.p_het << " " <<
+        pos + 1 << " " << geno.p_het << " " << geno.het_type << " " <<
         bcf_rec->d.als[0] << endl;
     return geno.is_hom(min_depth_);
 }
@@ -331,7 +334,7 @@ BED CisAseIdentifier::get_relevant_window(const char* chr, int pos) {
 //Callback for somatic het
 bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid,
                                            int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
-    genotype geno = call_geno(bc);
+    genotype geno = call_genotype_dna(bc);
     if(geno.is_het(min_depth_)) {
         cerr << endl << "Somatic het. ";
         cerr << "total, max " <<

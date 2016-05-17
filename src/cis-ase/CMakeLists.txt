@@ -6,6 +6,7 @@ include_directories(../gtf/
                     ../utils/bedtools/fileType/
                     ../utils/bedtools/stringUtilities/
                     ../utils/htslib/
+                    ../utils/rmath/
                     ../utils/samtools/
                     ../variants/
                     ../junctions/)

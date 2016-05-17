@@ -50,12 +50,24 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         self.assertEqual(rv, 0, err)
 
     #Test -E option
-    def test_default(self):
+    def test_E(self):
         self.initialize()
         dna_bam = self.inputFiles("bam/cis_ase_tumor_dna.bam")[0]
         output_default = self.tempFile("observed-cse-identify-default.out")
         expected_default = self.inputFiles("cis-ase-identify/expected-cis-ase-identify-default.out")[0]
         params = ["cis-ase", "identify", "-E",
+                  self.somatic_vcf, self.poly_vcf,
+                  dna_bam, self.rna_bam, self.fasta, self.gtf]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 0, err)
+
+    #Test -B option
+    def test_B(self):
+        self.initialize()
+        dna_bam = self.inputFiles("bam/cis_ase_tumor_dna.bam")[0]
+        output_default = self.tempFile("observed-cse-identify-default.out")
+        expected_default = self.inputFiles("cis-ase-identify/expected-cis-ase-identify-default.out")[0]
+        params = ["cis-ase", "identify", "-B",
                   self.somatic_vcf, self.poly_vcf,
                   dna_bam, self.rna_bam, self.fasta, self.gtf]
         rv, err = self.execute(params)

@@ -55,15 +55,23 @@ extern "C" {
     void set_data_iter(mplp_conf_t *conf, char** fn, mplp_aux_t **data, int *beg0, int *end0);
 }
 
+//Return a string which is "chr:bin"
+inline string construct_chrom_bin_index(string chrom, BIN bin1) {
+    return chrom + ":" + common::num_to_str(bin1);
+}
+
 //Results of genotype call
 struct genotype {
     //prob of het
     double p_het;
     //Read depth at the sites
     int n_reads;
+    //Metadata describing the het type
+    string het_type;
     genotype() {
         p_het = -1.0;
         n_reads = -1;
+        het_type = "NA";
     }
     bool is_het(int min_depth) {
         if(n_reads == -1.0) {
@@ -308,6 +316,8 @@ class CisAseIdentifier {
         map<string, locus_info> rna_snps_;
         //synced-reader for polymorphism vcf
         bcf_srs_t *poly_sr_;
+        //Use binomial model for modeling ase?
+        bool use_binomial_model_;
         //list of exonic variants indexed by "chr:BIN"
         map<string, vector<AnnotatedVariant> > bin_to_exonic_variants_;
     public:
@@ -323,7 +333,8 @@ class CisAseIdentifier {
                              somatic_vcf_header_(NULL),
                              somatic_vcf_record_(NULL),
                              poly_vcf_fh_(NULL),
-                             poly_vcf_header_(NULL) {
+                             poly_vcf_header_(NULL),
+                             use_binomial_model_(false) {
         }
         //Destructor
         ~CisAseIdentifier() {
@@ -345,8 +356,10 @@ class CisAseIdentifier {
         void mpileup_init1(string bam, mplp_conf_t *conf, mpileup_conf_misc& mmc1);
         //Run mpileup and get the genotype likelihoods
         bool mpileup_run(mplp_conf_t *conf, bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*), mpileup_conf_misc& mmc1);
-        //Call genotypes using the posterior prob
-        genotype call_geno(const bcf_call_t& bc);
+        //Call genotypes using the binomial model - DNA
+        genotype call_genotype_dna(const bcf_call_t& bc);
+        //Call genotypes using the beta/binomial model - RNA
+        genotype call_genotype_rna(const bcf_call_t& bc);
         //Get the SNPs within relevant window
         void process_snps_in_window(BED window);
         //Process homs in RNA(ASE)
