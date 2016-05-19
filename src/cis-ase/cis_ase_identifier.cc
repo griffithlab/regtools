@@ -256,7 +256,9 @@ bool CisAseIdentifier::process_germline_het(bcf_hdr_t* bcf_hdr, int tid,
                                             int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
     string region = common::create_region_string(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid), pos + 1, pos + 1);
     genotype geno = call_genotype_dna(bc);
-    dna_snps_[region].p_het_dna = geno.p_het;
+    dna_snps_[region].p_het = geno.p_het;
+    vcf_op_.alt = string(bcf_rec->d.allele[1]);
+    vcf_op_.p_het_dna = geno.p_het;
     dna_snps_[region].is_het_dna = false;
     if(geno.is_het(min_depth_)) {
         dna_snps_[region].is_het_dna = true;
@@ -275,7 +277,11 @@ bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid,
                                        int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
     string region = common::create_region_string(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid), pos + 1, pos + 1);
     genotype geno = call_genotype_rna(bc);
-    rna_snps_[region].p_het_dna = geno.p_het;
+    rna_snps_[region].p_het = geno.p_het;
+    vcf_op_.chr = string(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid));
+    vcf_op_.pos = pos + 1;
+    vcf_op_.ref = string(bcf_rec->d.allele[0]);
+    vcf_op_.p_hom_rna = 1 - geno.p_het;
     rna_snps_[region].is_het_dna = true;
     if(geno.is_hom(min_depth_)) {
         rna_snps_[region].is_het_dna = false;
@@ -345,7 +351,9 @@ bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid,
             get_relevant_window(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid), pos);
         cerr << endl << "Window is ";
         cerr << relevant_bed << endl;
-        process_snps_in_window(relevant_bed);
+        string somatic_region = common::create_region_string(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid),
+                                                          pos + 1, pos + 1);
+        process_snps_in_window(somatic_region, relevant_bed);
     } else {
         cerr << "Somatic variant is hom" << endl;
     }
@@ -378,7 +386,7 @@ vector<BIN> get_bins_in_region(CHRPOS start, CHRPOS end) {
 }
 
 //Get the information for SNPs within relevant window
-void CisAseIdentifier::process_snps_in_window(BED region) {
+void CisAseIdentifier::process_snps_in_window(string somatic_region, BED region) {
     std::cerr << "\ninside process_snps " << region << endl;
     vector<BIN> bins = get_bins_in_region(region.start, region.end);
     for(vector<BIN>::iterator bin_it = bins.begin(); bin_it != bins.end(); ++bin_it) {
@@ -395,6 +403,7 @@ void CisAseIdentifier::process_snps_in_window(BED region) {
                     cerr << endl << "Variant in map - already analyzed";
                     if(!rna_snps_[snp_region].is_het_dna) {
                         cerr << "rna is hom, now running DNA snp-mpileup" << endl;
+                        //If RNA has been analyzed for the SNP so has DNA
                         if(dna_snps_.count(snp_region)) {
                             if(dna_snps_[snp_region].is_het_dna) {
                                 cerr << "DNA is het. potential ASE " << snp_region << endl;
@@ -409,6 +418,9 @@ void CisAseIdentifier::process_snps_in_window(BED region) {
                 }
                 cerr << "running rna mpileup" << endl;
                 set_mpileup_conf_region(germline_conf_, snp_region);
+                //Reset ouput vcf line
+                vcf_op_.reset();
+                vcf_op_.set_somatic_region(somatic_region);
                 //Check if hom in RNA
                 if(mpileup_run(&germline_conf_,
                             &CisAseIdentifier::process_rna_hom,
@@ -419,6 +431,7 @@ void CisAseIdentifier::process_snps_in_window(BED region) {
                                 &CisAseIdentifier::process_germline_het,
                                 germline_dna_mmc_)) {
                         cerr << "DNA is het. potential ASE " << snp_region << endl;
+                        vcf_op_.print_line();
                     } else {
                         cerr << "DNA not het" << endl;
                     }
@@ -498,6 +511,7 @@ void CisAseIdentifier::run() {
     open_somatic_vcf();
     open_poly_vcf();
     mpileup_init_all();
+    vcf_op_.print_header();
     identify_ase();//Start running the pileups and looking at GTs
     cleanup();//Cleanup file handles
 }

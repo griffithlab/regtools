@@ -93,6 +93,79 @@ struct genotype {
     }
 };
 
+//VCF record for the output
+struct VcfRecord {
+    //Chromosome name
+    string chr;
+    //1-based position
+    CHRPOS pos;
+    //Ref allele
+    string ref;
+    //Alt allele
+    string alt;
+    //p_het in DNA
+    double p_het_dna;
+    //p_hom in RNA
+    double p_hom_rna;
+    //somatic region proximal to the VCF record
+    string somatic_region;
+    //Flag for hom variants in RNA.
+    VcfRecord() {
+        chr = "NA";
+        pos = 0;
+        ref = alt = somatic_region = "NA";
+        p_het_dna = -1;
+        p_hom_rna = -1;
+    }
+    //Print the variant line
+    void print_line() {
+        string id = ".";
+        string qual = ".";
+        //This variant satisfies ASE criterion
+        string filter = "PASS";
+        string info = construct_info();
+        cout << chr << "\t" <<
+                pos << "\t" <<
+                id << "\t" <<
+                ref << "\t" <<
+                alt << "\t" <<
+                qual << "\t" <<
+                filter << "\t" <<
+                info << "\n";
+    }
+    //Construct the info field
+    string construct_info() {
+        return "SOMATIC_VARIANT=" + somatic_region + ";" +
+               "P_HET_DNA=" + common::num_to_str(p_het_dna) + ";" +
+               "P_HOM_RNA=" + common::num_to_str(p_hom_rna);
+    }
+    //VCF header
+    void print_header() {
+        cout << "##fileformat=VCFv4.2" << endl;
+        cout << "##INFO=<ID=SOMATIC_VARIANT,Number=1,Type=String,"
+                "Description=\"Somatic variant proximal to ASE variant.\"";
+        cout << endl;
+        cout << "##INFO=<ID=P_HET_DNA,Number=1,Type=Float,"
+                "Description=\"Posterior probability of het in the DNA at ASE site.\"";
+        cout << endl;
+        cout << "##INFO=<ID=P_HOM_RNA,Number=1,Type=Float,"
+                "Description=\"Posterior probability of hom in the RNA at ASE site.\"";
+        cout << endl;
+        cout << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" << endl;
+    }
+    //Reset all fields
+    void reset() {
+        chr = "NA";
+        pos = 0;
+        ref = alt = somatic_region = "NA";
+        p_het_dna = -1;
+        p_hom_rna = -1;
+    }
+    void set_somatic_region(string region1) {
+        somatic_region = region1;
+    }
+};
+
 //results of mpileup for a variant
 struct locus_info {
     bool is_hom_rna;
@@ -316,6 +389,8 @@ class CisAseIdentifier {
         bool use_binomial_model_;
         //list of exonic variants indexed by "chr:BIN"
         map<string, vector<AnnotatedVariant> > bin_to_exonic_variants_;
+        //Output VCF record
+        VcfRecord vcf_op_;
     public:
         //Constructor
         CisAseIdentifier() : min_depth_(10),
@@ -357,7 +432,7 @@ class CisAseIdentifier {
         //Call genotypes using the beta/binomial model - RNA
         genotype call_genotype_rna(const bcf_call_t& bc);
         //Get the SNPs within relevant window
-        void process_snps_in_window(BED window);
+        void process_snps_in_window(string somatic_region, BED window);
         //Process homs in RNA(ASE)
         bool process_rna_hom(bcf_hdr_t* bcf_hdr, int tid, int pos, const bcf_call_t& bc, bcf1_t* bcf_rec);
         //Process somatic variants
