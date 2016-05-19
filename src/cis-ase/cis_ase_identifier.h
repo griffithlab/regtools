@@ -95,21 +95,17 @@ struct genotype {
 
 //results of mpileup for a variant
 struct locus_info {
-    //Flag for hom variants in RNA.
     bool is_hom_rna;
-    //probability of hom genotype in RNA
-    double p_hom_rna;
     //read-depth at the site - RNA
     int n_reads_rna;
     //Flag for het variants in DNA.
     bool is_het_dna;
-    //probability of het variant in DNA.
-    double p_het_dna;
+    //probability of het at this locus
+    double p_het;
     //read-depth at the site - DNA
     int n_reads_dna;
     locus_info() {
-        p_het_dna = -1;
-        p_hom_rna = -1;
+        p_het = -1;
         n_reads_dna = -1;
         n_reads_rna = -1;
         is_hom_rna = false;
