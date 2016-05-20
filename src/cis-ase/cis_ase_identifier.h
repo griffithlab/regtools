@@ -118,13 +118,13 @@ struct VcfRecord {
         p_hom_rna = -1;
     }
     //Print the variant line
-    void print_line() {
+    void print_line(ostream& out = std::cout) {
         string id = ".";
         string qual = ".";
         //This variant satisfies ASE criterion
         string filter = "PASS";
         string info = construct_info();
-        cout << chr << "\t" <<
+        out << chr << "\t" <<
                 pos << "\t" <<
                 id << "\t" <<
                 ref << "\t" <<
@@ -140,18 +140,18 @@ struct VcfRecord {
                "P_HOM_RNA=" + common::num_to_str(p_hom_rna);
     }
     //VCF header
-    void print_header() {
-        cout << "##fileformat=VCFv4.2" << endl;
-        cout << "##INFO=<ID=SOMATIC_VARIANT,Number=1,Type=String,"
+    void print_header(ostream& out = std::cout) {
+        out << "##fileformat=VCFv4.2" << endl;
+        out << "##INFO=<ID=SOMATIC_VARIANT,Number=1,Type=String,"
                 "Description=\"Somatic variant proximal to ASE variant.\"";
-        cout << endl;
-        cout << "##INFO=<ID=P_HET_DNA,Number=1,Type=Float,"
+        out << endl;
+        out << "##INFO=<ID=P_HET_DNA,Number=1,Type=Float,"
                 "Description=\"Posterior probability of het in the DNA at ASE site.\"";
-        cout << endl;
-        cout << "##INFO=<ID=P_HOM_RNA,Number=1,Type=Float,"
+        out << endl;
+        out << "##INFO=<ID=P_HOM_RNA,Number=1,Type=Float,"
                 "Description=\"Posterior probability of hom in the RNA at ASE site.\"";
-        cout << endl;
-        cout << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" << endl;
+        out << endl;
+        out << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" << endl;
     }
     //Reset all fields
     void reset() {
@@ -355,7 +355,7 @@ class CisAseIdentifier {
         string output_file_;
         //Which polymorphisms to look at
         string relevant_poly_annot_;
-        //output stream to output annotated junctions file
+        //output stream to output ASE variants in VCF format
         ofstream ofs_;
         //Somatic VCF file handle
         htsFile *somatic_vcf_fh_;
@@ -460,6 +460,19 @@ class CisAseIdentifier {
         //create the map, where list of exonic variants are
         //indexed by "chr:bin"
         void annotate_exonic_polymorphisms();
+        //If output file is not empty, attempt to open
+        //If output file is empty, set to cout
+        void set_ostream() {
+            if(output_file_ == "NA") {
+                common::copy_stream(cout, ofs_);
+                return;
+            }
+            ofs_.open(output_file_.c_str());
+            if(!ofs_.is_open()) {
+                throw runtime_error("Unable to open " +
+                        output_file_);
+            }
+        }
 };
 
 #endif //CIS_ASE_IDENTIFIER_

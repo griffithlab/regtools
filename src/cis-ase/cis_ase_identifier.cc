@@ -125,6 +125,9 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
     if(use_binomial_model_) {
         cerr << "\nUsing the binomial model for modeling RNAseq ASE";
     }
+    if(output_file_ != "NA") {
+        cerr << "\nWriting VCF output to " << output_file_;
+    }
     cerr << endl;
 }
 
@@ -431,7 +434,7 @@ void CisAseIdentifier::process_snps_in_window(string somatic_region, BED region)
                                 &CisAseIdentifier::process_germline_het,
                                 germline_dna_mmc_)) {
                         cerr << "DNA is het. potential ASE " << snp_region << endl;
-                        vcf_op_.print_line();
+                        vcf_op_.print_line(ofs_);
                     } else {
                         cerr << "DNA not het" << endl;
                     }
@@ -507,11 +510,12 @@ void CisAseIdentifier::run() {
     mmc_init_all(); //load all the mmcs
     load_reference(); //load reference genome
     gtf_parser_.load(); //load gene annotations
+    set_ostream(); //Set the output stream
     annotate_exonic_polymorphisms();
     open_somatic_vcf();
     open_poly_vcf();
     mpileup_init_all();
-    vcf_op_.print_header();
+    vcf_op_.print_header(ofs_);
     identify_ase();//Start running the pileups and looking at GTs
     cleanup();//Cleanup file handles
 }
