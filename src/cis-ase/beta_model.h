@@ -94,10 +94,6 @@ class BetaModel {
             calc_M_lik();
             calc_N_lik();
             calculate_posteriors();
-            cerr << "pp_S_ " << pp_S_;
-            cerr << " pp_M_ " << pp_M_;
-            cerr << " pp_N_ " << pp_N_;
-            cerr << endl;
             if(pp_M_ > 0.5) {
                 geno.het_type = "MODASE";
             } else if(pp_S_ > 0.5) {
