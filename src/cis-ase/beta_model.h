@@ -69,6 +69,15 @@ class BetaModel {
             lik_N_ = lik_M_ = lik_S_ = 0;
             pp_N_ = pp_M_ = pp_S_ = 0;
         }
+        //Copy assignment operator.
+        //Doesn't copy the likelihoods.
+        BetaModel& operator=(const BetaModel& other) {
+            ref_count_ = other.ref_count_;
+            alt_count_ = other.alt_count_;
+            lik_N_ = lik_M_ = lik_S_ = 0;
+            pp_N_ = pp_M_ = pp_S_ = 0;
+            return *this;
+        }
         BetaModel(const bcf_call_t& bc) {
             ref_count_ = bc.anno[0] + bc.anno[1];
             alt_count_ = bc.anno[2] + bc.anno[3];
