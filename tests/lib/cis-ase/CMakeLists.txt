@@ -20,7 +20,7 @@ include_directories("${PROJECT_SOURCE_DIR}/src/cis-ase/"
                     "${PROJECT_SOURCE_DIR}/src/utils/samtools/"
                     "${PROJECT_SOURCE_DIR}/src/utils/htslib/")
 add_executable(${test_name} ${TEST_SOURCES})
-target_link_libraries(${test_name} gtest gtest_main Rmath)
+target_link_libraries(${test_name} gtest gtest_main rmath)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__STDC_LIMIT_MACROS")
 set(NOSTRING_FLAG "-Wno-write-strings")
 set_target_properties(${test_name} PROPERTIES COMPILE_FLAGS
