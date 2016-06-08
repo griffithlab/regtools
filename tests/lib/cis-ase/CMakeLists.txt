@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 set(TEST_LIBS cis-ase-effects)
 set(TEST_SOURCES
+    "test_binomial_model.cc"
     "test_beta_model.cc")
 
 set(test_name TestCisAseIdentifier)
