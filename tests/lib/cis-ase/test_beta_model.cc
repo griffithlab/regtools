@@ -1,4 +1,4 @@
-/*  binomial_model.h -- Use the binomial likelihoods to calculate prob_het
+/*  test_beta_model.cc -- Unit tests for the Beta model
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -22,32 +22,48 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
-#ifndef BINOMIAL_MODEL_H
-#define BINOMIAL_MODEL_H
-
-#include <cmath>
+#include <gtest/gtest.h>
+#include <stdexcept>
 #include "cis_ase_identifier.h"
+#include "beta_model.h"
 
-//Calculate binomial p_het
-inline void calculate_binomial_phet(const bcf_call_t& bc, genotype& geno) {
-    //RR, RA1, A1A1, RA2, A1A2, A2A2, RA3, A1A3, A2A3, A3A3, RA4 ..
-    bool gt_het[15] = {0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0};
-    double sum_lik = 0, max_het_lik = 0;
-    int n_gt = bc.n_alleles * (bc.n_alleles + 1) / 2;
-    for (int i=0; i < n_gt; i++) {
-        //convert back from phred
-        double lik = pow(10.0, (-1.0 / 10.0 * bc.PL[i]));
-        //printf(" PL %d lik %f", bc.PL[i], lik);
-        sum_lik += lik;
-        //True if GT is het
-        if(gt_het[i]) {
-            //perhaps switch from max to sum
-            if (lik > max_het_lik) {
-                max_het_lik = lik;
-            }
+class BetaModelTest : public ::testing::Test {
+    public:
+        BetaModel bm1, bm2, bm3, bm4;
+        void SetUp() {
+            bm2 = BetaModel(50, 50);
+            bm3 = BetaModel(75, 25);
+            bm4 = BetaModel(100, 3);
         }
-    }
-    geno.p_het = max_het_lik/sum_lik;
+};
+
+//Uninitialized case
+TEST_F(BetaModelTest, Construct1) {
+    genotype geno1;
+    bm1.calculate_beta_phet(geno1);
+    EXPECT_EQ(-1, geno1.p_het);
 }
 
-#endif
+//CHECK NO ASE
+TEST_F(BetaModelTest, NoAse) {
+    genotype geno1;
+    bm2.calculate_beta_phet(geno1);
+    EXPECT_NEAR(1, geno1.p_het, 0.001);
+    EXPECT_EQ("NOASE", geno1.het_type);
+}
+
+//CHECK MOD ASE
+TEST_F(BetaModelTest, ModAse) {
+    genotype geno1;
+    bm3.calculate_beta_phet(geno1);
+    EXPECT_NEAR(0, geno1.p_het, 0.001);
+    EXPECT_EQ("MODASE", geno1.het_type);
+}
+
+//CHECK STRONG ASE
+TEST_F(BetaModelTest, StrongAse) {
+    genotype geno1;
+    bm4.calculate_beta_phet(geno1);
+    EXPECT_NEAR(0, geno1.p_het, 0.001);
+    EXPECT_EQ("STRONGASE", geno1.het_type);
+}
