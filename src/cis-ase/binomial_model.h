@@ -25,6 +25,7 @@ DEALINGS IN THE SOFTWARE.  */
 #ifndef BINOMIAL_MODEL_H
 #define BINOMIAL_MODEL_H
 
+#include <cmath>
 #include "cis_ase_identifier.h"
 
 //Calculate binomial p_het
