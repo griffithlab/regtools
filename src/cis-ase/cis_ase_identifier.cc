@@ -233,7 +233,7 @@ genotype CisAseIdentifier::call_genotype_rna(const bcf_call_t& bc) {
     geno.n_reads = bc.depth;
     if(bc.n_alleles <= 5 && bc.depth >= min_depth_) {
         if(use_binomial_model_) {
-            calculate_binomial_phet(bc, geno);
+            calculate_binomial_germline_phet(bc, geno);
         } else {
             BetaModel bm(bc);
             bm.calculate_beta_phet(geno);
@@ -243,13 +243,25 @@ genotype CisAseIdentifier::call_genotype_rna(const bcf_call_t& bc) {
 }
 
 //Call genotypes using the posterior prob under the binomial model for DNA hets
-genotype CisAseIdentifier::call_genotype_dna(const bcf_call_t& bc) {
+genotype CisAseIdentifier::call_germline_genotype_dna(const bcf_call_t& bc) {
     genotype geno;
     //disregard sites with more than 5 alleles in the VCF &&
     //Check for minimum coverage
     geno.n_reads = bc.depth;
     if(bc.n_alleles <= 5 && bc.depth >= min_depth_) {
-        calculate_binomial_phet(bc, geno);
+        calculate_binomial_germline_phet(bc, geno);
+    }
+    return geno;
+}
+
+//Call genotypes using the posterior prob under the binomial model for DNA hets
+genotype CisAseIdentifier::call_somatic_genotype_dna(const bcf_call_t& bc) {
+    genotype geno;
+    //disregard sites with more than 5 alleles in the VCF &&
+    //Check for minimum coverage
+    geno.n_reads = bc.depth;
+    if(bc.n_alleles <= 5 && bc.depth >= min_depth_) {
+        calculate_binomial_somatic_phet(bc, geno);
     }
     return geno;
 }
@@ -258,12 +270,12 @@ genotype CisAseIdentifier::call_genotype_dna(const bcf_call_t& bc) {
 bool CisAseIdentifier::process_germline_het(bcf_hdr_t* bcf_hdr, int tid,
                                             int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
     string region = common::create_region_string(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid), pos + 1, pos + 1);
-    genotype geno = call_genotype_dna(bc);
+    genotype geno = call_germline_genotype_dna(bc);
     dna_snps_[region].p_het = geno.p_het;
     vcf_op_.alt = string(bcf_rec->d.allele[1]);
     vcf_op_.p_het_dna = geno.p_het;
     dna_snps_[region].is_het_dna = false;
-    if(geno.is_het(min_depth_)) {
+    if(geno.is_germline_het(min_depth_)) {
         dna_snps_[region].is_het_dna = true;
     } else {
         cerr << "Germline poly is hom" << endl;
@@ -272,7 +284,7 @@ bool CisAseIdentifier::process_germline_het(bcf_hdr_t* bcf_hdr, int tid,
         bcf_hdr_id2name(bcf_hdr, bcf_rec->rid) << " " <<
         pos + 1 << " " << geno.p_het << " " <<
         bcf_rec->d.als[0] << endl;
-    return geno.is_het(min_depth_);
+    return geno.is_germline_het(min_depth_);
 }
 
 //Callback for hom in RNA(ASE)
@@ -285,6 +297,7 @@ bool CisAseIdentifier::process_rna_hom(bcf_hdr_t* bcf_hdr, int tid,
     vcf_op_.pos = pos + 1;
     vcf_op_.ref = string(bcf_rec->d.allele[0]);
     vcf_op_.p_hom_rna = 1 - geno.p_het;
+    vcf_op_.ase_model = geno.het_type;
     rna_snps_[region].is_het_dna = true;
     if(geno.is_hom(min_depth_)) {
         rna_snps_[region].is_het_dna = false;
@@ -343,13 +356,12 @@ BED CisAseIdentifier::get_relevant_window(const char* chr, int pos) {
 //Callback for somatic het
 bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid,
                                            int pos, const bcf_call_t& bc, bcf1_t* bcf_rec) {
-    genotype geno = call_genotype_dna(bc);
-    if(geno.is_het(min_depth_)) {
+    genotype geno = call_somatic_genotype_dna(bc);
+    if(geno.is_somatic_het(min_depth_)) {
         cerr << endl << "Somatic het. ";
-        cerr << "total, max " <<
-            bcf_hdr_id2name(bcf_hdr, bcf_rec->rid) << " " <<
+        cerr << bcf_hdr_id2name(bcf_hdr, bcf_rec->rid) << " " <<
             pos + 1 << " " << geno.p_het << " " <<
-            bcf_rec->d.als[0];
+            bcf_rec->d.als[0] << endl;
         BED relevant_bed =
             get_relevant_window(bcf_hdr_id2name(bcf_hdr, bcf_rec->rid), pos);
         cerr << endl << "Window is ";
@@ -360,7 +372,7 @@ bool CisAseIdentifier::process_somatic_het(bcf_hdr_t* bcf_hdr, int tid,
     } else {
         cerr << "Somatic variant is hom" << endl;
     }
-    return geno.is_het(min_depth_);
+    return geno.is_somatic_het(min_depth_);
 }
 
 //Open the polymorphism VCF file
