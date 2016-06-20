@@ -27,27 +27,44 @@ DEALINGS IN THE SOFTWARE.  */
 
 #include <cmath>
 #include "cis_ase_identifier.h"
+#include "Rmath/Rmath.h"
 
-//Calculate binomial p_het
-inline void calculate_binomial_phet(const bcf_call_t& bc, genotype& geno) {
-    //RR, RA1, A1A1, RA2, A1A2, A2A2, RA3, A1A3, A2A3, A3A3, RA4 ..
-    bool gt_het[15] = {0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0};
-    double sum_lik = 0, max_het_lik = 0;
-    int n_gt = bc.n_alleles * (bc.n_alleles + 1) / 2;
-    for (int i=0; i < n_gt; i++) {
-        //convert back from phred
-        double lik = pow(10.0, (-1.0 / 10.0 * bc.PL[i]));
-        //printf(" PL %d lik %f", bc.PL[i], lik);
-        sum_lik += lik;
-        //True if GT is het
-        if(gt_het[i]) {
-            //perhaps switch from max to sum
-            if (lik > max_het_lik) {
-                max_het_lik = lik;
-            }
-        }
-    }
-    geno.p_het = max_het_lik/sum_lik;
+//Calculate binomial p_het for germline variants
+inline void calculate_binomial_germline_phet(const bcf_call_t& bc, genotype& geno) {
+    uint32_t ref_count_ = bc.anno[0] + bc.anno[1];
+    uint32_t alt_count_ = bc.anno[2] + bc.anno[3];
+    // Assume a uniform beta prior of beta(1, 9)
+    double alpha = 1 + alt_count_;
+    double beta = 1 + ref_count_;
+    //Last two arguments of pbeta specifies if lower.tail, returned prob is log
+    double p_het = pbeta(0.6, alpha, beta, true, false) - pbeta(0.4, alpha, beta, true, false);
+    geno.p_het = (double) p_het;
+    //0.0 - 0.1
+    double p_homref = pbeta(0.1, alpha, beta, true, false);
+    //0.9 - 1.0, note: upper tail used here for pbeta
+    double p_homalt = pbeta(0.9, alpha, beta, false, false);
+    //geno.p_het = (double) p_het / (double) (p_het + p_homref + p_homalt);
+    cerr << "inside beta " << ref_count_ << "\t" << alt_count_ << "\t" << p_het << "\t" << p_homref <<
+            "\t" << p_homalt << "\t" << geno.p_het << endl;
+}
+
+//Calculate binomial p_het for somatic variants - be more permissive with AF
+inline void calculate_binomial_somatic_phet(const bcf_call_t& bc, genotype& geno) {
+    uint32_t ref_count_ = bc.anno[0] + bc.anno[1];
+    uint32_t alt_count_ = bc.anno[2] + bc.anno[3];
+    // Assume a uniform beta prior of beta(1, 9)
+    double alpha = 1 + alt_count_;
+    double beta = 1 + ref_count_;
+    //Last two arguments of pbeta specifies if lower.tail, returned prob is log
+    double p_het = pbeta(0.8, alpha, beta, true, false) - pbeta(0.2, alpha, beta, true, false);
+    geno.p_het = (double) p_het;
+    //0.0 - 0.1
+    double p_homref = pbeta(0.25, alpha, beta, true, false);
+    //0.9 - 1.0, note: upper tail used here for pbeta
+    double p_homalt = pbeta(0.75, alpha, beta, false, false);
+    //geno.p_het = (double) p_het / (double) (p_het + p_homref + p_homalt);
+    cerr << "inside beta " << ref_count_ << "\t" << alt_count_ << "\t" << p_het << "\t" << p_homref <<
+            "\t" << p_homalt << "\t" << geno.p_het << endl;
 }
 
 #endif
