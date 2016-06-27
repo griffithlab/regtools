@@ -400,8 +400,6 @@ class CisAseIdentifier {
         map<string, locus_info> dna_snps_;
         //processed RNA snps - helps to pileup only once
         map<string, locus_info> rna_snps_;
-        //synced-reader for polymorphism vcf
-        bcf_srs_t *poly_sr_;
         //Use binomial model for modeling ase?
         bool use_binomial_model_;
         //list of exonic variants indexed by "chr:BIN"
