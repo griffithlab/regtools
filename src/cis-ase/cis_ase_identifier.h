@@ -66,14 +66,23 @@ struct genotype {
     double p_het;
     //Read depth at the sites
     int n_reads;
-    //Metadata describing the het type
+    //Metadata describing the genotype
     string het_type;
     genotype() {
         p_het = -1.0;
         n_reads = -1;
         het_type = "NA";
     }
-    bool is_het(int min_depth) {
+    bool is_germline_het(int min_depth) {
+        if(n_reads == -1.0) {
+            throw runtime_error("Uninitialized genotype!");
+        }
+        if(p_het >= MIN_HET_PROB && n_reads >= min_depth) {
+            return true;
+        }
+        return false;
+    }
+    bool is_somatic_het(int min_depth) {
         if(n_reads == -1.0) {
             throw runtime_error("Uninitialized genotype!");
         }
@@ -109,6 +118,8 @@ struct VcfRecord {
     double p_hom_rna;
     //somatic region proximal to the VCF record
     string somatic_region;
+    //which model describes the data best
+    string ase_model;;
     //Flag for hom variants in RNA.
     VcfRecord() {
         chr = "NA";
@@ -116,6 +127,7 @@ struct VcfRecord {
         ref = alt = somatic_region = "NA";
         p_het_dna = -1;
         p_hom_rna = -1;
+        ase_model = "NA";
     }
     //Print the variant line
     void print_line(ostream& out = std::cout) {
@@ -137,7 +149,8 @@ struct VcfRecord {
     string construct_info() {
         return "SOMATIC_VARIANT=" + somatic_region + ";" +
                "P_HET_DNA=" + common::num_to_str(p_het_dna) + ";" +
-               "P_HOM_RNA=" + common::num_to_str(p_hom_rna);
+               "P_HOM_RNA=" + common::num_to_str(p_hom_rna) + ";" +
+               "ASE_MODEL=" + ase_model;
     }
     //VCF header
     void print_header(ostream& out = std::cout) {
@@ -151,6 +164,9 @@ struct VcfRecord {
         out << "##INFO=<ID=P_HOM_RNA,Number=1,Type=Float,"
                 "Description=\"Posterior probability of hom in the RNA at ASE site.\"";
         out << endl;
+        out << "##INFO=<ID=ASE_MODEL,Number=1,Type=String,"
+                "Description=\"Name of the model that explains the ASE data best.\"";
+        out << endl;
         out << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" << endl;
     }
     //Reset all fields
@@ -160,6 +176,7 @@ struct VcfRecord {
         ref = alt = somatic_region = "NA";
         p_het_dna = -1;
         p_hom_rna = -1;
+        ase_model = "NA";
     }
     void set_somatic_region(string region1) {
         somatic_region = region1;
@@ -383,8 +400,6 @@ class CisAseIdentifier {
         map<string, locus_info> dna_snps_;
         //processed RNA snps - helps to pileup only once
         map<string, locus_info> rna_snps_;
-        //synced-reader for polymorphism vcf
-        bcf_srs_t *poly_sr_;
         //Use binomial model for modeling ase?
         bool use_binomial_model_;
         //list of exonic variants indexed by "chr:BIN"
@@ -428,7 +443,8 @@ class CisAseIdentifier {
         //Run mpileup and get the genotype likelihoods
         bool mpileup_run(mplp_conf_t *conf, bool (CisAseIdentifier::*f)(bcf_hdr_t*, int, int, const bcf_call_t&, bcf1_t*), mpileup_conf_misc& mmc1);
         //Call genotypes using the binomial model - DNA
-        genotype call_genotype_dna(const bcf_call_t& bc);
+        genotype call_germline_genotype_dna(const bcf_call_t& bc);
+        genotype call_somatic_genotype_dna(const bcf_call_t& bc);
         //Call genotypes using the beta/binomial model - RNA
         genotype call_genotype_rna(const bcf_call_t& bc);
         //Get the SNPs within relevant window

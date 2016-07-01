@@ -30,8 +30,8 @@ DEALINGS IN THE SOFTWARE.  */
 #include <algorithm>
 
 //parameters for no ASE model
-int N_alpha = 2000;
-int N_beta = 2000;
+int N_alpha = 20;
+int N_beta = 20;
 //parameters for the moderate ASE model
 int M_alpha = 36;
 int M_beta = 12;
@@ -94,15 +94,17 @@ class BetaModel {
             calc_M_lik();
             calc_N_lik();
             calculate_posteriors();
-            if(pp_M_ > 0.5) {
+            if(pp_M_ >= pp_S_ && pp_M_ > pp_N_) {
                 geno.het_type = "MODASE";
-            } else if(pp_S_ > 0.5) {
+            } else if(pp_S_ > pp_M_ && pp_S_ > pp_N_) {
                 geno.het_type = "STRONGASE";
-            } else if(pp_N_ > 0.5) {
+            } else if(pp_N_ >= pp_S_ && pp_N_ >= pp_M_) {
                 geno.het_type = "NOASE";
             }
-            //Assign p_het to max of MOD/STRONG
-            geno.p_het = pp_N_;
+            double alpha = N_alpha + alt_count_;
+            double beta = N_beta + ref_count_;
+            //Assign p_het to posterior prob between 0.4-0.6
+            geno.p_het = pbeta(0.6, alpha, beta, true, false) - pbeta(0.4, alpha, beta, true, false);
         }
         //Calculate likelihood under the S model
         void calc_S_lik() {

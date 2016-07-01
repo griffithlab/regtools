@@ -31,9 +31,9 @@ class BetaModelTest : public ::testing::Test {
     public:
         BetaModel bm1, bm2, bm3, bm4;
         void SetUp() {
-            bm2 = BetaModel(50, 50);
-            bm3 = BetaModel(75, 25);
-            bm4 = BetaModel(100, 3);
+            bm2 = BetaModel(150, 150);
+            bm3 = BetaModel(150, 50);
+            bm4 = BetaModel(100, 1);
         }
 };
 

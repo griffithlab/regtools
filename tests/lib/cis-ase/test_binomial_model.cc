@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include "binomial_model.h"
 
 //Check hom-ref
-TEST(BinomialModel, HomRef) {
+TEST(BinomialGermlineModel, HomRef) {
     bcf_call_t bc1;
     int n_samples = 1;
     memset(&bc1, 0, sizeof(bcf_call_t));
@@ -37,14 +37,18 @@ TEST(BinomialModel, HomRef) {
     bc1.PL[0] = 0;
     bc1.PL[1] = 255;
     bc1.PL[2] = 255;
+    bc1.anno[0] = 10;
+    bc1.anno[1] = 10;
+    bc1.anno[2] = 1;
+    bc1.anno[3] = 0;
     genotype geno1;
-    calculate_binomial_phet(bc1, geno1);
+    calculate_binomial_germline_phet(bc1, geno1);
     EXPECT_NEAR(0, geno1.p_het, 0.001);
     free(bc1.PL);
 }
 
 //Check het
-TEST(BinomialModel, Het) {
+TEST(BinomialGermlineModel, Het) {
     bcf_call_t bc2;
     int n_samples = 1;
     memset(&bc2, 0, sizeof(bcf_call_t));
@@ -53,14 +57,18 @@ TEST(BinomialModel, Het) {
     bc2.PL[0] = 255;
     bc2.PL[1] = 0;
     bc2.PL[2] = 255;
+    bc2.anno[0] = 130;
+    bc2.anno[1] = 112;
+    bc2.anno[2] = 129;
+    bc2.anno[3] = 130;
     genotype geno1;
-    calculate_binomial_phet(bc2, geno1);
+    calculate_binomial_germline_phet(bc2, geno1);
     EXPECT_NEAR(1, geno1.p_het, 0.001);
     free(bc2.PL);
 }
 
 //Check hom-alt
-TEST(BinomialModel, HomAlt) {
+TEST(BinomialGermlineModel, HomAlt) {
     bcf_call_t bc3;
     int n_samples = 1;
     memset(&bc3, 0, sizeof(bcf_call_t));
@@ -69,8 +77,12 @@ TEST(BinomialModel, HomAlt) {
     bc3.PL[0] = 255;
     bc3.PL[1] = 255;
     bc3.PL[2] = 0;
+    bc3.anno[0] = 1;
+    bc3.anno[1] = 2;
+    bc3.anno[2] = 129;
+    bc3.anno[3] = 130;
     genotype geno1;
-    calculate_binomial_phet(bc3, geno1);
+    calculate_binomial_germline_phet(bc3, geno1);
     EXPECT_NEAR(0, geno1.p_het, 0.001);
     free(bc3.PL);
 }
