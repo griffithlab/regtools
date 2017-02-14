@@ -15,8 +15,8 @@ The `regtools variants annotate` command is used to annotate variants of interes
 ###Options
 | Option  | Description |
 | ------  | ----------- |
-| -e      | Minimum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in exonic space, i.e a coding variant. [default = 3] |
-| -i      | Minimum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in intronic space. [default = 2] |
+| -e      | Maximum distance from the start/end of an exon to annotate an exonic variant (i.e. a coding variant) as relevant to splicing. [default = 3] |
+| -i      | Maximum distance from the start/end of an exon to annotate an intronic variant as relevant to splicing. [default = 2] |
 | -S      | Dont skip single exon transcripts. The default is to skip the single exon transcripts. |
 | -o      | Name of output file, this file will be in the VCF format. [STDOUT] |
 
