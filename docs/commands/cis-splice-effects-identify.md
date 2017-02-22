@@ -9,7 +9,7 @@ The `cis-splice-effects identify` command is used to identify splicing misregula
 ###Input
 | Input                  | Description |
 | ------                 | ----------- |
-| variants.vcf | Aligned RNAseq BAM produced with a splice aware aligner, this BAM should also be indexed for example with `samtools index`. We have tested this command with alignments from TopHat.|
+| variants.vcf | Variant call in VCF format from which to look for cis-splice-effects.|
 | alignments.bam | Aligned RNAseq BAM produced with a splice aware aligner, that has been indexed for example with `samtools index`. We have tested this command with alignments from TopHat.|
 | ref.fa          | The reference FASTA file. The donor and acceptor sequences used in the "splice-site" column of the annotated junctions are extracted from the FASTA file. |
 | annotations.gtf | The GTF file specifies the transcriptome that is used to annotate the junctions and variants. For examples, the Ensembl GTFs for release78 are [here](ftp://ftp.ensembl.org/pub/release-78/gtf/).|
