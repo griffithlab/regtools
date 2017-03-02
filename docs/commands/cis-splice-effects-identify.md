@@ -22,6 +22,7 @@ The `cis-splice-effects identify` command is used to identify splicing misregula
 | -o      | Output file containing the aberrant splice junctions. [STDOUT] |
 | -v      | Output file containing variants annotated as splice relevant (VCF format). |
 | -w      | Window around the variant file (in basepairs) to identify splicing events in. If specified the tool looks at +/- n b.p around the variant start position. For example -w 500 will look at a 1kb window around the variant. If this option is not specified, the default option is to look at a window that ranges from the start co-ordinate of the previous exon and ends at the end co-ordinate of the next exon i.e by treating the current exon as a cassette exon. |
+| -j      | Optional file containing the aberrant junctions in BED12 format. |
 
 ###Output
 For an explanation of the annotated junctions that are identified by this command please refer to the output of the `junctions annotate` command [here](junctions-annotate.md#output)
