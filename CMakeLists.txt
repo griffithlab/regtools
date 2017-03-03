@@ -11,7 +11,7 @@ include(TestHelper)
 
 #versioning stuff
 set (regtools_VERSION_MAJOR 0)
-set (regtools_VERSION_MINOR 2)
+set (regtools_VERSION_MINOR 3)
 set (regtools_VERSION_PATCH 0)
 configure_file (
     "${PROJECT_SOURCE_DIR}/src/version.h.in"
