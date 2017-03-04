@@ -57,12 +57,12 @@ void CisSpliceEffectsIdentifier::close_ostream() {
 void CisSpliceEffectsIdentifier::set_ostream() {
     if(output_file_ == "NA") {
         common::copy_stream(cout, ofs_);
-        return;
+    } else {
+        ofs_.open(output_file_.c_str());
+        if(!ofs_.is_open())
+            throw runtime_error("Unable to open " +
+                                output_file_);
     }
-    ofs_.open(output_file_.c_str());
-    if(!ofs_.is_open())
-        throw runtime_error("Unable to open " +
-                            output_file_);
     if(output_junctions_bed_ != "NA") {
         ofs_junctions_bed_.open(output_junctions_bed_.c_str());
         if(!ofs_junctions_bed_.is_open())
