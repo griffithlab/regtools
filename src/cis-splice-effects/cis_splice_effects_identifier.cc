@@ -158,14 +158,12 @@ void CisSpliceEffectsIdentifier::annotate_junctions(const GtfParser& gp1) {
         AnnotatedJunction line(j);
         ja1.get_splice_site(line);
         ja1.annotate_junction_with_gtf(line);
-        if(line.anchor != "DA") {
-            if(output_junctions_bed_ != "NA") {
-                j.name = get_junction_name(++i);
-                j.print(ofs_junctions_bed_);
-            }
-            line.variant_info = variant_set_to_string(junction_to_variant_[j]);
-            line.print(ofs_, true);
+        if(output_junctions_bed_ != "NA") {
+            j.name = get_junction_name(++i);
+            j.print(ofs_junctions_bed_);
         }
+        line.variant_info = variant_set_to_string(junction_to_variant_[j]);
+        line.print(ofs_, true);
     }
     close_ostream();
 }
