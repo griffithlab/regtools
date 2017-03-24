@@ -27,4 +27,5 @@ The `cis-ase identify` command is used to identify allele-specific expression ev
 
 ###Output
 The output is in the VCF format and contains a list of polymorphic sites that show evidence for allele specific expression.
+
 TODO - add details about the model parameters here.
