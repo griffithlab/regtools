@@ -18,14 +18,14 @@ p <- p + geom_rect(aes(xmin = 10, ymin = 0, xmax = 20, ymax = 5), fill = "red") 
 p <- p + geom_rect(aes(xmin = -5, ymin = -10, xmax = 5, ymax = -5), fill = "red") + geom_rect(aes(xmin = 45, ymin = -10, xmax = 55, ymax = -5), fill = "red") + geom_segment(aes(x = 5, y = -7.5, xend = 45, yend = -7.5), arrow = arrow(length = unit(0.5, "cm")))
 
 #Add labels
-p <- p + annotate("text", label = "Transcripts", x = 7, y = 105, size = 5)
-p <- p + annotate("text", label = "Junctions", x = 5, y = 42.5, size = 5)
-p <- p + annotate("text", label = "Annotations from regtools", x = 120, y = 42.5, size = 5)
-p <- p + annotate("text", label = "'DA': Known donor-acceptor", x = 140, y = 32.5, size = 5)
-p <- p + annotate("text", label = "'NDA': Novel donor-acceptor combination", x = 140, y = 22.5, size = 5)
-p <- p + annotate("text", label = "'D': Novel donor", x = 90, y = 12.5, size = 5)
-p <- p + annotate("text", label = "'A': Novel acceptor", x = 90, y = 2.5, size = 5)
-p <- p + annotate("text", label = "'N': Novel acceptor and novel donor.", x = 90, y = -7.5, size = 5)
+p <- p + annotate("text", label = "Transcripts", hjust = 0, x = -20, y = 108, size = 5)
+p <- p + annotate("text", label = "Junctions", hjust = 0, x = -20, y = 42.5, size = 5)
+p <- p + annotate("text", label = "Annotations from regtools", x = 85, hjust = 0,  y = 42.5, size = 5)
+p <- p + annotate("text", label = "'DA': Known donor-acceptor", x = 85, hjust = 0, y = 32.5, size = 5)
+p <- p + annotate("text", label = "'NDA': Novel donor-acceptor combination", x = 85, hjust = 0, y = 22.5, size = 5)
+p <- p + annotate("text", label = "'D': Known donor, novel acceptor", x = 85, hjust = 0, y = 12.5, size = 5)
+p <- p + annotate("text", label = "'A': Known acceptor, novel donor", x = 85, hjust = 0, y = 2.5, size = 5)
+p <- p + annotate("text", label = "'N': Novel acceptor and novel donor.", x = 85, hjust = 0, y = -7.5, size = 5)
 
 
 #Add lines to make it clear
