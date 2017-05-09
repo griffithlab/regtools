@@ -64,13 +64,32 @@ class CisSpliceEffectsIdentifier {
         set<Junction> unique_junctions_;
         //Store the variants that mark a junction
         map<Junction, set<AnnotatedVariant> > junction_to_variant_;
+        //Minimum distance of a variant from
+        //edge of an exon(intronic) to be considered
+        //a splicing variant
+        uint32_t intronic_min_distance_;
+        //Minimum distance of a variant from
+        //edge of an exon(exonic) to be considered
+        //a splicing variant
+        uint32_t exonic_min_distance_;
+        //Flag set by the -I option
+        bool all_intronic_space_;
+        //Flag set by the -E option
+        bool all_exonic_space_;
+        //Option to skip single exon genes
+        bool skip_single_exon_genes_;
     public:
         //Constructor
         CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"),
                                        output_junctions_bed_("NA"),
                                        annotated_variant_file_("NA"),
                                        write_annotated_variants_(false),
-                                       window_size_(0) {}
+                                       window_size_(0),
+                                       intronic_min_distance_(2),
+                                       exonic_min_distance_(3),
+                                       all_intronic_space_(false),
+                                       all_exonic_space_(false),
+                                       skip_single_exon_genes_(true) {}
         //Destructor
         ~CisSpliceEffectsIdentifier() {
             if(ofs_.is_open()) {

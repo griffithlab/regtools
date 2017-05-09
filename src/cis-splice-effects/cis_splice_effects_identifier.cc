@@ -42,6 +42,15 @@ void CisSpliceEffectsIdentifier::usage(ostream& out) {
         << "\n\t\t\t" << "The tool identifies events in variant.start +/- w basepairs."
         << "\n\t\t\t" << "Default behaviour is to look at the window between previous and next exons.";
     out << "\n\t\t" << "-j STR Output file containing the aberrant junctions in BED12 format.";
+    out << "\n\t\t" << "-e INT\tMaximum distance from the start/end of an exon "
+                       "\n\t\t\tto annotate a variant as relevant to splicing, the variant "
+                       "\n\t\t\tis in exonic space, i.e a coding variant. [3]";
+    out << "\n\t\t" << "-i INT\tMaximum distance from the start/end of an exon "
+                       "\n\t\t\tto annotate a variant as relevant to splicing, the variant "
+                       "\n\t\t\tis in intronic space. [2]";
+    out << "\n\t\t" << "-I\tAnnotate variants in intronic space within a transcript(not to be used with -i).";
+    out << "\n\t\t" << "-E\tAnnotate variants in exonic space within a transcript(not to be used with -e).";
+    out << "\n\t\t" << "-S\tDon't skip single exon transcripts.";
     out << "\n";
 }
 
@@ -89,7 +98,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     stringstream help_ss;
     char c;
-    while((c = getopt(argc, argv, "o:w:v:j:h")) != -1) {
+    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:ISh")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
@@ -102,6 +111,21 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
                 break;
             case 'j':
                 output_junctions_bed_ = string(optarg);
+                break;
+            case 'i':
+                intronic_min_distance_ = atoi(optarg);
+                break;
+            case 'e':
+                exonic_min_distance_ = atoi(optarg);
+                break;
+            case 'I':
+                all_intronic_space_ = true;
+                break;
+            case 'E':
+                all_exonic_space_ = true;
+                break;
+            case 'S':
+                skip_single_exon_genes_ = false;
                 break;
             case 'h':
                 usage(help_ss);
@@ -181,7 +205,7 @@ void CisSpliceEffectsIdentifier::identify() {
     GtfParser gp1(gtf_);
     gp1.load();
     //variant annotator
-    VariantsAnnotator va(vcf_, gp1, annotated_variant_file_);
+    VariantsAnnotator va(vcf_, gp1, annotated_variant_file_, intronic_min_distance_, exonic_min_distance_, all_intronic_space_, all_exonic_space_, skip_single_exon_genes_);
     va.open_vcf_in();
     if(write_annotated_variants_)
         va.open_vcf_out();
