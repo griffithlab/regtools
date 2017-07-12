@@ -500,25 +500,25 @@ AnnotatedVariant VariantsAnnotator::annotate_record_with_transcripts() {
                 //Use a AnnotatedVariant object to hold the result
                 get_variant_overlaps_spliceregion(exons, variant);
                 if(variant.annotation != "non_splice_region") {
-                    string gene_id = gtf_.get_gene_from_transcript(transcripts[i]);
+                    string gene_name = gtf_.get_gene_from_transcript(transcripts[i])[0];
                     //Use sign to encode intronic/exonic
                     string annotation = variant.annotation;
                     string dist_str = variant.score;
                     //Add gene only once for multiple transcripts of the same gene.
                     if(overlapping_transcripts != "NA") {
                         //Check if this gene is new
-                        if(unique_genes.find(gene_id) == unique_genes.end()) {
-                            overlapping_genes += "," + gene_id;
-                            unique_genes.insert(gene_id);
+                        if(unique_genes.find(gene_name) == unique_genes.end()) {
+                            overlapping_genes += "," + gene_name;
+                            unique_genes.insert(gene_name);
                         }
                         overlapping_distances += "," + dist_str;
                         overlapping_transcripts += "," + transcripts[i];
                         annotations += "," + annotation;
                     } else {
-                        overlapping_genes = gene_id;
+                        overlapping_genes = gene_name;
                         overlapping_distances = dist_str;
                         overlapping_transcripts = transcripts[i];
-                        unique_genes.insert(gene_id);
+                        unique_genes.insert(gene_name);
                         annotations = annotation;
                     }
                 }
