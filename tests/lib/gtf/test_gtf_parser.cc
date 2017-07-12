@@ -102,9 +102,13 @@ TEST_F(GtfParserTest, AddExonToTranscriptTest) {
     test_gtf1.is_exon = true;
     gp1.add_exon_to_transcript_map(test_gtf1);
     EXPECT_EQ("EP300",
-              gp1.get_gene_from_transcript("ENST00000263253"));
+              gp1.get_gene_from_transcript("ENST00000263253")[0]);
+    EXPECT_EQ("ENSG00000100393",
+              gp1.get_gene_from_transcript("ENST00000263253")[1]);
     EXPECT_EQ("NA",
-              gp1.get_gene_from_transcript("ENSTfake"));
+              gp1.get_gene_from_transcript("ENSTfake")[0]);
+    EXPECT_EQ("NA",
+              gp1.get_gene_from_transcript("ENSTfake")[1]);
     gp1.annotate_transcript_with_bins();
     EXPECT_EQ(37359u,
               gp1.bin_from_transcript("ENST00000263253"));
