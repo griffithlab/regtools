@@ -121,8 +121,6 @@ class GtfParser {
         TranscriptToBin transcript_to_bin_;
         //keyed by transcript_id
         ChrBinToTranscripts chrbin_to_transcripts_;
-        //constant pair of "NA", "NA" for gene name and gene id
-        static string NA[];
     public:
         //Constructor
         GtfParser()

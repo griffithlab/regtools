@@ -95,8 +95,12 @@ struct AnnotatedJunction : BED {
                     out << ",";
                 //print gene name
                 out << (*it)[0];
-                out << "\t";
-                //print gene id
+            }
+            out << "\t";
+            for(set<string*>::iterator it = genes_overlap.begin(); it != genes_overlap.end(); ++it) {
+                if(it != genes_overlap.begin())
+                    out << ",";
+                //print gene name
                 out << (*it)[1];
             }
         } else {

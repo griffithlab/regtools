@@ -37,8 +37,6 @@ DEALINGS IN THE SOFTWARE.  */
 
 using namespace std;
 
-string GtfParser::NA[] = {"NA", "NA"};
-
 //Sort exons by start - positive strand
 bool sort_by_start_ps(const BED & a, const BED & b) {
     return a.start < b.start;
@@ -251,6 +249,8 @@ string* GtfParser::get_gene_from_transcript(string transcript_id) {
     if(transcript_to_gene_.count(transcript_id)) {
         return transcript_to_gene_[transcript_id];
     } else {
+        string* NA = new string[2];
+        NA[0] = NA[1] = "NA";
         return NA;
     }
 }
@@ -268,7 +268,9 @@ void GtfParser::load() {
 inline void GtfParser::set_transcript_gene(string transcript_id, string gene_name, string gene_id) {
     //check if key already exists
     if(transcript_to_gene_.count(transcript_id) == 0){
-        string gene[2] = {gene_name, gene_id};
+        string* gene = new string[2];
+        gene[0] = gene_name;
+        gene[1] = gene_id;
         transcript_to_gene_[transcript_id] = gene;
     }
 }
