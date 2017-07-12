@@ -41,7 +41,7 @@ struct AnnotatedJunction : BED {
     set<string> transcripts_overlap;
     //set of genes that
     //the junction overlaps
-    set<string> genes_overlap;
+    set<string*> genes_overlap;
     //set of exons that the junction
     //overlaps
     set<string> exons_skipped;
@@ -93,7 +93,11 @@ struct AnnotatedJunction : BED {
             for(set<string>::iterator it = genes_overlap.begin(); it != genes_overlap.end(); ++it) {
                 if(it != genes_overlap.begin())
                     out << ",";
-                out << *it;
+                //print gene name
+                out << *it[0];
+                out << "\t";
+                //print gene id
+                out << *it[1];
             }
         } else {
             out << "\t" << "NA";

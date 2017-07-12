@@ -112,13 +112,14 @@ void GtfParser::add_exon_to_transcript_map(Gtf gtf1) {
     Tokenize(gtf1.attributes, attributes, ';');
     string transcript_id = parse_attribute(attributes, "transcript_id");
     string gene_name = parse_attribute(attributes, "gene_name");
+    string gene_id = parse_attribute(attributes, "gene_id");
     //create a BED6 object
     BED exon = BED(gtf1.seqname, gtf1.start,
                    gtf1.end, gtf1.feature,
                    gtf1.score, gtf1.strand);
     if(transcript_id != string("NA")) {
         transcript_map_[transcript_id].exons.push_back(exon);
-        set_transcript_gene(transcript_id, gene_name);
+        set_transcript_gene(transcript_id, gene_name, gene_id);
     }
 }
 
@@ -243,12 +244,12 @@ void GtfParser::set_gtffile(string filename) {
     gtffile_ = filename;
 }
 
-//Get the gene ID using the trancript ID
-string GtfParser::get_gene_from_transcript(string transcript_id) {
+//Get the gene name and gene ID using the trancript ID
+string* GtfParser::get_gene_from_transcript(string transcript_id) {
     if(transcript_to_gene_.count(transcript_id)) {
         return transcript_to_gene_[transcript_id];
     } else {
-        return "NA";
+        return {"NA","NA"};
     }
 }
 
@@ -261,11 +262,11 @@ void GtfParser::load() {
     //print_transcripts();
 }
 
-//Set the gene ID for a trancript ID
-inline void GtfParser::set_transcript_gene(string transcript_id, string gene_id) {
+//Set the gene name and gene ID for a trancript ID
+inline void GtfParser::set_transcript_gene(string transcript_id, string gene_name, string gene_id) {
     //check if key already exists
     if(transcript_to_gene_.count(transcript_id) == 0)
-        transcript_to_gene_[transcript_id] = gene_id;
+        transcript_to_gene_[transcript_id] = {gene_name, gene_id};
 }
 
 //Assignment operator

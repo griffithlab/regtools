@@ -112,8 +112,8 @@ class GtfParser {
         ifstream gtf_fh_;
         //Are exons within transcripts sorted
         bool transcripts_sorted_;
-        //Jump from transcript-id to gene-id
-        map<string, string> transcript_to_gene_;
+        //Jump from transcript-id to {gene name, gene id}
+        map<string, string*> transcript_to_gene_;
         //Store transcripts as a vector of exon BEDs
         //keyed by transcript_id
         map<string, Transcript> transcript_map_;
@@ -177,9 +177,9 @@ class GtfParser {
         //The return value is a vector of BEDs
         const vector<BED> & get_exons_from_transcript(string transcript_id);
         //Get the gene ID using the trancript ID
-        string get_gene_from_transcript(string transcript_id);
+        string* get_gene_from_transcript(string transcript_id);
         //Set the gene ID for a trancript ID
-        void set_transcript_gene(string transcript_id, string gene_id);
+        void set_transcript_gene(string transcript_id, string gene_name, string gene_id);
         //Load all the necessary objects into memory
         void load();
         //Assignment operator
