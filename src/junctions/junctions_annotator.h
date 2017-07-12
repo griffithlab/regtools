@@ -72,7 +72,7 @@ struct AnnotatedJunction : BED {
                 "\t" << "exons_skipped" << "\t" << "donors_skipped" <<
                 "\t" << "anchor" <<
                 "\t" << "known_donor" << "\t" << "known_acceptor" << "\t" << "known_junction" <<
-                "\t" << "genes" << "\t" << "transcripts";
+                "\t" << "gene_names" << "\t" << "gene_ids" << "\t" << "transcripts";
         if(variant_info_exists) {
             out << "\t" << "variant_info";
         }
