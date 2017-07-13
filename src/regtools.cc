@@ -69,7 +69,6 @@ int main(int argc, char* argv[]) {
             return cis_ase_main(argc - 1, argv + 1);
         }
     }
-    cout << "\n";
     return usage();
 }
 

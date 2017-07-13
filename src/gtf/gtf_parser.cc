@@ -252,7 +252,7 @@ array<string, 2> GtfParser::get_gene_from_transcript(string transcript_id) {
     if(transcript_to_gene_.count(transcript_id)) {
         return transcript_to_gene_[transcript_id];
     } else {
-        array<string, 2> NA = {"NA, NA"};
+        array<string, 2> NA = {{"NA, NA"}};
         return NA;
     }
 }
@@ -270,7 +270,7 @@ void GtfParser::load() {
 inline void GtfParser::set_transcript_gene(string transcript_id, string gene_name, string gene_id) {
     //check if key already exists
     if(transcript_to_gene_.count(transcript_id) == 0){
-        array<string, 2> gene = {gene_name, gene_id};
+        array<string, 2> gene = {{gene_name, gene_id}};
         transcript_to_gene_[transcript_id] = gene;
     }
 }
