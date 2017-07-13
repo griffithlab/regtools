@@ -22,6 +22,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
+#include <array>
+#include <string>
+#include <sstream>
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
@@ -245,12 +248,11 @@ void GtfParser::set_gtffile(string filename) {
 }
 
 //Get the gene name and gene ID using the trancript ID
-string* GtfParser::get_gene_from_transcript(string transcript_id) {
+array<string, 2> GtfParser::get_gene_from_transcript(string transcript_id) {
     if(transcript_to_gene_.count(transcript_id)) {
         return transcript_to_gene_[transcript_id];
     } else {
-        string* NA = new string[2];
-        NA[0] = NA[1] = "NA";
+        array<string, 2> NA = {"NA, NA"};
         return NA;
     }
 }
@@ -268,9 +270,7 @@ void GtfParser::load() {
 inline void GtfParser::set_transcript_gene(string transcript_id, string gene_name, string gene_id) {
     //check if key already exists
     if(transcript_to_gene_.count(transcript_id) == 0){
-        string* gene = new string[2];
-        gene[0] = gene_name;
-        gene[1] = gene_id;
+        array<string, 2> gene = {gene_name, gene_id};
         transcript_to_gene_[transcript_id] = gene;
     }
 }

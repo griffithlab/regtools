@@ -82,7 +82,7 @@ int junctions_annotate(int argc, char *argv[]) {
             linec++;
         }
         anno.close_ofstream();
-        cerr << endl << "Annotated " << linec << " lines.";
+        cerr << endl << "Annotated " << linec << " lines." << "\n";
         anno.close_junctions();
     } catch(const common::cmdline_help_exception& e) {
         cerr << e.what();

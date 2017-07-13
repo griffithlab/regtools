@@ -25,6 +25,9 @@ DEALINGS IN THE SOFTWARE.  */
 #ifndef JUNCTIONS_ANNOTATOR_H_
 #define JUNCTIONS_ANNOTATOR_H_
 
+#include <array>
+#include <string>
+#include <sstream>
 #include <iostream>
 #include <iterator>
 #include "bedFile.h"
@@ -41,7 +44,7 @@ struct AnnotatedJunction : BED {
     set<string> transcripts_overlap;
     //set of genes that
     //the junction overlaps
-    set<string*> genes_overlap;
+    set<array<string, 2> > genes_overlap;
     //set of exons that the junction
     //overlaps
     set<string> exons_skipped;
@@ -90,14 +93,14 @@ struct AnnotatedJunction : BED {
         //See if any genes overlap the junction
         if(genes_overlap.size()) {
             out << "\t";
-            for(set<string*>::iterator it = genes_overlap.begin(); it != genes_overlap.end(); ++it) {
+            for(set< array<string, 2> >::iterator it = genes_overlap.begin(); it != genes_overlap.end(); ++it) {
                 if(it != genes_overlap.begin())
                     out << ",";
                 //print gene name
                 out << (*it)[0];
             }
             out << "\t";
-            for(set<string*>::iterator it = genes_overlap.begin(); it != genes_overlap.end(); ++it) {
+            for(set< array<string, 2> >::iterator it = genes_overlap.begin(); it != genes_overlap.end(); ++it) {
                 if(it != genes_overlap.begin())
                     out << ",";
                 //print gene name
