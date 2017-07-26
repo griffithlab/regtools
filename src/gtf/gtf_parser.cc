@@ -22,19 +22,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
-#include <array>
-#include <string>
 #include <sstream>
 #include <cassert>
 #include <cstdlib>
-#include <fstream>
-#include <iostream>
 #include <set>
 #include <stdexcept>
-#include <vector>
 #include <algorithm>
 #include "common.h"
-#include "bedFile.h"
 #include "gtf_parser.h"
 #include "lineFileUtilities.h"
 

@@ -24,6 +24,8 @@ DEALINGS IN THE SOFTWARE.  */
 #ifndef GTF_PARSER_H_
 #define GTF_PARSER_H_
 
+#include <array>
+#include <string>
 #include <fstream>
 #include <iostream>
 #include <map>
