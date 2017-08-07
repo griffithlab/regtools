@@ -10,7 +10,7 @@ The `cis-ase identify` command is used to identify allele-specific expression ev
 | somatic-variants.vcf   | Somatic variant calls in VCF format. The tool looks for allele specific expression at polymorphic loci near the somatic variants|
 | polymorphisms.vcf   | List of polymorphic loci in the VCF format. RNA expression is checked at these sites to identify evidence of allele speciific expression|
 | dna-alignments.bam | Aligned DNA reads in the BAM format that has been indexed for example with `samtools index`. We have tested this command with alignments from BWA.|
-| dna-alignments.bam | Aligned RNAseq BAM produced with a splice aware aligner, that has been indexed for example with `samtools index`. We have tested this command with alignments from TopHat.|
+| rna-alignments.bam | Aligned RNAseq BAM produced with a splice aware aligner, that has been indexed for example with `samtools index`. We have tested this command with alignments from TopHat.|
 | ref.fa          | The reference FASTA file. The donor and acceptor sequences used in the "splice-site" column of the annotated junctions are extracted from the FASTA file. |
 | annotations.gtf | The GTF file specifies the transcriptome that is used to annotate the junctions and variants. For examples, the Ensembl GTFs for release78 are [here](ftp://ftp.ensembl.org/pub/release-78/gtf/).|
 
