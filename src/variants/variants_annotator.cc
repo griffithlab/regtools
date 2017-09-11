@@ -170,7 +170,7 @@ void VariantsAnnotator::set_variant_cis_effect_limits_ps(const vector<BED>& exon
                                                       AnnotatedVariant& variant,
                                                       uint32_t i) {
     //Check if the cis effect limits have increased.
-    if(variant.annotation == "exonic" || variant.annotation == "splicing_exonic") { //Current exon is cassette
+    if(variant.annotation == "exonic" || variant.annotation == "splicing_exonic" || variant.annotation == "splicing_intronic") { //Current exon is cassette
         if(i != 0) {
             if(exons[i-1].start < variant.cis_effect_start) {
                 variant.cis_effect_start = exons[i-1].start;
@@ -189,25 +189,9 @@ void VariantsAnnotator::set_variant_cis_effect_limits_ps(const vector<BED>& exon
                 variant.cis_effect_end = exons[exons.size() - 1].end;
             }
         }
-    } else if(variant.annotation == "intronic" || variant.annotation == "splicing_intronic") { //Current exon is cassette
-        if(i != 0) {
-            if(exons[i-1].start < variant.cis_effect_start) {
-                variant.cis_effect_start = exons[i-1].end;
-            }
-        } else {
-            if(exons[0].start < variant.cis_effect_start) {
-                variant.cis_effect_start = exons[0].end;
-            }
-        }
-        if(i != exons.size() - 1) {
-            if(exons[i+1].end > variant.cis_effect_end) {
-                variant.cis_effect_end = exons[i+1].start;
-            }
-        } else {
-            if(exons[exons.size() - 1].end > variant.cis_effect_end) {
-                variant.cis_effect_end = exons[exons.size() - 1].start;
-            }
-        }
+    } else if(variant.annotation == "intronic") {
+        variant.cis_effect_start = exons[i - 1].end;
+        variant.cis_effect_end = exons[i].start;
     }
     return;
 }
@@ -217,7 +201,7 @@ inline
 void VariantsAnnotator::set_variant_cis_effect_limits_ns(const vector<BED>& exons,
                                                       AnnotatedVariant& variant,
                                                       uint32_t i) {
-    if(variant.annotation == "exonic" || variant.annotation == "splicing_exonic") { //Current exon is cassette
+    if(variant.annotation == "exonic" || variant.annotation == "splicing_exonic" || variant.annotation == "splicing_intronic") { //Current exon is cassette
         if(i != 0) {
             //Check if the cis effect limits have increased.
             if(exons[i-1].end > variant.cis_effect_end) {
@@ -237,26 +221,9 @@ void VariantsAnnotator::set_variant_cis_effect_limits_ns(const vector<BED>& exon
                 variant.cis_effect_start = exons[exons.size() - 1].start;
             }
         }
-    } else if(variant.annotation == "intronic" || variant.annotation == "splicing_intronic") { //Look at junctions that overlap intronic space
-        if(i != 0) {
-            //Check if the cis effect limits have increased.
-            if(exons[i-1].end > variant.cis_effect_end) {
-                variant.cis_effect_end = exons[i-1].start;
-            }
-        } else {
-            if(exons[0].end > variant.cis_effect_end) {
-                variant.cis_effect_end = exons[0].start;
-            }
-        }
-        if(i != exons.size() -1) {
-            if(exons[i+1].start < variant.cis_effect_start) {
-                variant.cis_effect_start = exons[i+1].end;
-            }
-        } else {
-            if(exons[exons.size() - 1].start < variant.cis_effect_start) {
-                variant.cis_effect_start = exons[exons.size() - 1].end;
-            }
-        }
+    } else if(variant.annotation == "intronic") {
+        variant.cis_effect_start = exons[i].end;
+        variant.cis_effect_end = exons[i - 1].start;
     }
     return;
 }
