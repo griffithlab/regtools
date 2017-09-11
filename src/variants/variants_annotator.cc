@@ -132,7 +132,7 @@ void VariantsAnnotator::open_vcf_out() {
     if(vcf_fh_out_ == NULL) {
         throw runtime_error("Unable to open output VCF file");
     }
-    vcf_header_out_ = bcf_hdr_dup(vcf_header_in_);
+    vcf_header_out_ = vcf_header_in_;
     bcf_hdr_append(vcf_header_out_,
                    "##INFO=<ID=genes,Number=1,Type=String,"
                    "Description=\"The Variant falls in the splice "
@@ -158,8 +158,6 @@ void VariantsAnnotator::cleanup() {
         bcf_hdr_destroy(vcf_header_in_);
     if(vcf_fh_in_)
         bcf_close(vcf_fh_in_);
-    if(vcf_header_out_)
-        bcf_hdr_destroy(vcf_header_out_);
     if(vcf_fh_out_)
         bcf_close(vcf_fh_out_);
     if(vcf_record_)
