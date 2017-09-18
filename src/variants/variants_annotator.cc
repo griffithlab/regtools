@@ -190,8 +190,12 @@ void VariantsAnnotator::set_variant_cis_effect_limits_ps(const vector<BED>& exon
             }
         }
     } else if(variant.annotation == "intronic") {
-        variant.cis_effect_start = exons[i - 1].end;
-        variant.cis_effect_end = exons[i].start;
+        if(exons[i].end > variant.cis_effect_start){
+            variant.cis_effect_start = exons[i].end;
+        }
+        if (exons[i+1].start < variant.cis_effect_end){
+            variant.cis_effect_end = exons[i+1].start;
+        }
     }
     return;
 }
@@ -222,8 +226,12 @@ void VariantsAnnotator::set_variant_cis_effect_limits_ns(const vector<BED>& exon
             }
         }
     } else if(variant.annotation == "intronic") {
-        variant.cis_effect_start = exons[i].end;
-        variant.cis_effect_end = exons[i - 1].start;
+        if(exons[i].start > variant.cis_effect_end){
+            variant.cis_effect_end = exons[i].start;
+        } 
+        if(exons[i+1].end > variant.cis_effect_start){
+            variant.cis_effect_start = exons[i+1].end;
+        }
     }
     return;
 }
@@ -382,7 +390,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ps(const vector<BED>& 
                 set_variant_cis_effect_limits(exons, variant, i);
                 return;
             }
-            //intronic near start (make sure not first/last exon.)
+            //intronic near start and not first exon
             //make sure this isn't exonic in prev exon
             if(variant.end < exons[i].start &&
             variant.end >= exons[i].start - intronic_min_distance_ &&
@@ -393,7 +401,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ps(const vector<BED>& 
                 set_variant_cis_effect_limits(exons, variant, i);
                 return;
             }
-            //exonic near end
+            //exonic near end and not last exon
             if(i != exons.size() - 1 &&
                variant.end <= exons[i].end &&
                variant.end >= exons[i].start &&
@@ -404,7 +412,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ps(const vector<BED>& 
                 set_variant_cis_effect_limits(exons, variant, i);
                 return;
             }
-            //intronic near end (make sure not first/last exon.)
+            //intronic near end and not last exon
             //make sure this isn't exonic in next exon
             if(variant.end > exons[i].end &&
             variant.end <= exons[i].end + intronic_min_distance_ &&
