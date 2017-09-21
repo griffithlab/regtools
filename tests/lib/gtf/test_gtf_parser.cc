@@ -107,9 +107,9 @@ TEST_F(GtfParserTest, AddExonToTranscriptTest) {
               gp1.get_gene_from_transcript("ENST00000263253")[0]);
     EXPECT_EQ("ENSG00000100393",
               gp1.get_gene_from_transcript("ENST00000263253")[1]);
-    EXPECT_EQ("NA",
+    EXPECT_EQ("NA, NA",
               gp1.get_gene_from_transcript("ENSTfake")[0]);
-    EXPECT_EQ("NA",
+    EXPECT_EQ("NA, NA",
               gp1.get_gene_from_transcript("ENSTfake")[1]);
     gp1.annotate_transcript_with_bins();
     EXPECT_EQ(37359u,
