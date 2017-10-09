@@ -190,16 +190,17 @@ void VariantsAnnotator::set_variant_cis_effect_limits_ps(const vector<BED>& exon
             }
         }
     } else if(variant.annotation == "intronic") {
-        if(exons[i].end > variant.cis_effect_start){
+        if(exons[i].end < variant.cis_effect_start){
             variant.cis_effect_start = exons[i].end;
         }
-        if (exons[i+1].start < variant.cis_effect_end){
+        if (exons[i+1].start > variant.cis_effect_end){
             variant.cis_effect_end = exons[i+1].start;
         }
     }
     return;
 }
 
+//start and end are as in ps, but index of exons proceeds from 5' to 3'
 //Set limits on - strand
 inline
 void VariantsAnnotator::set_variant_cis_effect_limits_ns(const vector<BED>& exons,
@@ -229,7 +230,7 @@ void VariantsAnnotator::set_variant_cis_effect_limits_ns(const vector<BED>& exon
         if(exons[i].start > variant.cis_effect_end){
             variant.cis_effect_end = exons[i].start;
         } 
-        if(exons[i+1].end > variant.cis_effect_start){
+        if(exons[i+1].end < variant.cis_effect_start){
             variant.cis_effect_start = exons[i+1].end;
         }
     }
@@ -269,7 +270,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ns(const vector<BED>& 
     }
     for(uint32_t i = 0; i < exons.size(); i++) {
         if(all_exonic_space_) {
-            //The exon start and end are in 1-based
+            //The exon start and end are in 1-based, variant is 0-based (start:0, end:1)
             if(variant.end >= exons[i].start && variant.end <= exons[i].end) {
                 variant.score =  common::num_to_str(min(variant.end - exons[i].start,
                                                         exons[i].end - variant.end));
@@ -279,7 +280,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ns(const vector<BED>& 
             }
         }
         if(all_intronic_space_) {
-            //The exon start and end are in 1-based
+            //The exon start and end are in 1-based, variant is 0-based (start:0, end:1)
             if(i != exons.size() - 1 && variant.end < exons[i].start && variant.end > exons[i+1].end) {
                 variant.score =  common::num_to_str(min(variant.end - exons[i+1].end,
                                                         exons[i].start - variant.end));
