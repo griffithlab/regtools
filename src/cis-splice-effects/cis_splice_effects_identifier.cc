@@ -228,21 +228,21 @@ void CisSpliceEffectsIdentifier::identify() {
             vector<Junction> junctions = je1.get_all_junctions();
             //Add all the junctions to the unique set
             for (size_t i = 0; i < junctions.size(); i++) {
-                if(window_size_ == 0) {
-                    if(junctions[i].start >= v1.cis_effect_start &&
-                       junctions[i].end <= v1.cis_effect_end) {
-                       unique_junctions_.insert(junctions[i]);
-                       //add to the map of junctions to variants
-                       junction_to_variant_[junctions[i]].insert(v1);
-                    }
-                    continue;
+                //Allow partial overlap - either junction start or end is within window
+                if((junctions[i].start >= v1.cis_effect_start && junctions[i].start <= v1.cis_effect_end) ||
+                   (junctions[i].end <= v1.cis_effect_end && junctions[i].end >= v1.cis_effect_start)) {
+                   unique_junctions_.insert(junctions[i]);
+                   //add to the map of junctions to variants
+                   junction_to_variant_[junctions[i]].insert(v1);
                 }
-                if(common::coordinate_diff(junctions[i].start, v1.start) < window_size_ &&
-                   common::coordinate_diff(junctions[i].end, v1.start) <= window_size_) {
-                       unique_junctions_.insert(junctions[i]);
-                       //add to the map of junctions to variants
-                       junction_to_variant_[junctions[i]].insert(v1);
-                }
+                //Didn't delete since we might add an option to do this in the future
+                //Don't allow partial overlap - if window is specified junction has to lie entirely within window
+                // if(common::coordinate_diff(junctions[i].start, v1.start) < window_size_ &&
+                //    common::coordinate_diff(junctions[i].end, v1.start) <= window_size_) {
+                //        unique_junctions_.insert(junctions[i]);
+                //        //add to the map of junctions to variants
+                //        junction_to_variant_[junctions[i]].insert(v1);
+                // }
             }
         }
     }

@@ -170,65 +170,68 @@ void VariantsAnnotator::set_variant_cis_effect_limits_ps(const vector<BED>& exon
                                                       AnnotatedVariant& variant,
                                                       uint32_t i) {
     //Check if the cis effect limits have increased.
-    if(i != 0) {
-        if(exons[i-1].start < variant.cis_effect_start) {
-            variant.cis_effect_start = exons[i-1].start;
+    if(variant.annotation == "exonic" || variant.annotation == "splicing_exonic" || variant.annotation == "splicing_intronic") { //Current exon is cassette
+        if(i != 0) {
+            if(exons[i-1].start < variant.cis_effect_start) {
+                variant.cis_effect_start = exons[i-1].start;
+            }
+        } else {
+            if(exons[0].start < variant.cis_effect_start) {
+                variant.cis_effect_start = exons[0].start;
+            }
         }
-    } else {
-        if(exons[0].start < variant.cis_effect_start) {
-            variant.cis_effect_start = exons[0].start;
+        if(i != exons.size() - 1) {
+            if(exons[i+1].end > variant.cis_effect_end) {
+                variant.cis_effect_end = exons[i+1].end;
+            }
+        } else {
+            if(exons[exons.size() - 1].end > variant.cis_effect_end) {
+                variant.cis_effect_end = exons[exons.size() - 1].end;
+            }
         }
-    }
-    if(i != exons.size() - 1) {
-        if(exons[i+1].end > variant.cis_effect_end) {
-            variant.cis_effect_end = exons[i+1].end;
+    } else if(variant.annotation == "intronic") {
+        if(exons[i].end < variant.cis_effect_start){
+            variant.cis_effect_start = exons[i].end;
         }
-    } else {
-        if(exons[exons.size() - 1].end > variant.cis_effect_end) {
-            variant.cis_effect_end = exons[exons.size() - 1].end;
+        if (exons[i+1].start > variant.cis_effect_end){
+            variant.cis_effect_end = exons[i+1].start;
         }
     }
     return;
 }
 
-//Set limits on + strand for exonic/intronic case
-inline
-void VariantsAnnotator::set_variant_cis_effect_limits_exonic_intronic_ps(const vector<BED>& exons,
-                                                      AnnotatedVariant& variant) {
-    variant.cis_effect_start = exons[0].start;
-    variant.cis_effect_end = exons[exons.size() - 1].end;
-}
-
-//Set limits on - strand for exonic/intronic case
-inline
-void VariantsAnnotator::set_variant_cis_effect_limits_exonic_intronic_ns(const vector<BED>& exons,
-                                                      AnnotatedVariant& variant) {
-    variant.cis_effect_end = exons[0].end;
-    variant.cis_effect_start = exons[exons.size() - 1].start;
-}
-
+//start and end are as in ps, but index of exons proceeds from 5' to 3'
 //Set limits on - strand
 inline
 void VariantsAnnotator::set_variant_cis_effect_limits_ns(const vector<BED>& exons,
                                                       AnnotatedVariant& variant,
                                                       uint32_t i) {
-    if(i != 0) {
-        //Check if the cis effect limits have increased.
-        if(exons[i-1].end > variant.cis_effect_end) {
-            variant.cis_effect_end = exons[i-1].end;
+    if(variant.annotation == "exonic" || variant.annotation == "splicing_exonic" || variant.annotation == "splicing_intronic") { //Current exon is cassette
+        if(i != 0) {
+            //Check if the cis effect limits have increased.
+            if(exons[i-1].end > variant.cis_effect_end) {
+                variant.cis_effect_end = exons[i-1].end;
+            }
+        } else {
+            if(exons[0].end > variant.cis_effect_end) {
+                variant.cis_effect_end = exons[0].end;
+            }
         }
-    } else {
-        if(exons[0].end > variant.cis_effect_end) {
-            variant.cis_effect_end = exons[0].end;
+        if(i != exons.size() -1) {
+            if(exons[i+1].start < variant.cis_effect_start) {
+                variant.cis_effect_start = exons[i+1].start;
+            }
+        } else {
+            if(exons[exons.size() - 1].start < variant.cis_effect_start) {
+                variant.cis_effect_start = exons[exons.size() - 1].start;
+            }
         }
-    }
-    if(i != exons.size() -1) {
-        if(exons[i+1].start < variant.cis_effect_start) {
-            variant.cis_effect_start = exons[i+1].start;
-        }
-    } else {
-        if(exons[exons.size() - 1].start < variant.cis_effect_start) {
-            variant.cis_effect_start = exons[exons.size() - 1].start;
+    } else if(variant.annotation == "intronic") {
+        if(exons[i].start > variant.cis_effect_end){
+            variant.cis_effect_end = exons[i].start;
+        } 
+        if(exons[i+1].end < variant.cis_effect_start){
+            variant.cis_effect_start = exons[i+1].end;
         }
     }
     return;
@@ -255,27 +258,6 @@ void VariantsAnnotator::set_variant_cis_effect_limits(const vector<BED>& exons,
     }
 }
 
-//Get the coordinates which limit the effect of this variant.
-//The cis-splice-effects command uses these fields to pull out
-//junctions which might be related to the presence of this variant.
-//This is set to the nearest acceptor and donor of the neigboring
-//exons. The calculation will vary according to the strand of this
-//transcript.
-//This is for exonic/intronic variants - not necessarily in the splice region
-inline
-void VariantsAnnotator::set_variant_cis_effect_limits_exonic_intronic(const vector<BED>& exons,
-                                                      AnnotatedVariant& variant) {
-    string transcript_strand = exons[0].strand;
-    if(transcript_strand == "+") {
-        set_variant_cis_effect_limits_exonic_intronic_ps(exons, variant);
-        return;
-    }
-    if(transcript_strand == "-") {
-        set_variant_cis_effect_limits_exonic_intronic_ns(exons, variant);
-        return;
-    }
-}
-
 //Overlap splice region in the negative strand
 void VariantsAnnotator::get_variant_overlaps_spliceregion_ns(const vector<BED>& exons,
                                                       AnnotatedVariant& variant) {
@@ -288,22 +270,22 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ns(const vector<BED>& 
     }
     for(uint32_t i = 0; i < exons.size(); i++) {
         if(all_exonic_space_) {
-            //The exon start and end are in 1-based
+            //The exon start and end are in 1-based, variant is 0-based (start:0, end:1)
             if(variant.end >= exons[i].start && variant.end <= exons[i].end) {
                 variant.score =  common::num_to_str(min(variant.end - exons[i].start,
                                                         exons[i].end - variant.end));
                 variant.annotation = "exonic";
-                set_variant_cis_effect_limits_exonic_intronic(exons, variant);
+                set_variant_cis_effect_limits(exons, variant, i);
                 return;
             }
         }
         if(all_intronic_space_) {
-            //The exon start and end are in 1-based
+            //The exon start and end are in 1-based, variant is 0-based (start:0, end:1)
             if(i != exons.size() - 1 && variant.end < exons[i].start && variant.end > exons[i+1].end) {
                 variant.score =  common::num_to_str(min(variant.end - exons[i+1].end,
                                                         exons[i].start - variant.end));
                 variant.annotation = "intronic";
-                set_variant_cis_effect_limits_exonic_intronic(exons, variant);
+                set_variant_cis_effect_limits(exons, variant, i);
                 return;
             }
         }
@@ -378,7 +360,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ps(const vector<BED>& 
                 variant.score =  common::num_to_str(min(variant.end - exons[i].start,
                                                         exons[i].end - variant.end));
                 variant.annotation = "exonic";
-                set_variant_cis_effect_limits_exonic_intronic(exons, variant);
+                set_variant_cis_effect_limits(exons, variant, i);
                 return;
             }
         }
@@ -389,7 +371,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ps(const vector<BED>& 
                 variant.score =  common::num_to_str(min(variant.end - exons[i].end,
                                                         exons[i+1].start - variant.end));
                 variant.annotation = "intronic";
-                set_variant_cis_effect_limits_exonic_intronic(exons, variant);
+                set_variant_cis_effect_limits(exons, variant, i);
                 return;
             }
         }
@@ -409,7 +391,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ps(const vector<BED>& 
                 set_variant_cis_effect_limits(exons, variant, i);
                 return;
             }
-            //intronic near start (make sure not first/last exon.)
+            //intronic near start and not first exon
             //make sure this isn't exonic in prev exon
             if(variant.end < exons[i].start &&
             variant.end >= exons[i].start - intronic_min_distance_ &&
@@ -420,7 +402,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ps(const vector<BED>& 
                 set_variant_cis_effect_limits(exons, variant, i);
                 return;
             }
-            //exonic near end
+            //exonic near end and not last exon
             if(i != exons.size() - 1 &&
                variant.end <= exons[i].end &&
                variant.end >= exons[i].start &&
@@ -431,7 +413,7 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion_ps(const vector<BED>& 
                 set_variant_cis_effect_limits(exons, variant, i);
                 return;
             }
-            //intronic near end (make sure not first/last exon.)
+            //intronic near end and not last exon
             //make sure this isn't exonic in next exon
             if(variant.end > exons[i].end &&
             variant.end <= exons[i].end + intronic_min_distance_ &&
