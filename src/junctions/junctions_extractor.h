@@ -145,6 +145,8 @@ class JunctionsExtractor {
         string output_file_;
         //Region to identify junctions, in "chr:start-end" format
         string region_;
+        //strandness off data; 0 = unstranded, 1 = FR, 2 = RF
+        int strandness;
     public:
         //Default constructor
         JunctionsExtractor() {

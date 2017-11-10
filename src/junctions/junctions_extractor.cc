@@ -202,7 +202,7 @@ void JunctionsExtractor::print_all_junctions(ostream& out) {
 }
 
 //Get the strand from the XS aux tag
-void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
+void JunctionsExtractor::set_junction_strand_XS(bam1_t *aln, Junction& j1) {
     uint8_t *p = bam_aux_get(aln, "XS");
     if(p != NULL) {
         char strand = bam_aux2A(p);
@@ -210,6 +210,42 @@ void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
     } else {
         j1.strand = string(1, '?');
         return;
+    }
+}
+
+//Get the strand from the bitwise flag
+void JunctionsExtractor::set_junction_strand_flag(bam1_t *aln, Junction& j1) {
+    uint32_t flag = (aln->core).flag;
+    int reversed = (flag >> 4) % 2;
+    int mate_reversed = (flag >> 5) % 2;
+    int first_in_pair = (flag >> 6) % 2;
+    int second_in_pair = (flag >> 7) % 2;
+    // strandness is 0 for unstranded, 1 for FR, and 2 for RF
+    int bool_strandness = strandness - 1;
+    int first_strand = bool_strandness ^ first_in_pair ^ reversed;
+    int second_strand = bool_strandness ^ second_in_pair ^ mate_reversed;
+    char strand;
+    if (first_strand){
+        strand = '+';
+    } else {
+        strand = '-';
+    }
+    // if strand inferences from first and second in pair don't agree, we've got a problem
+    if (first_strand == second_strand){
+        j1.strand = string(1, strand);
+    } else {
+        j1.strand = string(1, '?');
+    }
+    return;
+}
+
+//Get the strand
+void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
+    // if unstranded data
+    if (strandness > 0){
+        return set_junction_strand_flag(aln, j1);
+    } else {
+        return set_junction_strand_XS(aln, j1);
     }
 }
 
