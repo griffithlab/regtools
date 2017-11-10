@@ -63,6 +63,7 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
                 throw common::cmdline_help_exception(help_ss.str());
             case 's':
                 strandness_ = atoi(optarg);
+                break;
             case '?':
             default:
                 throw runtime_error("Error parsing inputs!");
