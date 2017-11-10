@@ -98,7 +98,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     stringstream help_ss;
     char c;
-    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:IShs")) != -1) {
+    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:IShs:")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
