@@ -61,6 +61,8 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
             case 'h':
                 usage(help_ss);
                 throw common::cmdline_help_exception(help_ss.str());
+            case 's':
+                strandness_ = atoi(optarg);
             case '?':
             default:
                 throw runtime_error("Error parsing inputs!");
@@ -220,8 +222,8 @@ void JunctionsExtractor::set_junction_strand_flag(bam1_t *aln, Junction& j1) {
     int mate_reversed = (flag >> 5) % 2;
     int first_in_pair = (flag >> 6) % 2;
     int second_in_pair = (flag >> 7) % 2;
-    // strandness is 0 for unstranded, 1 for FR, and 2 for RF
-    int bool_strandness = strandness - 1;
+    // strandness_ is 0 for unstranded, 1 for FR, and 2 for RF
+    int bool_strandness = strandness_ - 1;
     int first_strand = bool_strandness ^ first_in_pair ^ reversed;
     int second_strand = bool_strandness ^ second_in_pair ^ mate_reversed;
     char strand;
@@ -242,7 +244,7 @@ void JunctionsExtractor::set_junction_strand_flag(bam1_t *aln, Junction& j1) {
 //Get the strand
 void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
     // if unstranded data
-    if (strandness > 0){
+    if (strandness_ > 0){
         return set_junction_strand_flag(aln, j1);
     } else {
         return set_junction_strand_XS(aln, j1);

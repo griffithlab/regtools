@@ -98,7 +98,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     stringstream help_ss;
     char c;
-    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:ISh")) != -1) {
+    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:IShs")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
@@ -130,6 +130,9 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
             case 'h':
                 usage(help_ss);
                 throw common::cmdline_help_exception(help_ss.str());
+            case 's':
+                strandness_ = atoi(optarg);
+                break;
             default:
                 usage(std::cerr);
                 throw runtime_error("\nError parsing inputs!(1)");
@@ -223,7 +226,7 @@ void CisSpliceEffectsIdentifier::identify() {
             if(write_annotated_variants_)
                 va.write_annotation_output(v1);
             //Extract junctions near this variant
-            JunctionsExtractor je1(bam_, variant_region);
+            JunctionsExtractor je1(bam_, variant_region, strandness_);
             je1.identify_junctions_from_BAM();
             vector<Junction> junctions = je1.get_all_junctions();
             //Add all the junctions to the unique set
