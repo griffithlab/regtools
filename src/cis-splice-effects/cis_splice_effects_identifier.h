@@ -78,6 +78,8 @@ class CisSpliceEffectsIdentifier {
         bool all_exonic_space_;
         //Option to skip single exon genes
         bool skip_single_exon_genes_;
+        //strandness of data
+        int strandness_;
     public:
         //Constructor
         CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"),
