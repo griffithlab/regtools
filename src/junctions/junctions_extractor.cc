@@ -41,7 +41,7 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int c;
     stringstream help_ss;
-    while((c = getopt(argc, argv, "ha:i:I:o:r:")) != -1) {
+    while((c = getopt(argc, argv, "ha:i:I:o:r:s")) != -1) {
         switch(c) {
             case 'a':
                 min_anchor_length_ = atoi(optarg);
