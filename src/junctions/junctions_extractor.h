@@ -196,6 +196,10 @@ class JunctionsExtractor {
         //Add a junction to the junctions map
         int add_junction(Junction j1);
         //Get the strand from the XS aux tag
+        void set_junction_strand_XS(bam1_t *aln, Junction& j1);
+        //Get the strand from bitwise flag
+        void set_junction_strand_flag(bam1_t *aln, Junction& j1);
+        //Get the strand
         void set_junction_strand(bam1_t *aln, Junction& j1);
 };
 
