@@ -150,6 +150,7 @@ class JunctionsExtractor {
     public:
         //Default constructor
         JunctionsExtractor() {
+            cerr << "default constructor called" << endl;
             min_anchor_length_ = 8;
             min_intron_length_ = 70;
             max_intron_length_ = 500000;
@@ -159,8 +160,9 @@ class JunctionsExtractor {
             output_file_ = "NA";
             region_ = ".";
         }
-        //Default constructor
         JunctionsExtractor(string bam1, string region1, int strandness1) : bam_(bam1), region_(region1), strandness_(strandness1) {
+            cerr << "param constructor called" << endl;
+            cerr << "strandness1 is " << strandness1 << endl;
             min_anchor_length_ = 8;
             min_intron_length_ = 70;
             max_intron_length_ = 500000;

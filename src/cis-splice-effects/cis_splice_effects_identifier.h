@@ -91,7 +91,8 @@ class CisSpliceEffectsIdentifier {
                                        exonic_min_distance_(3),
                                        all_intronic_space_(false),
                                        all_exonic_space_(false),
-                                       skip_single_exon_genes_(true) {}
+                                       skip_single_exon_genes_(true),
+                                       strandness_(2) {}
         //Destructor
         ~CisSpliceEffectsIdentifier() {
             if(ofs_.is_open()) {

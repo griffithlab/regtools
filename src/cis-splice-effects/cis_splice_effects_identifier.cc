@@ -222,7 +222,7 @@ void CisSpliceEffectsIdentifier::identify() {
                                            common::num_to_str(v1.cis_effect_end);
             string variant_region = v1.chrom + ":" + region_start + "-" + region_end;
             cerr << "\n\nVariant " << v1;
-            cerr << "Variant region is " << variant_region;
+            cerr << "Variant region is " << variant_region << endl;
             if(write_annotated_variants_)
                 va.write_annotation_output(v1);
             //Extract junctions near this variant

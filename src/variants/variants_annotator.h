@@ -148,6 +148,7 @@ class VariantsAnnotator {
                               vcf_record_(NULL) {
             vcf_record_ = bcf_init();
             intronic_min_distance_ = intronic_min_distance;
+            cerr << "exonic_min_distance_ is " << exonic_min_distance_ << endl;
             exonic_min_distance_ = exonic_min_distance;
             all_intronic_space_ = all_intronic_space;
             all_exonic_space_ = all_exonic_space;
