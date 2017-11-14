@@ -233,18 +233,21 @@ void JunctionsExtractor::set_junction_strand_flag(bam1_t *aln, Junction& j1) {
     } else {
         strand = '-';
     }
+    cerr << "flag is " << flag;
     // if strand inferences from first and second in pair don't agree, we've got a problem
     if (first_strand == second_strand){
         j1.strand = string(1, strand);
     } else {
         j1.strand = string(1, '?');
     }
+    cerr <<"strand is " << j1.strand;
     return;
 }
 
 //Get the strand
 void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
     // if unstranded data
+    cerr << "strandness is " << strandness_;
     if (strandness_ > 0){
         return set_junction_strand_flag(aln, j1);
     } else {
