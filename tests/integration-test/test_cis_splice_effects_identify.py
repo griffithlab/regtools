@@ -42,7 +42,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         expected_annotatedjunctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-annotatedjunctions.out")[0]
         expected_annotatedvariants = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-annotatedvariants.out")[0]
         expected_junctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-junctions.out")[0]
-        params = ["cis-splice-effects", "identify",
+        params = ["cis-splice-effects", "identify", "-s 0",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
