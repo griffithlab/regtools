@@ -212,9 +212,9 @@ void JunctionsExtractor::set_junction_strand_XS(bam1_t *aln, Junction& j1) {
     if(p != NULL) {
         char strand = bam_aux2A(p);
         strand ? j1.strand = string(1, strand) : j1.strand = string(1, '?');
-        cerr <<"XS strand is " << strand << endl;
+        //cerr <<"XS strand is " << strand << endl;
     } else {
-        cerr <<"XS strand is NULL" << endl;
+        //cerr <<"XS strand is NULL" << endl;
         j1.strand = string(1, '?');
         return;
     }
@@ -237,21 +237,21 @@ void JunctionsExtractor::set_junction_strand_flag(bam1_t *aln, Junction& j1) {
     } else {
         strand = '-';
     }
-    cerr << "flag is " << flag << endl;
+    //cerr << "flag is " << flag << endl;
     // if strand inferences from first and second in pair don't agree, we've got a problem
     if (first_strand == second_strand){
         j1.strand = string(1, strand);
     } else {
         j1.strand = string(1, '?');
     }
-    cerr <<"flag strand is " << j1.strand << endl;
+    //cerr <<"flag strand is " << j1.strand << endl;
     return;
 }
 
 //Get the strand
 void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
     // if unstranded data
-    cerr << "strandness is " << strandness_ << endl;
+    //cerr << "strandness is " << strandness_ << endl;
     if (strandness_ > 0){
         return set_junction_strand_flag(aln, j1);
     } else {
