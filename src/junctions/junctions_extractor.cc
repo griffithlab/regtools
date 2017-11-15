@@ -63,36 +63,38 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
                 throw common::cmdline_help_exception(help_ss.str());
             case '?':
             default:
-                throw runtime_error("Error parsing inputs!");
+                usage();
+                throw runtime_error("Error parsing inputs!(1)\n\n");
         }
     }
     if(argc - optind >= 1) {
         bam_ = string(argv[optind++]);
     }
     if(optind < argc || bam_ == "NA") {
-        throw runtime_error("\nError parsing inputs!");
+        usage();
+        throw runtime_error("Error parsing inputs!(2)\n\n");
     }
-    cerr << endl << "Minimum junction anchor length: " << min_anchor_length_;
-    cerr << endl << "Minimum intron length: " << min_intron_length_;
-    cerr << endl << "Maximum intron length: " << max_intron_length_;
-    cerr << endl << "Alignment: " << bam_;
-    cerr << endl << "Output file: " << output_file_;
+    cerr << "Minimum junction anchor length: " << min_anchor_length_ << endl;
+    cerr << "Minimum intron length: " << min_intron_length_ << endl;
+    cerr << "Maximum intron length: " << max_intron_length_ << endl;
+    cerr << "Alignment: " << bam_ << endl;
+    cerr << "Output file: " << output_file_ << endl;
     cerr << endl;
     return 0;
 }
 
 //Usage statement for this tool
 int JunctionsExtractor::usage(ostream& out) {
-    out << "\nUsage:\t\t" << "regtools junctions extract [options] indexed_alignments.bam";
-    out << "\nOptions:";
+    out << "Usage:\t\t" << "regtools junctions extract [options] indexed_alignments.bam" << endl;
+    out << "Options:" << endl;
     out << "\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum "
-                     "anchor length on both sides are reported. [8]";
-    out << "\n\t\t" << "-i INT\tMinimum intron length. [70]";
-    out << "\n\t\t" << "-I INT\tMaximum intron length. [500000]";
-    out << "\n\t\t" << "-o FILE\tThe file to write output to. [STDOUT]";
-    out << "\n\t\t" << "-r STR\tThe region to identify junctions "
-                     "in \"chr:start-end\" format. Entire BAM by default.";
-    out << "\n";
+                     "anchor length on both sides are reported. [8]" << endl;
+    out << "\t\t" << "-i INT\tMinimum intron length. [70]" << endl;
+    out << "\t\t" << "-I INT\tMaximum intron length. [500000]" << endl;
+    out << "\t\t" << "-o FILE\tThe file to write output to. [STDOUT]" << endl;
+    out << "\t\t" << "-r STR\tThe region to identify junctions "
+                     "in \"chr:start-end\" format. Entire BAM by default." << endl;
+    out << endl;
     return 0;
 }
 
@@ -330,13 +332,13 @@ int JunctionsExtractor::identify_junctions_from_BAM() {
         //open BAM for reading
         samFile *in = sam_open(bam_.c_str(), "r");
         if(in == NULL) {
-            throw runtime_error("Unable to open BAM/SAM file.");
+            throw runtime_error("Unable to open BAM/SAM file.\n\n");
         }
         //Load the index
         hts_idx_t *idx = sam_index_load(in, bam_.c_str());
         if(idx == NULL) {
             throw runtime_error("Unable to open BAM/SAM index."
-                                " Make sure alignments are indexed");
+                                " Make sure alignments are indexed\n\n");
         }
         //Get the header
         bam_hdr_t *header = sam_hdr_read(in);
@@ -346,7 +348,7 @@ int JunctionsExtractor::identify_junctions_from_BAM() {
         iter  = sam_itr_querys(idx, header, region_.c_str());
         if(header == NULL || iter == NULL) {
             sam_close(in);
-            throw runtime_error("Unable to iterate to region within BAM.");
+            throw runtime_error("Unable to iterate to region within BAM.\n\n");
         }
         //Initiate the alignment record
         bam1_t *aln = bam_init1();

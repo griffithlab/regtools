@@ -51,6 +51,7 @@ void CisSpliceEffectsIdentifier::usage(ostream& out) {
     out << "\t\t" << "-I\tAnnotate variants in intronic space within a transcript(not to be used with -i)." << endl;
     out << "\t\t" << "-E\tAnnotate variants in exonic space within a transcript(not to be used with -e)." << endl;
     out << "\t\t" << "-S\tDon't skip single exon transcripts." << endl;
+    out << endl;
 }
 
 //Return stream to write output to
@@ -84,11 +85,11 @@ void CisSpliceEffectsIdentifier::file_qc() {
     if(vcf_ == "NA" || bam_ == "NA" ||
        ref_ == "NA" || gtf_ == "NA") {
         usage(std::cout);
-        throw runtime_error("\nError parsing inputs!(2)\n");
+        throw runtime_error("Error parsing inputs!(2)\n\n");
     }
     if(!common::file_exists(vcf_) || !common::file_exists(bam_) ||
        !common::file_exists(ref_) || !common::file_exists(gtf_)) {
-        throw runtime_error("\nPlease make sure input files exist.\n");
+        throw runtime_error("Please make sure input files exist.\n\n");
     }
 }
 
@@ -131,7 +132,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
                 throw common::cmdline_help_exception(help_ss.str());
             default:
                 usage(std::cerr);
-                throw runtime_error("\nError parsing inputs!(1)");
+                throw runtime_error("Error parsing inputs!(1)\n\n");
         }
     }
     if(argc - optind >= 4) {
@@ -146,7 +147,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
        ref_ == "NA" ||
        gtf_ == "NA"){
         usage(std::cerr);
-        throw runtime_error("\nError parsing inputs!(2)\n");
+        throw runtime_error("Error parsing inputs!(2)\n\n");
     }
     file_qc();
     cerr << "Variant file: " << vcf_ << endl;
@@ -208,6 +209,7 @@ void CisSpliceEffectsIdentifier::identify() {
     va.open_vcf_in();
     if(write_annotated_variants_)
         va.open_vcf_out();
+    cerr << endl;
     //Annotate each variant and pay attention to splicing related ones
     while(va.read_next_record()) {
         AnnotatedVariant v1 = va.annotate_record_with_transcripts();

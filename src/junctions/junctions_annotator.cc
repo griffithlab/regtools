@@ -261,7 +261,7 @@ void JunctionsAnnotator::check_for_overlap(string transcript_id, AnnotatedJuncti
         gtf_.get_exons_from_transcript(transcript_id);
     if(!exons.size()) {
         throw runtime_error("Unexpected error. No exons for transcript "
-                            + transcript_id);
+                            + transcript_id + "\n\n");
     }
     string transcript_strand = exons[0].strand;
     //Make sure the strands of the junction and transcript match
@@ -281,7 +281,7 @@ void JunctionsAnnotator::check_for_overlap(string transcript_id, AnnotatedJuncti
                     gtf_.get_gene_from_transcript(transcript_id));
         }
     } else {
-        throw runtime_error("\nUnknown strand " + junction.strand);
+        throw runtime_error("Unknown strand " + junction.strand + "\n\n");
     }
 }
 
@@ -315,7 +315,7 @@ string JunctionsAnnotator::get_reference_sequence(string position) {
     char *s = fai_fetch(fai, position.c_str(), &len);
     if(s == NULL)
         throw runtime_error("Unable to extract FASTA sequence "
-                             "for position " + position);
+                             "for position " + position + "\n\n");
     std::string seq(s);
     free(s);
     fai_destroy(fai);
@@ -345,7 +345,7 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
                 throw common::cmdline_help_exception(help_ss.str());
             default:
                 usage();
-                throw runtime_error("\nError parsing inputs!(1)");
+                throw runtime_error("Error parsing inputs!(1)\n\n");
         }
     }
     if(argc - optind >= 3) {
@@ -358,24 +358,24 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
        junctions_.bedFile.empty() ||
        gtf_.gtffile().empty()) {
         usage();
-        throw runtime_error("\nError parsing inputs!(2)");
+        throw runtime_error("Error parsing inputs!(2)\n\n");
     }
-    cerr << "\nReference: " << ref_;
-    cerr << "\nGTF: " << gtf_.gtffile();
-    cerr << "\nJunctions: " << junctions_.bedFile;
+    cerr << "Reference: " << ref_ << endl;
+    cerr << "GTF: " << gtf_.gtffile() << endl;
+    cerr << "Junctions: " << junctions_.bedFile << endl;
     if(skip_single_exon_genes_)
-        cerr << "\nSkipping single exon genes.";
+        cerr << "Skipping single exon genes." << endl;
     if(output_file_ != "NA")
-        cerr << "\nOutput file: " << output_file_;
-    cerr << endl << endl;
+        cerr << "Output file: " << output_file_ << endl;
+    cerr << endl;
     return 0;
 }
 
 //Usage statement for this tool
 int JunctionsAnnotator::usage(ostream& out) {
-    out << "\nUsage:\t\t" << "regtools junctions annotate [options] junctions.bed ref.fa annotations.gtf";
-    out << "\nOptions:\t" << "-E include single exon genes";
-    out << "\n\t\t" << "-o Output file";
-    out << "\n";
+    out << "Usage:\t\t" << "regtools junctions annotate [options] junctions.bed ref.fa annotations.gtf" << endl;
+    out << "Options:\t" << "-E include single exon genes" << endl;
+    out << "\t\t" << "-o Output file" << endl; 
+    out << endl;
     return 0;
 }

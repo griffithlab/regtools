@@ -37,13 +37,13 @@ int cis_splice_effects_identify(int argc, char* argv[]) {
         csei1.parse_options(argc, argv);
         csei1.identify();
     } catch(const common::cmdline_help_exception& e) {
-        cerr << e.what();
+        cerr << e.what() << endl;
         return 0;
     } catch (const std::runtime_error &e) {
-        cerr << endl << e.what();
+        cerr << e.what() << endl;
         return 1;
     } catch (const std::logic_error &e) {
-        cerr << endl << e.what();
+        cerr << e.what() << endl;
         return 1;
     }
     return 0;
@@ -53,7 +53,7 @@ int cis_splice_effects_identify(int argc, char* argv[]) {
 int cis_splice_effects_usage(ostream &out = cout) {
     out << "Usage:\t\t" << "regtools cis-splice-effects <command> [options]" << endl;
     out << "Command:\t" << "identify\t\tIdentify cis splicing effects." << endl;
-    out << "\n";
+    out << endl;
     return 0;
 }
 

@@ -45,10 +45,10 @@ int cis_ase_identify(int argc, char* argv[]) {
         cerr << e.what();
         return 0;
     } catch (const std::runtime_error &e) {
-        cerr << endl << e.what();
+        cerr << e.what() << endl;
         return 1;
     } catch (const std::logic_error &e) {
-        cerr << endl << e.what();
+        cerr << e.what() << endl;
         return 1;
     }
     return 0;
@@ -56,9 +56,9 @@ int cis_ase_identify(int argc, char* argv[]) {
 
 //Usage for cis-ase subcommands
 int cis_ase_usage(ostream &out = cout) {
-    out << "\nUsage:\t\t" << "regtools cis-ase <command> [options]";
-    out << "\nCommand:\t" << "identify\t\tIdentify cis ase.";
-    out << "\n";
+    out << "Usage:\t\t" << "regtools cis-ase <command> [options]" << endl;
+    out << "Command:\t" << "identify\t\tIdentify cis ase." << endl;
+    out << endl;
     return 0;
 }
 
