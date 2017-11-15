@@ -55,16 +55,16 @@ TEST_F(JunctionsExtractTest, ParseIncorrectOption) {
 
 TEST_F(JunctionsExtractTest, Usage) {
     ostringstream out, out2;
-    out << "\nUsage:\t\t" << "regtools junctions extract [options] indexed_alignments.bam";
-    out << "\nOptions:";
+    out << "Usage:\t\t" << "regtools junctions extract [options] indexed_alignments.bam" << endl;
+    out << "Options:" << endl;
     out << "\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum "
-                     "anchor length on both sides are reported. [8]";
-    out << "\n\t\t" << "-i INT\tMinimum intron length. [70]";
-    out << "\n\t\t" << "-I INT\tMaximum intron length. [500000]";
-    out << "\n\t\t" << "-o FILE\tThe file to write output to. [STDOUT]";
-    out << "\n\t\t" << "-r STR\tThe region to identify junctions "
-                     "in \"chr:start-end\" format. Entire BAM by default.";
-    out << "\n";
+                     "anchor length on both sides are reported. [8]" << endl;
+    out << "\t\t" << "-i INT\tMinimum intron length. [70]" << endl;
+    out << "\t\t" << "-I INT\tMaximum intron length. [500000]" << endl;
+    out << "\t\t" << "-o FILE\tThe file to write output to. [STDOUT]" << endl;
+    out << "\t\t" << "-r STR\tThe region to identify junctions "
+                     "in \"chr:start-end\" format. Entire BAM by default." << endl;
+    out << endl;
     jc1.usage(out2);
     ASSERT_EQ(out.str(), out2.str()) << "Error parsing as expected";
 }
