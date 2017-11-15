@@ -31,9 +31,9 @@ using namespace std;
 
 //Usage for variants subcommands
 int variants_usage(ostream &out = cout) {
-    out << "\nUsage:\t\t" << "regtools variants <command> [options]";
-    out << "\nCommand:\t" << "annotate\t\tAnnotate variants with splicing information.";
-    out << "\n";
+    out << "Usage:\t\t" << "regtools variants <command> [options]" << endl;
+    out << "Command:\t" << "annotate\t\tAnnotate variants with splicing information." << endl;
+    out << endl;
     return 0;
 }
 
@@ -44,10 +44,10 @@ int variants_annotate(int argc, char *argv[]) {
         va.parse_options(argc, argv);
         va.annotate_vcf();
     } catch(const common::cmdline_help_exception& e) {
-        cerr << e.what();
+        cerr << e.what() << endl;
         return 0;
     } catch (runtime_error e) {
-        cerr << e.what();
+        cerr << e.what() << endl;
         return 1;
     }
     return 0;

@@ -32,26 +32,26 @@ DEALINGS IN THE SOFTWARE.  */
 
 //Usage for this tool
 void CisSpliceEffectsIdentifier::usage(ostream& out) {
-    out << "\nUsage:\t\t"
+    out << "Usage:\t\t" 
         << "regtools cis-splice-effects identify [options] variants.vcf"
-        << " alignments.bam ref.fa annotations.gtf";
-    out << "\nOptions:";
-    out << "\t"   << "-o STR Output file containing the aberrant splice junctions with annotations. [STDOUT]";
-    out << "\n\t\t" << "-v STR Output file containing variants annotated as splice relevant (VCF format).";
-    out << "\n\t\t" << "-w INT\tWindow size in b.p to identify splicing events in. "
-        << "\n\t\t\t" << "The tool identifies events in variant.start +/- w basepairs."
-        << "\n\t\t\t" << "Default behaviour is to look at the window between previous and next exons.";
-    out << "\n\t\t" << "-j STR Output file containing the aberrant junctions in BED12 format.";
-    out << "\n\t\t" << "-e INT\tMaximum distance from the start/end of an exon "
-                       "\n\t\t\tto annotate a variant as relevant to splicing, the variant "
-                       "\n\t\t\tis in exonic space, i.e a coding variant. [3]";
-    out << "\n\t\t" << "-i INT\tMaximum distance from the start/end of an exon "
-                       "\n\t\t\tto annotate a variant as relevant to splicing, the variant "
-                       "\n\t\t\tis in intronic space. [2]";
-    out << "\n\t\t" << "-I\tAnnotate variants in intronic space within a transcript(not to be used with -i).";
-    out << "\n\t\t" << "-E\tAnnotate variants in exonic space within a transcript(not to be used with -e).";
-    out << "\n\t\t" << "-S\tDon't skip single exon transcripts.";
-    out << "\n";
+        << " alignments.bam ref.fa annotations.gtf" << endl;
+    out << "Options:" << endl;
+    out << "\t"   << "-o STR Output file containing the aberrant splice junctions with annotations. [STDOUT]" << endl;
+    out << "\t\t" << "-v STR Output file containing variants annotated as splice relevant (VCF format)." << endl;
+    out << "\t\t" << "-w INT\tWindow size in b.p to identify splicing events in. "
+        << "\t\t\t" << "The tool identifies events in variant.start +/- w basepairs."
+        << "\t\t\t" << "Default behaviour is to look at the window between previous and next exons." << endl;
+    out << "\t\t" << "-j STR Output file containing the aberrant junctions in BED12 format." << endl;
+    out << "\t\t" << "-e INT\tMaximum distance from the start/end of an exon "
+                       "\t\t\tto annotate a variant as relevant to splicing, the variant "
+                       "\t\t\tis in exonic space, i.e a coding variant. [3]" << endl;
+    out << "\t\t" << "-i INT\tMaximum distance from the start/end of an exon "
+                       "\t\t\tto annotate a variant as relevant to splicing, the variant "
+                       "\t\t\tis in intronic space. [2]" << endl;
+    out << "\t\t" << "-I\tAnnotate variants in intronic space within a transcript(not to be used with -i)." << endl;
+    out << "\t\t" << "-E\tAnnotate variants in exonic space within a transcript(not to be used with -e)." << endl;
+    out << "\t\t" << "-S\tDon't skip single exon transcripts." << endl;
+    out << endl;
 }
 
 //Return stream to write output to
@@ -85,11 +85,11 @@ void CisSpliceEffectsIdentifier::file_qc() {
     if(vcf_ == "NA" || bam_ == "NA" ||
        ref_ == "NA" || gtf_ == "NA") {
         usage(std::cout);
-        throw runtime_error("\nError parsing inputs!(2)\n");
+        throw runtime_error("Error parsing inputs!(2)\n\n");
     }
     if(!common::file_exists(vcf_) || !common::file_exists(bam_) ||
        !common::file_exists(ref_) || !common::file_exists(gtf_)) {
-        throw runtime_error("\nPlease make sure input files exist.\n");
+        throw runtime_error("Please make sure input files exist.\n\n");
     }
 }
 
@@ -135,7 +135,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
                 break;
             default:
                 usage(std::cerr);
-                throw runtime_error("\nError parsing inputs!(1)");
+                throw runtime_error("Error parsing inputs!(1)\n\n");
         }
     }
     if(argc - optind >= 4) {
@@ -150,22 +150,22 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
        ref_ == "NA" ||
        gtf_ == "NA"){
         usage(std::cerr);
-        throw runtime_error("\nError parsing inputs!(2)\n");
+        throw runtime_error("Error parsing inputs!(2)\n\n");
     }
     file_qc();
-    cerr << "\nVariant file: " << vcf_;
-    cerr << "\nAlignment file: " << bam_;
-    cerr << "\nReference fasta file: " << ref_;
-    cerr << "\nAnnotation file: " << gtf_;
+    cerr << "Variant file: " << vcf_ << endl;
+    cerr << "Alignment file: " << bam_ << endl;
+    cerr << "Reference fasta file: " << ref_ << endl;
+    cerr << "Annotation file: " << gtf_ << endl;
     if(window_size_ != 0) {
-        cerr << "\nWindow size: " << window_size_;
+        cerr << "Window size: " << window_size_ << endl;
     }
     if(output_file_ != "NA")
-        cerr << "\nOutput file: " << output_file_;
+        cerr << "Output file: " << output_file_ << endl;
     if(output_junctions_bed_ != "NA")
-        cerr << "\nOutput junctions BED file: " << output_junctions_bed_;
+        cerr << "Output junctions BED file: " << output_junctions_bed_ << endl; 
     if(annotated_variant_file_ != "NA") {
-        cerr << "\nAnnotated variants file: " << annotated_variant_file_;
+        cerr << "Annotated variants file: " << annotated_variant_file_ << endl;
         write_annotated_variants_ = true;
     }
     cerr << endl;
@@ -212,6 +212,7 @@ void CisSpliceEffectsIdentifier::identify() {
     va.open_vcf_in();
     if(write_annotated_variants_)
         va.open_vcf_out();
+    cerr << endl;
     //Annotate each variant and pay attention to splicing related ones
     while(va.read_next_record()) {
         AnnotatedVariant v1 = va.annotate_record_with_transcripts();
@@ -221,8 +222,9 @@ void CisSpliceEffectsIdentifier::identify() {
             string region_end = window_size_ ? common::num_to_str(v1.end + window_size_) :
                                            common::num_to_str(v1.cis_effect_end);
             string variant_region = v1.chrom + ":" + region_start + "-" + region_end;
-            cerr << "\n\nVariant " << v1;
+            cerr << "Variant " << v1;
             cerr << "Variant region is " << variant_region << endl;
+            cerr << endl;
             if(write_annotated_variants_)
                 va.write_annotation_output(v1);
             //Extract junctions near this variant
