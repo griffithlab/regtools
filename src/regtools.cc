@@ -34,20 +34,21 @@ using namespace std;
 
 //version info
 void version() {
-    cerr << "\nProgram:\tregtools";
-    cerr << "\nVersion:\t" << regtools_VERSION_MAJOR
-         << "." << regtools_VERSION_MINOR << "." << regtools_VERSION_PATCH;
+    cerr << endl;
+    cerr << "Program:\tregtools" << endl;
+    cerr << "Version:\t" << regtools_VERSION_MAJOR
+         << "." << regtools_VERSION_MINOR << "." << regtools_VERSION_PATCH << endl;
 }
 
 //Regtools usage
 int usage() {
-    cerr << "\nUsage:\t\t" << "regtools <command> [options]";
-    cerr << "\nCommand:\t" << "junctions\t\tTools that operate on feature junctions."
-         << "\n\t\t\t\t\t(eg. exon-exon junctions from RNA-seq.)";
-    cerr << "\n\t\t" << "cis-ase\t\t\tTools related to allele specific expression in cis.";
-    cerr << "\n\t\t" << "cis-splice-effects\tTools related to splicing effects of variants.";
-    cerr << "\n\t\t" << "variants\t\tTools that operate on variants.";
-    cerr << "\n";
+    cerr << "Usage:\t\t" << "regtools <command> [options]" << endl;
+    cerr << "Command:\t" << "junctions\t\tTools that operate on feature junctions."
+         << "\t\t\t\t\t(eg. exon-exon junctions from RNA-seq.)" << endl;
+    cerr << "\t\t" << "cis-ase\t\t\tTools related to allele specific expression in cis." << endl;
+    cerr << "\t\t" << "cis-splice-effects\tTools related to splicing effects of variants." << endl;
+    cerr << "\t\t" << "variants\t\tTools that operate on variants." << endl;
+    cerr << endl;
     return 0;
 }
 
