@@ -32,22 +32,24 @@ DEALINGS IN THE SOFTWARE.  */
 
 //Usage for this tool
 void CisSpliceEffectsIdentifier::usage(ostream& out) {
-    out << "Usage:\t\t" 
-        << "regtools cis-splice-effects identify [options] variants.vcf"
-        << " alignments.bam ref.fa annotations.gtf" << endl;
+    out << "Usage:" 
+        << "\t\t" << "regtools cis-splice-effects identify [options] variants.vcf"
+        << "\t\t " << "alignments.bam ref.fa annotations.gtf" << endl;
     out << "Options:" << endl;
-    out << "\t"   << "-o STR Output file containing the aberrant splice junctions with annotations. [STDOUT]" << endl;
-    out << "\t\t" << "-v STR Output file containing variants annotated as splice relevant (VCF format)." << endl;
-    out << "\t\t" << "-j STR Output file containing the aberrant junctions in BED12 format." << endl;
-    out << "\t\t" << "-w INT\tWindow size in b.p to identify splicing events in. "
-        << "\t\t\t" << "The tool identifies events in variant.start +/- w basepairs."
-        << "\t\t\t" << "Default behaviour is to look at the window between previous and next exons." << endl;
-    out << "\t\t" << "-e INT\tMaximum distance from the start/end of an exon "
-                       "\t\t\tto annotate a variant as relevant to splicing, the variant "
-                       "\t\t\tis in exonic space, i.e a coding variant. [3]" << endl;
-    out << "\t\t" << "-i INT\tMaximum distance from the start/end of an exon "
-                       "\t\t\tto annotate a variant as relevant to splicing, the variant "
-                       "\t\t\tis in intronic space. [2]" << endl;
+    out << "\t\t" << "-o STR\tOutput file containing the aberrant splice junctions with annotations. [STDOUT]" << endl;
+    out << "\t\t" << "-v STR\tOutput file containing variants annotated as splice relevant (VCF format)." << endl;
+    out << "\t\t" << "-j STR\tOutput file containing the aberrant junctions in BED12 format." << endl;
+    out << "\t\t" << "-s INT\tStrand specificity of RNA library preparation \n"
+        << "\t\t\t " << "(0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR). [1]" << endl;
+    out << "\t\t" << "-w INT\tWindow size in b.p to identify splicing events in.\n" 
+        << "\t\t\t " << "The tool identifies events in variant.start +/- w basepairs.\n"
+        << "\t\t\t " << "Default behaviour is to look at the window between previous and next exons." << endl;
+    out << "\t\t" << "-e INT\tMaximum distance from the start/end of an exon \n"
+        << "\t\t\t " << "to annotate a variant as relevant to splicing, the variant \n"
+        << "\t\t\t " << "is in exonic space, i.e a coding variant. [3]" << endl;
+    out << "\t\t" << "-i INT\tMaximum distance from the start/end of an exon \n"
+        << "\t\t\t " << "to annotate a variant as relevant to splicing, the variant \n"
+        << "\t\t\t " << "is in intronic space. [2]" << endl;
     out << "\t\t" << "-I\tAnnotate variants in intronic space within a transcript(not to be used with -i)." << endl;
     out << "\t\t" << "-E\tAnnotate variants in exonic space within a transcript(not to be used with -e)." << endl;
     out << "\t\t" << "-S\tDon't skip single exon transcripts." << endl;

@@ -88,16 +88,18 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
 
 //Usage statement for this tool
 int JunctionsExtractor::usage(ostream& out) {
-    out << "Usage:\t\t" << "regtools junctions extract [options] indexed_alignments.bam" << endl;
+    out << "Usage:" 
+        << "\t\t" << "regtools junctions extract [options] indexed_alignments.bam" << endl;
     out << "Options:" << endl;
-    out << "\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum "
-                     "anchor length on both sides are reported. [8]" << endl;
+    out << "\t\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum \n"
+        << "\t\t\t " << "anchor length on both sides are reported. [8]" << endl;
     out << "\t\t" << "-i INT\tMinimum intron length. [70]" << endl;
     out << "\t\t" << "-I INT\tMaximum intron length. [500000]" << endl;
     out << "\t\t" << "-o FILE\tThe file to write output to. [STDOUT]" << endl;
-    out << "\t\t" << "-r STR\tThe region to identify junctions "
-                     "in \"chr:start-end\" format. Entire BAM by default." << endl;
-    out << "\t\t" << "-s INT\tStrand specificity of RNA library preparation. (0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR) [1]" << endl;
+    out << "\t\t" << "-r STR\tThe region to identify junctions \n"
+        << "\t\t\t " << "in \"chr:start-end\" format. Entire BAM by default." << endl;
+    out << "\t\t" << "-s INT\tStrand specificity of RNA library preparation \n"
+        << "\t\t\t " << "(0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR). [1]" << endl;
     out << endl;
     return 0;
 }
