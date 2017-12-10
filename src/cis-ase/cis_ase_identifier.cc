@@ -56,7 +56,7 @@ void CisAseIdentifier::usage(ostream& out) {
         << "regtools cis-ase identify [options] somatic_variants.vcf polymorphism.vcf"
         << " tumor_dna_alignments.bam tumor_rna_alignments.bam ref.fa annotations.gtf" << endl;
     out << "Options:" << endl;
-    out << "\t"   << "-o STR Output file containing the ase variants in VCF format. [STDOUT]" << endl;
+    out << "\t\t"   << "-o STR Output file containing the ase variants in VCF format. [STDOUT]" << endl;
     out << "\t\t"   << "-d INT Minimum total read-depth for a somatic/ASE variant. [10]" << endl;
     out << "\t\t"   << "-w INT Window around a somatic variant to look for transcripts. ASE variants "
         << "will be in these transcripts[1000]" << endl;

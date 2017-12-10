@@ -375,7 +375,7 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
 int JunctionsAnnotator::usage(ostream& out) {
     out << "Usage:\t\t" << "regtools junctions annotate [options] junctions.bed ref.fa annotations.gtf" << endl;
     out << "Options:\t" << "-E include single exon genes" << endl;
-    out << "\t\t" << "-o Output file" << endl; 
+    out << "\t\t" << "-o FILE\tThe file to write output to. [STDOUT]" << endl;
     out << endl;
     return 0;
 }
