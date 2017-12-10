@@ -97,6 +97,7 @@ int JunctionsExtractor::usage(ostream& out) {
     out << "\t\t" << "-o FILE\tThe file to write output to. [STDOUT]" << endl;
     out << "\t\t" << "-r STR\tThe region to identify junctions "
                      "in \"chr:start-end\" format. Entire BAM by default." << endl;
+    out << "\t\t" << "-s INT\tStrand specificity of RNA library preparation. (0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR) [1]" << endl;
     out << endl;
     return 0;
 }
@@ -227,10 +228,10 @@ void JunctionsExtractor::set_junction_strand_flag(bam1_t *aln, Junction& j1) {
     int mate_reversed = (flag >> 5) % 2;
     int first_in_pair = (flag >> 6) % 2;
     int second_in_pair = (flag >> 7) % 2;
-    // strandness_ is 0 for unstranded, 1 for FR, and 2 for RF
+    // strandness_ is 0 for unstranded, 1 for RF, and 2 for FR
     int bool_strandness = strandness_ - 1;
-    int first_strand = bool_strandness ^ first_in_pair ^ reversed;
-    int second_strand = bool_strandness ^ second_in_pair ^ mate_reversed;
+    int first_strand = !bool_strandness ^ first_in_pair ^ reversed;
+    int second_strand = !bool_strandness ^ second_in_pair ^ mate_reversed;
     char strand;
     if (first_strand){
         strand = '+';
@@ -251,21 +252,12 @@ void JunctionsExtractor::set_junction_strand_flag(bam1_t *aln, Junction& j1) {
 //Get the strand
 void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
     // if unstranded data
-    //cerr << "strandness is " << strandness_ << endl;
     if (strandness_ > 0){
         return set_junction_strand_flag(aln, j1);
     } else {
         return set_junction_strand_XS(aln, j1);
     }
 }
-
-// // test
-// void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
-//     // if unstranded data
-//     cerr << "strandness is " << strandness_ << endl;
-//     set_junction_strand_flag(aln, j1);
-//     return set_junction_strand_XS(aln, j1);
-// }
 
 //Parse junctions from the read and store in junction map
 int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *aln) {
@@ -277,15 +269,6 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
     int read_pos = aln->core.pos;
     string chr(header->target_name[chr_id]);
     uint32_t *cigar = bam_get_cigar(aln);
-
-    /*
-    //Skip duplicates
-    int flag = aln->core.flag;
-    if(flag & 1024) {
-        cerr << "Skipping read_pos " << read_pos << " flag " << flag << endl;
-        return 0;
-    }
-    */
 
     Junction j1;
     j1.chrom = chr;

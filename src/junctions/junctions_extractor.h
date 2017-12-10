@@ -145,7 +145,7 @@ class JunctionsExtractor {
         string output_file_;
         //Region to identify junctions, in "chr:start-end" format
         string region_;
-        //strandness off data; 0 = unstranded, 1 = FR, 2 = RF
+        //strandness of data; 0 = unstranded, 1 = RF, 2 = FR
         int strandness_;
     public:
         //Default constructor
@@ -155,14 +155,13 @@ class JunctionsExtractor {
             min_intron_length_ = 70;
             max_intron_length_ = 500000;
             junctions_sorted_ = false;
-            strandness_ = 2;
+            strandness_ = 1;
             bam_ = "NA";
             output_file_ = "NA";
             region_ = ".";
         }
         JunctionsExtractor(string bam1, string region1, int strandness1) : bam_(bam1), region_(region1), strandness_(strandness1) {
             //cerr << "param constructor called" << endl;
-            //cerr << "strandness1 is " << strandness1 << endl;
             min_anchor_length_ = 8;
             min_intron_length_ = 70;
             max_intron_length_ = 500000;

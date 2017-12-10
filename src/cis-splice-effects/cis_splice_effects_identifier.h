@@ -92,7 +92,7 @@ class CisSpliceEffectsIdentifier {
                                        all_intronic_space_(false),
                                        all_exonic_space_(false),
                                        skip_single_exon_genes_(true),
-                                       strandness_(2) {}
+                                       strandness_(1) {}
         //Destructor
         ~CisSpliceEffectsIdentifier() {
             if(ofs_.is_open()) {
