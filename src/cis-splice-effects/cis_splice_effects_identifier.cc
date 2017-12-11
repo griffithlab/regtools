@@ -271,7 +271,7 @@ void CisSpliceEffectsIdentifier::identify() {
     }
     //debug
     for(set<Junction> :: iterator it = unique_junctions_.begin(); it != unique_junctions_.end(); it++){
-        Junction debug_junction = it*;
+        Junction debug_junction = *it;
         stringstream s1;
         string start, end;
         s1 << debug_junction.start; start = s1.str();
