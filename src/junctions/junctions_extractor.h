@@ -117,6 +117,7 @@ static inline bool compare_junctions(const Junction &j1,
 //Sort a vector of junctions
 template <class CollectionType>
 inline void sort_junctions(CollectionType &junctions) {
+    cerr << "sort_junctions called" << endl;
     sort(junctions.begin(), junctions.end(), compare_junctions);
 }
 

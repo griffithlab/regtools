@@ -147,7 +147,7 @@ int JunctionsExtractor::add_junction(Junction j1) {
     s1 << j1.end; end = s1.str();
     string key = j1.chrom + ":" + start + "-" + end + ":" + j1.strand;
     //debug
-    cerr << key << endl; 
+    //cerr << key << endl; 
     //Check if new junction
     if(!junctions_.count(key)) {
         //debug - showed that two new junctions are created as expected for ? and +
@@ -409,8 +409,8 @@ int JunctionsExtractor::identify_junctions_from_BAM() {
 
 //Create the junctions vector from the map
 void JunctionsExtractor::create_junctions_vector() {
-    cerr << "1:93698149-93700363:+ count: " << junctions_["1:93698149-93700363:+"].score << endl;
-    cerr << "1:93698149-93700363:? count: " << junctions_["1:93698149-93700363:?"].score << endl;
+    //cerr << "1:93698149-93700363:+ count: " << junctions_["1:93698149-93700363:+"].score << endl;
+    //cerr << "1:93698149-93700363:? count: " << junctions_["1:93698149-93700363:?"].score << endl;
     for(map<string, Junction> :: iterator it = junctions_.begin();
         it != junctions_.end(); it++) {
         Junction j1 = it->second;
