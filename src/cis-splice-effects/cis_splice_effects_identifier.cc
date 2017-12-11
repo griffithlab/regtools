@@ -245,9 +245,7 @@ void CisSpliceEffectsIdentifier::identify() {
                 //Allow partial overlap - either junction start or end is within window
                 if((junctions[i].start >= v1.cis_effect_start && junctions[i].start <= v1.cis_effect_end) || 
                     (junctions[i].end <= v1.cis_effect_end && junctions[i].end >= v1.cis_effect_start)) {
-                    cerr << "start experiment" << endl;
                     unique_junctions_.insert(junctions[i]);
-                    cerr << "end experiment" << endl;
                     // Junction debug_junction = junctions[i];
                     // stringstream s1;
                     // string start, end;

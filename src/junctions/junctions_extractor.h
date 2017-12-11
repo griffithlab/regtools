@@ -92,6 +92,34 @@ struct Junction : BED {
             "\t" << start - thick_start << "," << thick_end - end <<
             "\t" << "0," << end - thick_start << endl;
     }
+    //comparator - added specifically for set insertion
+    bool operator< (const Junction& rhs) const {
+        if (this->chrom < rhs.chrom){
+            return true;
+        }
+        if (this->chrom > rhs.chrom){
+            return false;
+        }
+        if (this->start < rhs.start){
+            return true;
+        }
+        if (this->start > rhs.start){
+            return false;
+        }
+        if (this->end < rhs.end){
+            return true;
+        }
+        if (this->end > rhs.end){
+            return false;
+        }
+        if (this->strand < rhs.strand){
+            return true;
+        }
+        if (this->strand > rhs.strand){
+            return false;
+        }
+        return false;
+    }
 };
 
 //Compare two junctions
@@ -117,7 +145,6 @@ static inline bool compare_junctions(const Junction &j1,
 //Sort a vector of junctions
 template <class CollectionType>
 inline void sort_junctions(CollectionType &junctions) {
-    cerr << "sort_junctions called" << endl;
     sort(junctions.begin(), junctions.end(), compare_junctions);
 }
 
