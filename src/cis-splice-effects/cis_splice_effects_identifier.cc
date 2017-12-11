@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.  */
 #include "junctions_extractor.h"
 #include "variants_annotator.h"
 
+using namespace std;
+
 //Usage for this tool
 void CisSpliceEffectsIdentifier::usage(ostream& out) {
     out << "Usage:" 
