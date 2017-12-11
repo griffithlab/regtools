@@ -150,9 +150,10 @@ int JunctionsExtractor::add_junction(Junction j1) {
     cerr << key << endl; 
     //Check if new junction
     if(!junctions_.count(key)) {
-        if (key == "1:93698149-93700363:+" || key == "1:93698149-93700363:?"){
-            cerr << "NEW JUNCTION CREATED" << endl;
-        }
+        //debug - showed that two new junctions are created as expected for ? and +
+        // if (key == "1:93698149-93700363:+" || key == "1:93698149-93700363:?"){
+        //     cerr << "NEW JUNCTION CREATED" << endl;
+        // }
         j1.name = get_new_junction_name();
         j1.read_count = 1;
         j1.score = common::num_to_str(j1.read_count);
@@ -408,6 +409,8 @@ int JunctionsExtractor::identify_junctions_from_BAM() {
 
 //Create the junctions vector from the map
 void JunctionsExtractor::create_junctions_vector() {
+    cerr << "1:93698149-93700363:+ count: " << junctions_["1:93698149-93700363:+"].score << endl;
+    cerr << "1:93698149-93700363:? count: " << junctions_["1:93698149-93700363:?"].score << endl;
     for(map<string, Junction> :: iterator it = junctions_.begin();
         it != junctions_.end(); it++) {
         Junction j1 = it->second;
