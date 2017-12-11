@@ -193,6 +193,10 @@ void CisSpliceEffectsIdentifier::annotate_junctions(const GtfParser& gp1) {
         }
         line.variant_info = variant_set_to_string(junction_to_variant_[j]);
         line.print(ofs_, true);
+        cerr << "debug: annotated_junction " << line.chrom + ":" 
+        + line.start +  "-"
+        + line.end + ":" 
+        + line.strand << endl;
     }
     close_ostream();
 }
@@ -240,7 +244,7 @@ void CisSpliceEffectsIdentifier::identify() {
                     (junctions[i].end <= v1.cis_effect_end && junctions[i].end >= v1.cis_effect_start)) {
                     unique_junctions_.insert(junctions[i]);
                     Junction debug_junction = junique_junctions_.back()
-                    cerr << "debug: unique_junctions " << debug_junction.chrom + ":" 
+                    cerr << "debug: unique_junction " << debug_junction.chrom + ":" 
                     + debug_junction.start +  "-"
                     + debug_junction.end + ":" 
                     + debug_junction.strand << endl;
