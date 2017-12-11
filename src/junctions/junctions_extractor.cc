@@ -143,11 +143,16 @@ int JunctionsExtractor::add_junction(Junction j1) {
     stringstream s1;
     string start, end;
     s1 << j1.start; start = s1.str();
+    s1.str(string()); s1.clear();
     s1 << j1.end; end = s1.str();
-    string key = j1.chrom + string(":") + start + "-" + end + ":" + j1.strand;
+    string key = j1.chrom + ":" + start + "-" + end + ":" + j1.strand;
+    //debug
     cerr << key << endl; 
     //Check if new junction
     if(!junctions_.count(key)) {
+        if (key == "1:93698149-93700363:+" || key == "1:93698149-93700363:?"){
+            cerr << "NEW JUNCTION CREATED" << endl;
+        }
         j1.name = get_new_junction_name();
         j1.read_count = 1;
         j1.score = common::num_to_str(j1.read_count);
