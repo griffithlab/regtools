@@ -193,13 +193,13 @@ void CisSpliceEffectsIdentifier::annotate_junctions(const GtfParser& gp1) {
         }
         line.variant_info = variant_set_to_string(junction_to_variant_[j]);
         line.print(ofs_, true);
-        stringstream s1;
-        string start, end;
-        s1 << line.start; start = s1.str();
-        s1.str(string()); s1.clear();
-        s1 << line.end; end = s1.str();
-        string key = line.chrom + ":" + start + "-" + end + ":" + line.strand;
-        cerr << "debug: unique_junction " << key << endl;
+        // stringstream s1;
+        // string start, end;
+        // s1 << line.start; start = s1.str();
+        // s1.str(string()); s1.clear();
+        // s1 << line.end; end = s1.str();
+        // string key = line.chrom + ":" + start + "-" + end + ":" + line.strand;
+        // cerr << "debug: annoted_junction " << key << endl;
     }
     close_ostream();
 }
@@ -246,14 +246,14 @@ void CisSpliceEffectsIdentifier::identify() {
                 if((junctions[i].start >= v1.cis_effect_start && junctions[i].start <= v1.cis_effect_end) || 
                     (junctions[i].end <= v1.cis_effect_end && junctions[i].end >= v1.cis_effect_start)) {
                     unique_junctions_.insert(junctions[i]);
-                    Junction debug_junction = junctions[i];
-                    stringstream s1;
-                    string start, end;
-                    s1 << debug_junction.start; start = s1.str();
-                    s1.str(string()); s1.clear();
-                    s1 << debug_junction.end; end = s1.str();
-                    string key = debug_junction.chrom + ":" + start + "-" + end + ":" + debug_junction.strand;
-                    cerr << "debug: unique_junction " << key << endl;
+                    // Junction debug_junction = junctions[i];
+                    // stringstream s1;
+                    // string start, end;
+                    // s1 << debug_junction.start; start = s1.str();
+                    // s1.str(string()); s1.clear();
+                    // s1 << debug_junction.end; end = s1.str();
+                    // string key = debug_junction.chrom + ":" + start + "-" + end + ":" + debug_junction.strand;
+                    // cerr << "debug: variant_junction " << key << endl;
                     //add to the map of junctions to variants
                     junction_to_variant_[junctions[i]].insert(v1);
                 }
@@ -267,6 +267,18 @@ void CisSpliceEffectsIdentifier::identify() {
                 // }
             }
         }
+
+    }
+    //debug
+    for(set<Junction> :: iterator it = unique_junctions_.begin(); it != unique_junctions_.end(); it++){
+        Junction debug_junction = it*;
+        stringstream s1;
+        string start, end;
+        s1 << debug_junction.start; start = s1.str();
+        s1.str(string()); s1.clear();
+        s1 << debug_junction.end; end = s1.str();
+        string key = debug_junction.chrom + ":" + start + "-" + end + ":" + debug_junction.strand;
+        cerr << "debug: unique_junction " << key << endl;
     }
     annotate_junctions(gp1);
 }
