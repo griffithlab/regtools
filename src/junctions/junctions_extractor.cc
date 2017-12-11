@@ -145,7 +145,7 @@ int JunctionsExtractor::add_junction(Junction j1) {
     s1 << j1.start; start = s1.str();
     s1 << j1.end; end = s1.str();
     string key = j1.chrom + string(":") + start + "-" + end + ":" + j1.strand;
-
+    cerr << key << endl; 
     //Check if new junction
     if(!junctions_.count(key)) {
         j1.name = get_new_junction_name();
