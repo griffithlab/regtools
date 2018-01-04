@@ -150,19 +150,29 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
             known_junction = true;
         }
         else {
+            // YY NOTE: if we have not yet reached the junction on this transcript,
             if(!junction_start) {
+                // then check if we have (i.e. the exon end is past or at the junction start)
                 if(exons[i].end >= junction.start) {
                     junction_start = true;
                 }
             }
             if(junction_start) {
+                // YY NOTE: if the exon lies completely within the junction,
+                //              count it as skipped
                 if(exons[i].start > junction.start &&
                         exons[i].end < junction.end) {
                     junction.exons_skipped.insert(exons[i].name);
                 }
+                // YY NOTE: if the exon starts after the junction starts
+                //              (and junction_start == true), then 
+                //              count the donor as skipped
                 if(exons[i].start > junction.start) {
                     junction.donors_skipped.insert(exons[i].start);
                 }
+                // YY NOTE: if the exon ends before the junction ends
+                //              (and junction_start == true), then
+                //              count the acceptor as skipped
                 if(exons[i].end < junction.end) {
                     junction.acceptors_skipped.insert(exons[i].end);
                 }
@@ -179,6 +189,29 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
     annotate_anchor(junction);
     return (junction.anchor != "N");
 }
+
+//YY NOTES
+/*
+
+So based on my understanding of the bin search, we should be looking at all the 
+possible transcripts that might overlap with a junction. That is to say, it 
+would seem that any discrepancy in acceptors/exons/donors skipped would come 
+from a problem with the actual counting.
+
+The overlap function will be run on each transcript, and you can see from the
+if block how it judges an acceptor/exon/donor as skipped. That logic appears
+correct to me (see notes above). Doesn't immediately seem like a problem
+with the actual recording of acceptors/exons/donors skipped (but probably
+warrants a closer look).
+
+Then the final place the count could get messed up is in the actual
+printing to the tsv. The way this works is the skipped elements are 
+held in sets. Acceptors/donors skipped are held in sets based on their 
+coordinates while exons skipped are held in sets based on their names.
+The number of elements skipped is simply the size of the set, so we only 
+count unique elements. Also don't see a problem immediately with how this works.
+
+*/
 
 //Find overlap between transcript and junction on the negative strand,
 //function returns true if either the acceptor or the donor is known
