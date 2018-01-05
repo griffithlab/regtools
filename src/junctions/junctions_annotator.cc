@@ -152,7 +152,8 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
         else {
             // YY NOTE: if we have not yet reached the junction on this transcript,
             if(!junction_start) {
-                // then check if we have (i.e. the exon end is past or at the junction start)
+                // then check if we have with this exon (i.e. the 
+                // exon end is past or at the junction start)
                 if(exons[i].end >= junction.start) {
                     junction_start = true;
                 }
@@ -162,24 +163,30 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
                 //              count it as skipped
                 if(exons[i].start > junction.start &&
                         exons[i].end < junction.end) {
-                    junction.exons_skipped.insert(exons[i].name);
+                    string exon_coords = to_string(exons[i].start) + "-" + to_string(exons[i].end);
+                    junction.exons_skipped.insert(exon_coords);
                 }
-                // YY NOTE: if the exon starts after the junction starts
+                // YY NOTE: if the exon ends after the junction starts
                 //              (and junction_start == true), then 
                 //              count the donor as skipped
-                if(exons[i].start > junction.start) {
-                    junction.donors_skipped.insert(exons[i].start);
+                        // YY NOTE: maybe it should be junction.end-1? since
+                        //              if the "donor" and "acceptor" are already
+                        //              contiguous in the DNA it would get counted
+                        //              as "skipped" 
+                if(exons[i].end > junction.start &&
+                        exons[i].end < junction.end) {
+                    junction.donors_skipped.insert(exons[i].end);
                 }
-                // YY NOTE: if the exon ends before the junction ends
+                // YY NOTE: if the exon starts before the junction ends
                 //              (and junction_start == true), then
                 //              count the acceptor as skipped
-                if(exons[i].end < junction.end) {
-                    junction.acceptors_skipped.insert(exons[i].end);
+                if(exons[i].start < junction.end &&
+                        exons[i].start > junction.start) {
+                    junction.acceptors_skipped.insert(exons[i].start);
                 }
                 if(exons[i].end == junction.start) {
                     junction.known_donor = true;
                 }
-                //TODO - check for last exon
                 if(exons[i].start == junction.end) {
                     junction.known_acceptor = true;
                 }
@@ -249,19 +256,28 @@ bool JunctionsAnnotator::overlap_ns(const vector<BED> & exons,
             if(junction_start) {
                 if(exons[i].start > junction.start &&
                         exons[i].end < junction.end) {
-                    junction.exons_skipped.insert(exons[i].name);
+                    string exon_coords = to_string(exons[i].start) + "-" + to_string(exons[i].end);
+                    junction.exons_skipped.insert(exon_coords);
                 }
-                if(exons[i].start > junction.start) {
-                    junction.donors_skipped.insert(exons[i].start);
-                }
-                if(exons[i].end < junction.end) {
+                // YY NOTE: if the exon ends after the junction starts
+                //              (and junction_start == true), then 
+                //              count the donor as skipped
+                if(exons[i].end > junction.start &&
+                        exons[i].end < junction.end) {
                     junction.acceptors_skipped.insert(exons[i].end);
                 }
-                if(exons[i].start == junction.end) {
-                    junction.known_donor = true;
+                // YY NOTE: if the exon starts before the junction ends
+                //              (and junction_start == true), then
+                //              count the acceptor as skipped
+                if(exons[i].start < junction.end &&
+                        exons[i].start > junction.start) {
+                    junction.donors_skipped.insert(exons[i].start);
                 }
                 if(exons[i].end == junction.start) {
                     junction.known_acceptor = true;
+                }
+                if(exons[i].start == junction.end) {
+                    junction.known_donor = true;
                 }
             }
         }

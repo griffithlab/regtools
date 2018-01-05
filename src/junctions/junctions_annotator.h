@@ -85,11 +85,11 @@ struct AnnotatedJunction : BED {
         string exons_skipped_str;
         string donors_skipped_str;
         for (set<CHRPOS>::iterator it = acceptors_skipped.begin(); it != acceptors_skipped.end(); ++it) {
-            acceptors_skipped_str += *it;
+            acceptors_skipped_str += to_string(*it);
             acceptors_skipped_str += ';'; 
         }
         for (set<CHRPOS>::iterator it = donors_skipped.begin(); it != donors_skipped.end(); ++it) {
-            donors_skipped_str += *it;
+            donors_skipped_str += to_string(*it);
             donors_skipped_str += ';'; 
         }
         for (set<string>::iterator it = exons_skipped.begin(); it != exons_skipped.end(); ++it) {
