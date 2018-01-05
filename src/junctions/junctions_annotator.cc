@@ -162,7 +162,8 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
                 // YY NOTE: if the exon lies completely within the junction,
                 //              count it as skipped
                 if(exons[i].start > junction.start &&
-                        exons[i].end < junction.end) {
+                        exons[i].end < junction.end &&
+                        i > 0 && i < (exons.size()-1)) {
                     string exon_coords = to_string(exons[i].start) + "-" + to_string(exons[i].end);
                     junction.exons_skipped.insert(exon_coords);
                 }
@@ -174,14 +175,16 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
                         //              contiguous in the DNA it would get counted
                         //              as "skipped" 
                 if(exons[i].end > junction.start &&
-                        exons[i].end < junction.end) {
+                        exons[i].end < junction.end && 
+                        i < (exons.size()-1)) {
                     junction.donors_skipped.insert(exons[i].end);
                 }
                 // YY NOTE: if the exon starts before the junction ends
                 //              (and junction_start == true), then
                 //              count the acceptor as skipped
                 if(exons[i].start < junction.end &&
-                        exons[i].start > junction.start) {
+                        exons[i].start > junction.start &&
+                        i > 0) {
                     junction.acceptors_skipped.insert(exons[i].start);
                 }
                 if(exons[i].end == junction.start) {
@@ -255,7 +258,8 @@ bool JunctionsAnnotator::overlap_ns(const vector<BED> & exons,
             }
             if(junction_start) {
                 if(exons[i].start > junction.start &&
-                        exons[i].end < junction.end) {
+                        exons[i].end < junction.end &&
+                        i > 0 && i < (exons.size()-1)) {
                     string exon_coords = to_string(exons[i].start) + "-" + to_string(exons[i].end);
                     junction.exons_skipped.insert(exon_coords);
                 }
@@ -263,7 +267,8 @@ bool JunctionsAnnotator::overlap_ns(const vector<BED> & exons,
                 //              (and junction_start == true), then 
                 //              count the donor as skipped
                 if(exons[i].end > junction.start &&
-                        exons[i].end < junction.end) {
+                        exons[i].end < junction.end && 
+                        i < (exons.size()-1)) {
                     junction.acceptors_skipped.insert(exons[i].end);
                 }
                 // YY NOTE: if the exon starts before the junction ends

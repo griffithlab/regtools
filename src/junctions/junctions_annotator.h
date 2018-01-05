@@ -80,7 +80,6 @@ struct AnnotatedJunction : BED {
     }
     //Print out the junction
     void print(ostream &out = std::cout, bool variant_info_exists = false) {
-        cerr << "PRINT" << endl;
         string acceptors_skipped_str;
         string exons_skipped_str;
         string donors_skipped_str;
@@ -99,8 +98,8 @@ struct AnnotatedJunction : BED {
         out << chrom << "\t" << start <<
                 "\t" << end << "\t" << name <<
                 "\t" << score << "\t" << strand <<
-                "\t" << splice_site << "\t" << acceptors_skipped_str <<
-                "\t" << exons_skipped_str << "\t" << donors_skipped_str <<
+                "\t" << splice_site << "\t" << acceptors_skipped.size() <<
+                "\t" << exons_skipped.size() << "\t" << donors_skipped.size() <<
                 "\t" << anchor <<
                 "\t" << known_donor << "\t" << known_acceptor << "\t" << known_junction;
         //See if any genes overlap the junction
