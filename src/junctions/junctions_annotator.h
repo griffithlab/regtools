@@ -80,21 +80,6 @@ struct AnnotatedJunction : BED {
     }
     //Print out the junction
     void print(ostream &out = std::cout, bool variant_info_exists = false) {
-        string acceptors_skipped_str;
-        string exons_skipped_str;
-        string donors_skipped_str;
-        for (set<CHRPOS>::iterator it = acceptors_skipped.begin(); it != acceptors_skipped.end(); ++it) {
-            acceptors_skipped_str += to_string(*it);
-            acceptors_skipped_str += ';'; 
-        }
-        for (set<CHRPOS>::iterator it = donors_skipped.begin(); it != donors_skipped.end(); ++it) {
-            donors_skipped_str += to_string(*it);
-            donors_skipped_str += ';'; 
-        }
-        for (set<string>::iterator it = exons_skipped.begin(); it != exons_skipped.end(); ++it) {
-            exons_skipped_str += *it;
-            exons_skipped_str += ';'; 
-        }
         out << chrom << "\t" << start <<
                 "\t" << end << "\t" << name <<
                 "\t" << score << "\t" << strand <<
