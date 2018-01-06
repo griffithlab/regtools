@@ -30,6 +30,20 @@ from integrationtest import IntegrationTest, main
 import unittest
 
 class TestExtract(IntegrationTest, unittest.TestCase):
+    def test_junctions_extract_anchor_stranded(self):
+        bam1 = self.inputFiles("bam/test_hcc1395.bam")[0]
+        output_file = self.tempFile("extract.out")
+        print "BAM1 is ", bam1
+        for anchor in ["", "30"]:
+            expected_file = self.inputFiles("junctions-extract/expected-stranded-a" +
+                                            anchor + ".out")[0]
+            if anchor != "":
+                anchor = "-a " + anchor
+            params = ["junctions", "extract", anchor, "-o", output_file, bam1]
+            rv, err = self.execute(params)
+            self.assertEqual(rv, 0)
+            self.assertFilesEqual(expected_file, output_file)
+
     def test_junctions_extract_anchor(self):
         bam1 = self.inputFiles("bam/test_hcc1395.bam")[0]
         output_file = self.tempFile("extract.out")
