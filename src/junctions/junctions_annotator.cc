@@ -164,7 +164,8 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
                 if(exons[i].start > junction.start &&
                         exons[i].end < junction.end &&
                         i > 0 && i < (exons.size()-1)) {
-                    string exon_coords = to_string(exons[i].start) + "-" + to_string(exons[i].end);
+                    stringstream exon_coords; 
+                    exon_coords << exons[i].start << "-" << exons[i].end;
                     junction.exons_skipped.insert(exon_coords);
                 }
                 // YY NOTE: if the exon ends after the junction starts
@@ -260,7 +261,8 @@ bool JunctionsAnnotator::overlap_ns(const vector<BED> & exons,
                 if(exons[i].start > junction.start &&
                         exons[i].end < junction.end &&
                         i > 0 && i < (exons.size()-1)) {
-                    string exon_coords = to_string(exons[i].start) + "-" + to_string(exons[i].end);
+                    stringstream exon_coords; 
+                    exon_coords << exons[i].start << "-" << exons[i].end;
                     junction.exons_skipped.insert(exon_coords);
                 }
                 // YY NOTE: if the exon ends after the junction starts
