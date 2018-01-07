@@ -100,18 +100,26 @@ struct Junction : BED {
 static inline bool compare_junctions(const Junction &j1,
                        const Junction &j2) {
     //Different chromosome
-    if(j1.chrom < j2.chrom)
+    if(j1.chrom < j2.chrom){
         return true;
-    if(j1.chrom > j2.chrom)
-        return false;
-    //Same chromosome
-    if(j1.thick_start == j2.thick_start) {
-        if(j1.thick_end < j2.thick_end)
-            return true;
-        else
-            return false;
     }
-    return j1.thick_start < j2.thick_start;
+    if(j1.chrom > j2.chrom){
+        return false;
+    }
+    //Same chromosome
+    if(j1.thick_start < j2.thick_start) {
+        return true;
+    }
+    if(j1.thick_start > j2.thick_start) {
+        return false;
+    }
+    if(j1.thick_end < j2.thick_end) {
+        return true;
+    }
+    if(j1.thick_end > j2.thick_end) {
+        return false;
+    }
+    return j1.name < j2.name;
 }
 
 //Sort a vector of junctions
