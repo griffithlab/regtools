@@ -145,13 +145,13 @@ int JunctionsExtractor::add_junction(Junction j1) {
     s1 << j1.start; start = s1.str();
     s1 << j1.end; end = s1.str();
     //since ?,+,- sort differently on different systems
-    char strand_proxy;
-    if(j1.strand == '+') {
-        strand_proxy = '0';
-    } else if(j1.strand == '-') {
-        strand_proxy = '1';
+    string strand_proxy;
+    if(j1.strand == "+") {
+        strand_proxy = "0";
+    } else if(j1.strand == "-") {
+        strand_proxy = "1";
     } else {
-        strand_proxy = '2';
+        strand_proxy = "2";
     }
     string key = j1.chrom + string(":") + start + "-" + end + ":" + strand_proxy;
 
