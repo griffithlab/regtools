@@ -134,7 +134,7 @@ class JunctionsExtractor {
         //Maximum length of an intron, i.e max junction width
         uint32_t max_intron_length_;
         //Map to store the junctions
-        //The key is "chr:start-end"
+        //The key is "chr:start-end:strand"
         //The value is an object of type Junction(see above)
         map<string, Junction> junctions_;
         //Maintain a sorted list of junctions

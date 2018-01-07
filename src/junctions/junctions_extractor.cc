@@ -144,7 +144,20 @@ int JunctionsExtractor::add_junction(Junction j1) {
     string start, end;
     s1 << j1.start; start = s1.str();
     s1 << j1.end; end = s1.str();
-    string key = j1.chrom + string(":") + start + "-" + end + ":" + j1.strand;
+    //since ?,+,- sort differently on different systems
+    char strand_proxy;
+    switch(j1.strand) {
+        case '+':
+            strand_proxy = '0';
+            break;
+        case '-': 
+            strand_proxy = '1';
+            break;
+        case '?': 
+            strand_proxy = '2';
+            break;
+    }
+    string key = j1.chrom + string(":") + start + "-" + end + ":" + strand_proxy;
 
     //Check if new junction
     if(!junctions_.count(key)) {
