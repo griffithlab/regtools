@@ -2199,7 +2199,7 @@ static int cram_populate_ref(cram_fd *fd, int id, ref_entry *r) {
 	 * However to avoid spamming it we require a local ref cache too.
 	 */
 	ref_path = "http://www.ebi.ac.uk:80/ena/cram/md5/%s";
-	std::cerr << ref_path << "\n";
+
 	if (!local_cache || *local_cache == '\0') {
 	    const char *extra;
 	    const char *base = get_cache_basedir(&extra);
@@ -2209,6 +2209,8 @@ static int cram_populate_ref(cram_fd *fd, int id, ref_entry *r) {
 		fprintf(stderr, "Populating local cache: %s\n", local_cache);
 	}
     }
+    // YY DEBUG
+    fprintf(stderr, "REF_PATH: %s\n", ref_path);
 
     if (!r->name)
 	return -1;
