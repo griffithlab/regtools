@@ -2183,6 +2183,8 @@ static const char *get_cache_basedir(const char **extra) {
  */
 static int cram_populate_ref(cram_fd *fd, int id, ref_entry *r) {
     char *ref_path = getenv("REF_PATH");
+    // YY DEBUG
+    fprintf(stderr, "REF_PATH (BEFORE): %s\n", ref_path);
     SAM_hdr_type *ty;
     SAM_hdr_tag *tag;
     char path[PATH_MAX], path_tmp[PATH_MAX], cache[PATH_MAX];
@@ -2209,8 +2211,7 @@ static int cram_populate_ref(cram_fd *fd, int id, ref_entry *r) {
 		fprintf(stderr, "Populating local cache: %s\n", local_cache);
 	}
     }
-    // YY DEBUG
-    fprintf(stderr, "REF_PATH: %s\n", ref_path);
+    fprintf(stderr, "REF_PATH (AFTER): %s\n", ref_path);
 
     if (!r->name)
 	return -1;
