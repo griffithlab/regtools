@@ -2199,6 +2199,7 @@ static int cram_populate_ref(cram_fd *fd, int id, ref_entry *r) {
 	 * However to avoid spamming it we require a local ref cache too.
 	 */
 	ref_path = "http://www.ebi.ac.uk:80/ena/cram/md5/%s";
+	cerr << ref_path << endl;
 	if (!local_cache || *local_cache == '\0') {
 	    const char *extra;
 	    const char *base = get_cache_basedir(&extra);
