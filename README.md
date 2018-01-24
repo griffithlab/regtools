@@ -26,6 +26,8 @@ Clone and install regtools by running:
     make
 ```
 
+For convienience we also maintain a docker image available at (https://hub.docker.com/r/griffithlab/regtools/)[https://hub.docker.com/r/griffithlab/regtools/]
+
 ## Usage:
 
 ```
