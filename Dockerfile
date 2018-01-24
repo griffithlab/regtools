@@ -26,13 +26,11 @@ RUN git clone https://github.com/griffithlab/regtools.git
 # make a build directory for regtools
 WORKDIR /regtools/
 RUN mkdir build
-WORKDIR /build/
 
 # compile from source
-RUN cmake ..
-RUN make
+RUN cd /regtools/build && cmake ..
+RUN cd /regtools/build && make
 
-WORKDIR /
 ################################################################################
 ###################### set environment path    #################################
 
