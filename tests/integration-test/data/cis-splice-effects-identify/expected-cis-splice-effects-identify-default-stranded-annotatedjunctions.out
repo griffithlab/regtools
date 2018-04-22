@@ -1,0 +1,2 @@
+chrom	start	end	name	score	strand	splice_site	acceptors_skipped	exons_skipped	donors_skipped	anchor	known_donor	known_acceptor	known_junction	genes	transcripts	variant_info
+22	93668	97252	JUNC00000001	5	-	CT-AC	0	0	0	N	0	0	0	NA	NA	22:94626-94627

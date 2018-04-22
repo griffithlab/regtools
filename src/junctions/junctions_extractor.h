@@ -100,18 +100,26 @@ struct Junction : BED {
 static inline bool compare_junctions(const Junction &j1,
                        const Junction &j2) {
     //Different chromosome
-    if(j1.chrom < j2.chrom)
+    if(j1.chrom < j2.chrom){
         return true;
-    if(j1.chrom > j2.chrom)
-        return false;
-    //Same chromosome
-    if(j1.thick_start == j2.thick_start) {
-        if(j1.thick_end < j2.thick_end)
-            return true;
-        else
-            return false;
     }
-    return j1.thick_start < j2.thick_start;
+    if(j1.chrom > j2.chrom){
+        return false;
+    }
+    //Same chromosome
+    if(j1.thick_start < j2.thick_start) {
+        return true;
+    }
+    if(j1.thick_start > j2.thick_start) {
+        return false;
+    }
+    if(j1.thick_end < j2.thick_end) {
+        return true;
+    }
+    if(j1.thick_end > j2.thick_end) {
+        return false;
+    }
+    return j1.name < j2.name;
 }
 
 //Sort a vector of junctions
@@ -134,7 +142,7 @@ class JunctionsExtractor {
         //Maximum length of an intron, i.e max junction width
         uint32_t max_intron_length_;
         //Map to store the junctions
-        //The key is "chr:start-end"
+        //The key is "chr:start-end:strand"
         //The value is an object of type Junction(see above)
         map<string, Junction> junctions_;
         //Maintain a sorted list of junctions
@@ -145,19 +153,22 @@ class JunctionsExtractor {
         string output_file_;
         //Region to identify junctions, in "chr:start-end" format
         string region_;
+        //strandness of data; 0 = unstranded, 1 = RF, 2 = FR
+        int strandness_;
     public:
         //Default constructor
         JunctionsExtractor() {
+            //cerr << "default constructor called" << endl;
             min_anchor_length_ = 8;
             min_intron_length_ = 70;
             max_intron_length_ = 500000;
             junctions_sorted_ = false;
+            strandness_ = 1;
             bam_ = "NA";
             output_file_ = "NA";
             region_ = ".";
         }
-        //Default constructor
-        JunctionsExtractor(string bam1, string region1) : bam_(bam1), region_(region1) {
+        JunctionsExtractor(string bam1, string region1, int strandness1) : bam_(bam1), region_(region1), strandness_(strandness1) {
             min_anchor_length_ = 8;
             min_intron_length_ = 70;
             max_intron_length_ = 500000;
@@ -193,6 +204,10 @@ class JunctionsExtractor {
         //Add a junction to the junctions map
         int add_junction(Junction j1);
         //Get the strand from the XS aux tag
+        void set_junction_strand_XS(bam1_t *aln, Junction& j1);
+        //Get the strand from bitwise flag
+        void set_junction_strand_flag(bam1_t *aln, Junction& j1);
+        //Get the strand
         void set_junction_strand(bam1_t *aln, Junction& j1);
 };
 
