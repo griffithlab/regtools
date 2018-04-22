@@ -66,5 +66,4 @@ int cis_splice_effects_main(int argc, char* argv[]) {
         return cis_splice_effects_identify(argc - 1, argv + 1);
     }
     return cis_splice_effects_usage(std::cout);
-    return 0;
 }

@@ -33,15 +33,16 @@ DEALINGS IN THE SOFTWARE.  */
 //Usage statement for this tool
 int VariantsAnnotator::usage(ostream& out) {
     out << "Usage:\t\t" << "regtools variants annotate [options] variants.vcf annotations.gtf" << endl;
-    out << "\t\t" << "-e INT\tMaximum distance from the start/end of an exon "
-                       "\t\t\tto annotate a variant as relevant to splicing, the variant "
-                       "\t\t\tis in exonic space, i.e a coding variant. [3]" << endl;
-    out << "\t\t" << "-i INT\tMaximum distance from the start/end of an exon "
-                       "\t\t\tto annotate a variant as relevant to splicing, the variant "
-                       "\t\t\tis in intronic space. [2]" << endl;
+    out << "Options:" << endl;
+    out << "\t\t" << "-o FILE\tThe file to write output to. [STDOUT]" << endl;
+    out << "\t\t" << "-e INT\tMaximum distance from the start/end of an exon \n"
+        << "\t\t\t " << "to annotate a variant as relevant to splicing, the variant \n"
+        << "\t\t\t " << "is in exonic space, i.e a coding variant. [3]" << endl;
+    out << "\t\t" << "-i INT\tMaximum distance from the start/end of an exon \n"
+        << "\t\t\t " << "to annotate a variant as relevant to splicing, the variant \n"
+        << "\t\t\t " << "is in intronic space. [2]" << endl;
     out << "\t\t" << "-I\tAnnotate variants in intronic space within a transcript(not to be used with -i)." << endl;
     out << "\t\t" << "-E\tAnnotate variants in exonic space within a transcript(not to be used with -e)." << endl;
-    out << "\t\t" << "-o\tFile to write output to. [STDOUT]" << endl;
     out << "\t\t" << "-S\tDon't skip single exon transcripts." << endl;
     out << endl;
     return 0;

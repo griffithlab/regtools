@@ -42,9 +42,9 @@ void version() {
 
 //Regtools usage
 int usage() {
-    cerr << "Usage:\t\t" << "regtools <command> [options]" << endl;
-    cerr << "Command:\t" << "junctions\t\tTools that operate on feature junctions."
-         << "\t\t\t\t\t(eg. exon-exon junctions from RNA-seq.)" << endl;
+    cerr << "Usage:" 
+        << "\t\t" << "regtools <command> [options]" << endl;
+    cerr << "Command:\t" << "junctions\t\tTools that operate on feature junctions (e.g. exon-exon junctions from RNA-seq)." << endl;
     cerr << "\t\t" << "cis-ase\t\t\tTools related to allele specific expression in cis." << endl;
     cerr << "\t\t" << "cis-splice-effects\tTools related to splicing effects of variants." << endl;
     cerr << "\t\t" << "variants\t\tTools that operate on variants." << endl;
