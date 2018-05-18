@@ -19,15 +19,16 @@ The `cis-splice-effects identify` command is used to identify splicing misregula
 ###Options
 | Option  | Description |
 | ------  | ----------- |
-| -o      | Output file containing the aberrant splice junctions. [STDOUT] |
-| -v      | Output file containing variants annotated as splice relevant (VCF format). |
-| -w      | Window around the variant file (in basepairs) to identify splicing events in. If specified the tool looks at +/- n b.p around the variant start position. For example -w 500 will look at a 1kb window around the variant. If this option is not specified, the default option is to look at a window that ranges from the start co-ordinate of the previous exon and ends at the end co-ordinate of the next exon i.e by treating the current exon as a cassette exon. |
-| -j      | Optional file containing the aberrant junctions in BED12 format. |
-| -e      | Maximum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in exonic space, i.e a coding variant. [default = 3] |
-| -i      | Maximum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in intronic space. [default = 2] |
-| -I      | Annotate variants in intronic space within a transcript (not to be used with -i).
-| -E      | Annotate variants in exonic space within a transcript (not to be used with -e).
-| -S      | Dont skip single exon transcripts. The default is to skip the single exon transcripts. |
+| -o STR	|	Output file containing the aberrant splice junctions with annotations. [STDOUT]	|
+| -v STR	|	Output file containing variants annotated as splice relevant (VCF format).	|
+| -j STR	|	Output file containing the aberrant junctions in BED12 format.	|
+| -s INT	|	Strand specificity of RNA library preparation (0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR). [1]	|
+| -w INT	|	Window size in b.p to identify splicing events in. The tool identifies events in variant.start +/- w basepairs. Default behaviour is to look at the window between previous and next exons.	|
+| -e INT	|	Maximum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in exonic space, i.e a coding variant. [3]	|
+| -i INT	|	Maximum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in intronic space. [2]	|
+| -I	|	Annotate variants in intronic space within a transcript(not to be used with -i).	|
+| -E	|	Annotate variants in exonic space within a transcript(not to be used with -e).	|
+| -S	|	Don't skip single exon transcripts.	|
 
 ###Output
 For an explanation of the annotated junctions that are identified by this command please refer to the output of the `junctions annotate` command [here](junctions-annotate.md#output)
