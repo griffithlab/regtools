@@ -52,17 +52,17 @@ const double MIN_HOM_PROB = 0.5;
 
 //Usage for this tool
 void CisAseIdentifier::usage(ostream& out) {
-    out << "\nUsage:\t\t"
+    out << "Usage:\t\t"
         << "regtools cis-ase identify [options] somatic_variants.vcf polymorphism.vcf"
-        << " tumor_dna_alignments.bam tumor_rna_alignments.bam ref.fa annotations.gtf";
-    out << "\nOptions:";
-    out << "\t"   << "-o STR Output file containing the ase variants in VCF format. [STDOUT]";
-    out << "\n\t\t"   << "-d INT Minimum total read-depth for a somatic/ASE variant. [10]";
-    out << "\n\t\t"   << "-w INT Window around a somatic variant to look for transcripts. ASE variants "
-        << "will be in these transcripts[1000]";
-    out << "\n\t\t"   << "-B Use the binomial model for modeling ASE in RNAseq(uses the beta model by default)";
-    out << "\n\t\t"   << "-E Look at all polymorphisms for ASE, not just exonic.";
-    out << "\n";
+        << " tumor_dna_alignments.bam tumor_rna_alignments.bam ref.fa annotations.gtf" << endl;
+    out << "Options:" << endl;
+    out << "\t\t"   << "-o STR Output file containing the ase variants in VCF format. [STDOUT]" << endl;
+    out << "\t\t"   << "-d INT Minimum total read-depth for a somatic/ASE variant. [10]" << endl;
+    out << "\t\t"   << "-w INT Window around a somatic variant to look for transcripts. ASE variants "
+        << "will be in these transcripts[1000]" << endl;
+    out << "\t\t"   << "-B Use the binomial model for modeling ASE in RNAseq(uses the beta model by default)" << endl;
+    out << "\t\t"   << "-E Look at all polymorphisms for ASE, not just exonic." << endl;
+    out << endl;
 }
 
 //Parse command line options
@@ -92,7 +92,7 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
                 throw common::cmdline_help_exception("");
             default:
                 usage(std::cerr);
-                throw runtime_error("\nError parsing inputs!(1)");
+                throw runtime_error("Error parsing inputs!(1)\n\n");
         }
     }
     if(argc - optind >= 6) {
@@ -111,22 +111,22 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
        ref_ == "NA" ||
        gtf_ == "NA"){
         usage(std::cerr);
-        throw runtime_error("\nError parsing inputs!(2)\n");
+        throw runtime_error("Error parsing inputs!(2)\n\n");
     }
-    cerr << "\nSomatic variants: " << somatic_vcf_;
-    cerr << "\nPolymorphisms: " << poly_vcf_;
-    cerr << "\nTumor DNA: " << tumor_dna_;
-    cerr << "\nTumor RNA: " << tumor_rna_;
-    cerr << "\nReference fasta file: " << ref_;
-    cerr << "\nAnnotation file: " << gtf_;
-    cerr << "\nMinimum read-depth for variants: " << min_depth_;
-    cerr << "\nWindow around somatic-variants to look for transcripts: " <<
-            transcript_variant_window_;
+    cerr << "Somatic variants: " << somatic_vcf_ << endl;
+    cerr << "Polymorphisms: " << poly_vcf_ << endl;
+    cerr << "Tumor DNA: " << tumor_dna_ << endl;
+    cerr << "Tumor RNA: " << tumor_rna_ << endl;
+    cerr << "Reference fasta file: " << ref_ << endl;
+    cerr << "Annotation file: " << gtf_ << endl;
+    cerr << "Minimum read-depth for variants: " << min_depth_ << endl;
+    cerr << "Window around somatic-variants to look for transcripts: " <<
+            transcript_variant_window_ << endl;
     if(use_binomial_model_) {
-        cerr << "\nUsing the binomial model for modeling RNAseq ASE";
+        cerr << "Using the binomial model for modeling RNAseq ASE" << endl;
     }
     if(output_file_ != "NA") {
-        cerr << "\nWriting VCF output to " << output_file_;
+        cerr << "Writing VCF output to " << output_file_ << endl;
     }
     cerr << endl;
 }
@@ -135,11 +135,11 @@ void CisAseIdentifier::parse_options(int argc, char* argv[]) {
 void CisAseIdentifier::open_somatic_vcf() {
     somatic_vcf_fh_ = bcf_open(somatic_vcf_.c_str(), "r");
     if(somatic_vcf_fh_ == NULL) {
-        throw std::runtime_error("Unable to open file.");
+        throw std::runtime_error("Unable to open file.\n\n");
     }
     somatic_vcf_header_ = bcf_hdr_read(somatic_vcf_fh_);
     if(somatic_vcf_header_ == NULL) {
-        throw std::runtime_error("Unable to read header.");
+        throw std::runtime_error("Unable to read header.\n\n");
     }
     somatic_vcf_record_ = bcf_init();
 }
@@ -192,7 +192,7 @@ bool CisAseIdentifier::mpileup_run(mplp_conf_t *conf,
     bam_mplp_init_overlaps(mmc1.iter);
     while (bam_mplp_auto(mmc1.iter, &mmc1.tid, &mmc1.pos, mmc1.n_plp, mmc1.plp) > 0) {
         if (conf->reg && (mmc1.pos < mmc1.beg0 || mmc1.pos >= mmc1.end0)) continue; // out of the region requested
-        if(!mmc1.h->target_name) printf("\nNot defined target\n");
+        if(!mmc1.h->target_name) printf("Not defined target\n\n");
         if (conf->bed && mmc1.tid >= 0 &&
             !bed_overlap(conf->bed, mmc1.h->target_name[mmc1.tid], mmc1.pos, mmc1.pos+1)) {
             continue;
@@ -402,7 +402,7 @@ vector<BIN> get_bins_in_region(CHRPOS start, CHRPOS end) {
 
 //Get the information for SNPs within relevant window
 void CisAseIdentifier::process_snps_in_window(string somatic_region, BED region) {
-    std::cerr << "\ninside process_snps " << region << endl;
+    std::cerr << "inside process_snps " << region << endl;
     vector<BIN> bins = get_bins_in_region(region.start, region.end);
     for(vector<BIN>::iterator bin_it = bins.begin(); bin_it != bins.end(); ++bin_it) {
         string index = construct_chrom_bin_index(region.chrom, *bin_it);

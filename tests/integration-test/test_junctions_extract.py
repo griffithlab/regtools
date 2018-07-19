@@ -30,6 +30,20 @@ from integrationtest import IntegrationTest, main
 import unittest
 
 class TestExtract(IntegrationTest, unittest.TestCase):
+    def test_junctions_extract_anchor_stranded(self):
+        bam1 = self.inputFiles("bam/test_hcc1395.bam")[0]
+        output_file = self.tempFile("extract.out")
+        print "BAM1 is ", bam1
+        for anchor in ["", "30"]:
+            expected_file = self.inputFiles("junctions-extract/expected-stranded-a" +
+                                            anchor + ".out")[0]
+            if anchor != "":
+                anchor = "-a " + anchor
+            params = ["junctions", "extract", anchor, "-o", output_file, bam1]
+            rv, err = self.execute(params)
+            self.assertEqual(rv, 0)
+            self.assertFilesEqual(expected_file, output_file)
+
     def test_junctions_extract_anchor(self):
         bam1 = self.inputFiles("bam/test_hcc1395.bam")[0]
         output_file = self.tempFile("extract.out")
@@ -39,7 +53,7 @@ class TestExtract(IntegrationTest, unittest.TestCase):
                                             anchor + ".out")[0]
             if anchor != "":
                 anchor = "-a " + anchor
-            params = ["junctions", "extract", anchor, "-o", output_file, bam1]
+            params = ["junctions", "extract", anchor, "-s 0", "-o", output_file, bam1]
             rv, err = self.execute(params)
             self.assertEqual(rv, 0)
             self.assertFilesEqual(expected_file, output_file)
@@ -52,7 +66,7 @@ class TestExtract(IntegrationTest, unittest.TestCase):
         expected_file = self.inputFiles("junctions-extract/expected-i" +
                 min_intron + "-I" + max_intron +
                 ".out")[0]
-        params = ["junctions", "extract", "-o", output_file,
+        params = ["junctions", "extract", "-s 0", "-o", output_file,
                   "-i", min_intron, "-I", max_intron, bam1]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
@@ -64,7 +78,7 @@ class TestExtract(IntegrationTest, unittest.TestCase):
         region = "1:22405013-22405020"
         expected_file = self.inputFiles("junctions-extract/expected-r" +
                 region + ".out")[0]
-        params = ["junctions", "extract", "-o", output_file, "-r", region,
+        params = ["junctions", "extract", "-s 0", "-o", output_file, "-r", region,
                   bam1]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
@@ -72,7 +86,7 @@ class TestExtract(IntegrationTest, unittest.TestCase):
 
     def test_no_bam(self):
         output_file = self.tempFile("extract.out")
-        params = ["junctions", "extract", "-o", output_file]
+        params = ["junctions", "extract", "-s 0", "-o", output_file]
         rv, err = self.execute(params)
         self.assertEqual(rv, 1)
 

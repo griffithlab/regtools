@@ -41,7 +41,7 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int c;
     stringstream help_ss;
-    while((c = getopt(argc, argv, "ha:i:I:o:r:")) != -1) {
+    while((c = getopt(argc, argv, "ha:i:I:o:r:s:")) != -1) {
         switch(c) {
             case 'a':
                 min_anchor_length_ = atoi(optarg);
@@ -61,38 +61,46 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
             case 'h':
                 usage(help_ss);
                 throw common::cmdline_help_exception(help_ss.str());
+            case 's':
+                strandness_ = atoi(optarg);
+                break;
             case '?':
             default:
-                throw runtime_error("Error parsing inputs!");
+                usage();
+                throw runtime_error("Error parsing inputs!(1)\n\n");
         }
     }
     if(argc - optind >= 1) {
         bam_ = string(argv[optind++]);
     }
     if(optind < argc || bam_ == "NA") {
-        throw runtime_error("\nError parsing inputs!");
+        usage();
+        throw runtime_error("Error parsing inputs!(2)\n\n");
     }
-    cerr << endl << "Minimum junction anchor length: " << min_anchor_length_;
-    cerr << endl << "Minimum intron length: " << min_intron_length_;
-    cerr << endl << "Maximum intron length: " << max_intron_length_;
-    cerr << endl << "Alignment: " << bam_;
-    cerr << endl << "Output file: " << output_file_;
+    cerr << "Minimum junction anchor length: " << min_anchor_length_ << endl;
+    cerr << "Minimum intron length: " << min_intron_length_ << endl;
+    cerr << "Maximum intron length: " << max_intron_length_ << endl;
+    cerr << "Alignment: " << bam_ << endl;
+    cerr << "Output file: " << output_file_ << endl;
     cerr << endl;
     return 0;
 }
 
 //Usage statement for this tool
 int JunctionsExtractor::usage(ostream& out) {
-    out << "\nUsage:\t\t" << "regtools junctions extract [options] indexed_alignments.bam";
-    out << "\nOptions:";
-    out << "\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum "
-                     "anchor length on both sides are reported. [8]";
-    out << "\n\t\t" << "-i INT\tMinimum intron length. [70]";
-    out << "\n\t\t" << "-I INT\tMaximum intron length. [500000]";
-    out << "\n\t\t" << "-o FILE\tThe file to write output to. [STDOUT]";
-    out << "\n\t\t" << "-r STR\tThe region to identify junctions "
-                     "in \"chr:start-end\" format. Entire BAM by default.";
-    out << "\n";
+    out << "Usage:" 
+        << "\t\t" << "regtools junctions extract [options] indexed_alignments.bam" << endl;
+    out << "Options:" << endl;
+    out << "\t\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum \n"
+        << "\t\t\t " << "anchor length on both sides are reported. [8]" << endl;
+    out << "\t\t" << "-i INT\tMinimum intron length. [70]" << endl;
+    out << "\t\t" << "-I INT\tMaximum intron length. [500000]" << endl;
+    out << "\t\t" << "-o FILE\tThe file to write output to. [STDOUT]" << endl;
+    out << "\t\t" << "-r STR\tThe region to identify junctions \n"
+        << "\t\t\t " << "in \"chr:start-end\" format. Entire BAM by default." << endl;
+    out << "\t\t" << "-s INT\tStrand specificity of RNA library preparation \n"
+        << "\t\t\t " << "(0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR). [1]" << endl;
+    out << endl;
     return 0;
 }
 
@@ -136,7 +144,16 @@ int JunctionsExtractor::add_junction(Junction j1) {
     string start, end;
     s1 << j1.start; start = s1.str();
     s1 << j1.end; end = s1.str();
-    string key = j1.chrom + string(":") + start + "-" + end + ":" + j1.strand;
+    //since ?,+,- sort differently on different systems
+    string strand_proxy;
+    if(j1.strand == "+") {
+        strand_proxy = "0";
+    } else if(j1.strand == "-") {
+        strand_proxy = "1";
+    } else {
+        strand_proxy = "2";
+    }
+    string key = j1.chrom + string(":") + start + "-" + end + ":" + strand_proxy;
 
     //Check if new junction
     if(!junctions_.count(key)) {
@@ -202,14 +219,54 @@ void JunctionsExtractor::print_all_junctions(ostream& out) {
 }
 
 //Get the strand from the XS aux tag
-void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
+void JunctionsExtractor::set_junction_strand_XS(bam1_t *aln, Junction& j1) {
     uint8_t *p = bam_aux_get(aln, "XS");
     if(p != NULL) {
         char strand = bam_aux2A(p);
         strand ? j1.strand = string(1, strand) : j1.strand = string(1, '?');
+        //cerr <<"XS strand is " << strand << endl;
     } else {
+        //cerr <<"XS strand is NULL" << endl;
         j1.strand = string(1, '?');
         return;
+    }
+}
+
+//Get the strand from the bitwise flag
+void JunctionsExtractor::set_junction_strand_flag(bam1_t *aln, Junction& j1) {
+    uint32_t flag = (aln->core).flag;
+    int reversed = (flag >> 4) % 2;
+    int mate_reversed = (flag >> 5) % 2;
+    int first_in_pair = (flag >> 6) % 2;
+    int second_in_pair = (flag >> 7) % 2;
+    // strandness_ is 0 for unstranded, 1 for RF, and 2 for FR
+    int bool_strandness = strandness_ - 1;
+    int first_strand = !bool_strandness ^ first_in_pair ^ reversed;
+    int second_strand = !bool_strandness ^ second_in_pair ^ mate_reversed;
+    char strand;
+    if (first_strand){
+        strand = '+';
+    } else {
+        strand = '-';
+    }
+    //cerr << "flag is " << flag << endl;
+    // if strand inferences from first and second in pair don't agree, we've got a problem
+    if (first_strand == second_strand){
+        j1.strand = string(1, strand);
+    } else {
+        j1.strand = string(1, '?');
+    }
+    //cerr <<"flag strand is " << j1.strand << endl;
+    return;
+}
+
+//Get the strand
+void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
+    // if unstranded data
+    if (strandness_ > 0){
+        return set_junction_strand_flag(aln, j1);
+    } else {
+        return set_junction_strand_XS(aln, j1);
     }
 }
 
@@ -223,15 +280,6 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
     int read_pos = aln->core.pos;
     string chr(header->target_name[chr_id]);
     uint32_t *cigar = bam_get_cigar(aln);
-
-    /*
-    //Skip duplicates
-    int flag = aln->core.flag;
-    if(flag & 1024) {
-        cerr << "Skipping read_pos " << read_pos << " flag " << flag << endl;
-        return 0;
-    }
-    */
 
     Junction j1;
     j1.chrom = chr;
@@ -330,13 +378,13 @@ int JunctionsExtractor::identify_junctions_from_BAM() {
         //open BAM for reading
         samFile *in = sam_open(bam_.c_str(), "r");
         if(in == NULL) {
-            throw runtime_error("Unable to open BAM/SAM file.");
+            throw runtime_error("Unable to open BAM/SAM file.\n\n");
         }
         //Load the index
         hts_idx_t *idx = sam_index_load(in, bam_.c_str());
         if(idx == NULL) {
             throw runtime_error("Unable to open BAM/SAM index."
-                                " Make sure alignments are indexed");
+                                " Make sure alignments are indexed\n\n");
         }
         //Get the header
         bam_hdr_t *header = sam_hdr_read(in);
@@ -346,7 +394,7 @@ int JunctionsExtractor::identify_junctions_from_BAM() {
         iter  = sam_itr_querys(idx, header, region_.c_str());
         if(header == NULL || iter == NULL) {
             sam_close(in);
-            throw runtime_error("Unable to iterate to region within BAM.");
+            throw runtime_error("Unable to iterate to region within BAM.\n\n");
         }
         //Initiate the alignment record
         bam1_t *aln = bam_init1();

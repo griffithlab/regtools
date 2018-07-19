@@ -150,26 +150,46 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
             known_junction = true;
         }
         else {
+            // YY NOTE: if we have not yet reached the junction on this transcript,
             if(!junction_start) {
+                // then check if we have with this exon (i.e. the 
+                // exon end is past or at the junction start)
                 if(exons[i].end >= junction.start) {
                     junction_start = true;
                 }
             }
             if(junction_start) {
+                // YY NOTE: if the exon lies completely within the junction,
+                //              count it as skipped
                 if(exons[i].start > junction.start &&
-                        exons[i].end < junction.end) {
-                    junction.exons_skipped.insert(exons[i].name);
+                        exons[i].end < junction.end &&
+                        i > 0 && i < (exons.size()-1)) {
+                    string exon_coords = common::num_to_str(exons[i].start) + "-" + common::num_to_str(exons[i].end);
+                    junction.exons_skipped.insert(exon_coords);
                 }
-                if(exons[i].start > junction.start) {
-                    junction.donors_skipped.insert(exons[i].start);
+                // YY NOTE: if the exon ends after the junction starts
+                //              (and junction_start == true), then 
+                //              count the donor as skipped
+                        // YY NOTE: maybe it should be junction.end-1? since
+                        //              if the "donor" and "acceptor" are already
+                        //              contiguous in the DNA it would get counted
+                        //              as "skipped" 
+                if(exons[i].end > junction.start &&
+                        exons[i].end < junction.end && 
+                        i < (exons.size()-1)) {
+                    junction.donors_skipped.insert(exons[i].end);
                 }
-                if(exons[i].end < junction.end) {
-                    junction.acceptors_skipped.insert(exons[i].end);
+                // YY NOTE: if the exon starts before the junction ends
+                //              (and junction_start == true), then
+                //              count the acceptor as skipped
+                if(exons[i].start < junction.end &&
+                        exons[i].start > junction.start &&
+                        i > 0) {
+                    junction.acceptors_skipped.insert(exons[i].start);
                 }
                 if(exons[i].end == junction.start) {
                     junction.known_donor = true;
                 }
-                //TODO - check for last exon
                 if(exons[i].start == junction.end) {
                     junction.known_acceptor = true;
                 }
@@ -179,6 +199,29 @@ bool JunctionsAnnotator::overlap_ps(const vector<BED>& exons,
     annotate_anchor(junction);
     return (junction.anchor != "N");
 }
+
+//YY NOTES
+/*
+
+So based on my understanding of the bin search, we should be looking at all the 
+possible transcripts that might overlap with a junction. That is to say, it 
+would seem that any discrepancy in acceptors/exons/donors skipped would come 
+from a problem with the actual counting.
+
+The overlap function will be run on each transcript, and you can see from the
+if block how it judges an acceptor/exon/donor as skipped. That logic appears
+correct to me (see notes above). Doesn't immediately seem like a problem
+with the actual recording of acceptors/exons/donors skipped (but probably
+warrants a closer look).
+
+Then the final place the count could get messed up is in the actual
+printing to the tsv. The way this works is the skipped elements are 
+held in sets. Acceptors/donors skipped are held in sets based on their 
+coordinates while exons skipped are held in sets based on their names.
+The number of elements skipped is simply the size of the set, so we only 
+count unique elements. Also don't see a problem immediately with how this works.
+
+*/
 
 //Find overlap between transcript and junction on the negative strand,
 //function returns true if either the acceptor or the donor is known
@@ -215,20 +258,31 @@ bool JunctionsAnnotator::overlap_ns(const vector<BED> & exons,
             }
             if(junction_start) {
                 if(exons[i].start > junction.start &&
-                        exons[i].end < junction.end) {
-                    junction.exons_skipped.insert(exons[i].name);
+                        exons[i].end < junction.end &&
+                        i > 0 && i < (exons.size()-1)) {
+                    string exon_coords = common::num_to_str(exons[i].start) + "-" + common::num_to_str(exons[i].end);
+                    junction.exons_skipped.insert(exon_coords);
                 }
-                if(exons[i].start > junction.start) {
-                    junction.donors_skipped.insert(exons[i].start);
-                }
-                if(exons[i].end < junction.end) {
+                // YY NOTE: if the exon ends after the junction starts
+                //              (and junction_start == true), then 
+                //              count the donor as skipped
+                if(exons[i].end > junction.start &&
+                        exons[i].end < junction.end && 
+                        i < (exons.size()-1)) {
                     junction.acceptors_skipped.insert(exons[i].end);
                 }
-                if(exons[i].start == junction.end) {
-                    junction.known_donor = true;
+                // YY NOTE: if the exon starts before the junction ends
+                //              (and junction_start == true), then
+                //              count the acceptor as skipped
+                if(exons[i].start < junction.end &&
+                        exons[i].start > junction.start) {
+                    junction.donors_skipped.insert(exons[i].start);
                 }
                 if(exons[i].end == junction.start) {
                     junction.known_acceptor = true;
+                }
+                if(exons[i].start == junction.end) {
+                    junction.known_donor = true;
                 }
             }
         }
@@ -261,7 +315,7 @@ void JunctionsAnnotator::check_for_overlap(string transcript_id, AnnotatedJuncti
         gtf_.get_exons_from_transcript(transcript_id);
     if(!exons.size()) {
         throw runtime_error("Unexpected error. No exons for transcript "
-                            + transcript_id);
+                            + transcript_id + "\n\n");
     }
     string transcript_strand = exons[0].strand;
     //Make sure the strands of the junction and transcript match
@@ -281,7 +335,7 @@ void JunctionsAnnotator::check_for_overlap(string transcript_id, AnnotatedJuncti
                     gtf_.get_gene_from_transcript(transcript_id));
         }
     } else {
-        throw runtime_error("\nUnknown strand " + junction.strand);
+        throw runtime_error("Unknown strand " + junction.strand + "\n\n");
     }
 }
 
@@ -315,7 +369,7 @@ string JunctionsAnnotator::get_reference_sequence(string position) {
     char *s = fai_fetch(fai, position.c_str(), &len);
     if(s == NULL)
         throw runtime_error("Unable to extract FASTA sequence "
-                             "for position " + position);
+                             "for position " + position + "\n\n");
     std::string seq(s);
     free(s);
     fai_destroy(fai);
@@ -345,7 +399,7 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
                 throw common::cmdline_help_exception(help_ss.str());
             default:
                 usage();
-                throw runtime_error("\nError parsing inputs!(1)");
+                throw runtime_error("Error parsing inputs!(1)\n\n");
         }
     }
     if(argc - optind >= 3) {
@@ -358,24 +412,24 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
        junctions_.bedFile.empty() ||
        gtf_.gtffile().empty()) {
         usage();
-        throw runtime_error("\nError parsing inputs!(2)");
+        throw runtime_error("Error parsing inputs!(2)\n\n");
     }
-    cerr << "\nReference: " << ref_;
-    cerr << "\nGTF: " << gtf_.gtffile();
-    cerr << "\nJunctions: " << junctions_.bedFile;
+    cerr << "Reference: " << ref_ << endl;
+    cerr << "GTF: " << gtf_.gtffile() << endl;
+    cerr << "Junctions: " << junctions_.bedFile << endl;
     if(skip_single_exon_genes_)
-        cerr << "\nSkipping single exon genes.";
+        cerr << "Skipping single exon genes." << endl;
     if(output_file_ != "NA")
-        cerr << "\nOutput file: " << output_file_;
-    cerr << endl << endl;
+        cerr << "Output file: " << output_file_ << endl;
+    cerr << endl;
     return 0;
 }
 
 //Usage statement for this tool
 int JunctionsAnnotator::usage(ostream& out) {
-    out << "\nUsage:\t\t" << "regtools junctions annotate [options] junctions.bed ref.fa annotations.gtf";
-    out << "\nOptions:\t" << "-E include single exon genes";
-    out << "\n\t\t" << "-o Output file";
-    out << "\n";
+    out << "Usage:\t\t" << "regtools junctions annotate [options] junctions.bed ref.fa annotations.gtf" << endl;
+    out << "Options:\t" << "-E include single exon genes" << endl;
+    out << "\t\t" << "-o FILE\tThe file to write output to. [STDOUT]" << endl;
+    out << endl;
     return 0;
 }

@@ -34,10 +34,10 @@ using namespace std;
 
 //Usage for junctions subcommands
 int junctions_usage(ostream &out = cout) {
-    out << "\nUsage:\t\t" << "regtools junctions <command> [options]";
-    out << "\nCommand:\t" << "extract\t\tIdentify exon-exon junctions from alignments.";
-    out << "\n\t\tannotate\tAnnotate the junctions.";
-    out << "\n";
+    out << "Usage:\t\t" << "regtools junctions <command> [options]" << endl;
+    out << "Command:\t" << "extract\t\tIdentify exon-exon junctions from alignments." << endl;
+    out << "\t\tannotate\tAnnotate the junctions." << endl;
+    out << endl;
     return 0;
 }
 
@@ -50,11 +50,10 @@ int junctions_extract(int argc, char *argv[]) {
         extract.identify_junctions_from_BAM();
         extract.print_all_junctions();
     } catch(const common::cmdline_help_exception& e) {
-        cerr << e.what();
+        cerr << e.what() << endl;
         return 0;
     } catch(const runtime_error& error) {
-        cerr << error.what();
-        extract.usage();
+        cerr << error.what() << endl;
         return 1;
     }
     return 0;
@@ -82,13 +81,13 @@ int junctions_annotate(int argc, char *argv[]) {
             linec++;
         }
         anno.close_ofstream();
-        cerr << endl << "Annotated " << linec << " lines.";
+        cerr << endl << "Annotated " << linec << " lines." << endl;
         anno.close_junctions();
     } catch(const common::cmdline_help_exception& e) {
-        cerr << e.what();
+        cerr << e.what() << endl;
         return 0;
     } catch(const runtime_error& e) {
-        cerr << endl << e.what() << endl;
+        cerr << e.what() << endl;
         return 1;
     }
     return 0;
