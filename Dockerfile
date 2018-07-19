@@ -11,11 +11,11 @@ LABEL "Description"="Software package which integrate DNA-seq and RNA-seq data\
 
 ################################################################################
 ##################### Install System Dependencies ##############################
-RUN apt-get update
-RUN apt-get install -y git
-RUN apt-get install -y build-essential
-RUN apt-get install -y cmake
-RUN apt-get install -y zlib1g-dev
+RUN apt-get update -y && apt-get install -y \
+    git \
+    build-essential \
+    cmake \
+    zlib1g-dev
 
 ################################################################################
 ##################### Install Regtools #########################################
