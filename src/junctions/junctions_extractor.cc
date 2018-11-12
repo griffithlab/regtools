@@ -41,15 +41,15 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int c;
     stringstream help_ss;
-    while((c = getopt(argc, argv, "ha:i:I:o:r:s:")) != -1) {
+    while((c = getopt(argc, argv, "ha:m:M:o:r:s:")) != -1) {
         switch(c) {
             case 'a':
                 min_anchor_length_ = atoi(optarg);
                 break;
-            case 'i':
+            case 'm':
                 min_intron_length_ = atoi(optarg);
                 break;
-            case 'I':
+            case 'M':
                 max_intron_length_ = atoi(optarg);
                 break;
             case 'o':
@@ -93,8 +93,8 @@ int JunctionsExtractor::usage(ostream& out) {
     out << "Options:" << endl;
     out << "\t\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum \n"
         << "\t\t\t " << "anchor length on both sides are reported. [8]" << endl;
-    out << "\t\t" << "-i INT\tMinimum intron length. [70]" << endl;
-    out << "\t\t" << "-I INT\tMaximum intron length. [500000]" << endl;
+    out << "\t\t" << "-m INT\tMinimum intron length. [70]" << endl;
+    out << "\t\t" << "-M INT\tMaximum intron length. [500000]" << endl;
     out << "\t\t" << "-o FILE\tThe file to write output to. [STDOUT]" << endl;
     out << "\t\t" << "-r STR\tThe region to identify junctions \n"
         << "\t\t\t " << "in \"chr:start-end\" format. Entire BAM by default." << endl;
