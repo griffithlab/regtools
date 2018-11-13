@@ -243,7 +243,7 @@ void CisSpliceEffectsIdentifier::identify() {
             if(write_annotated_variants_)
                 va.write_annotation_output(v1);
             //Extract junctions near this variant
-            JunctionsExtractor je1(bam_, variant_region, strandness_);
+            JunctionsExtractor je1(bam_, variant_region, strandness_, min_anchor_length_, min_intron_length_, max_intron_length_);
             je1.identify_junctions_from_BAM();
             vector<Junction> junctions = je1.get_all_junctions();
             //Add all the junctions to the unique set

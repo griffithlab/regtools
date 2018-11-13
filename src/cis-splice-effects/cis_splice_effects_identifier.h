@@ -80,6 +80,14 @@ class CisSpliceEffectsIdentifier {
         bool skip_single_exon_genes_;
         //strandness of data
         int strandness_;
+        //Minimum anchor length for junctions
+        //Junctions need atleast this many bp overlap
+        // on both ends.
+        uint32_t min_anchor_length_;
+        //Minimum length of an intron, i.e min junction width
+        uint32_t min_intron_length_;
+        //Maximum length of an intron, i.e max junction width
+        uint32_t max_intron_length_;
     public:
         //Constructor
         CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"),
@@ -92,7 +100,10 @@ class CisSpliceEffectsIdentifier {
                                        all_intronic_space_(false),
                                        all_exonic_space_(false),
                                        skip_single_exon_genes_(true),
-                                       strandness_(1) {}
+                                       strandness_(1),
+                                       min_anchor_length_(8),
+                                       min_intron_length_(70),
+                                       max_intron_length_(500000) {}
         //Destructor
         ~CisSpliceEffectsIdentifier() {
             if(ofs_.is_open()) {
