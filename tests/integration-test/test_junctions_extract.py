@@ -67,7 +67,7 @@ class TestExtract(IntegrationTest, unittest.TestCase):
                 min_intron + "-I" + max_intron +
                 ".out")[0]
         params = ["junctions", "extract", "-s 0", "-o", output_file,
-                  "-i", min_intron, "-I", max_intron, bam1]
+                  "-m", min_intron, "-M", max_intron, bam1]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
         self.assertFilesEqual(expected_file, output_file)
