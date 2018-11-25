@@ -93,5 +93,81 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         rv, err = self.execute(params)
         self.assertEqual(rv, 1, err)
 
+    #Test variants annotates params
+    def test_exonic_intronic_distance(self):
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("observed-annotate.vcf")
+        expected_file = self.inputFiles("variants-annotate/expected-annotate-e6-i6-S.out")[0]
+        exonic_distance = "-e 6"
+        intronic_distance = "-i 6"
+        dont_skip_single_exon_transcripts = "-S"
+        params = ["cis-splice-effects", "identify", "-o ", output_file, exonic_distance,
+                  intronic_distance, dont_skip_single_exon_transcripts,
+                  variants, gtf]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 0, err)
+        #self.assertFilesEqual(expected_file, output_file, err)
+
+    def test_allexonic(self):
+        variants = self.inputFiles("vcf/test2.vcf")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("observed-annotate.vcf")
+        expected_file = self.inputFiles("variants-annotate/expected-annotate-E.out")[0]
+        exonic_distance = "-E"
+        intronic_distance = ""
+        dont_skip_single_exon_transcripts = ""
+        params = ["cis-splice-effects", "identify", "-o ", output_file, exonic_distance,
+                  intronic_distance, dont_skip_single_exon_transcripts,
+                  variants, gtf]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 0, err)
+        #self.assertFilesEqual(expected_file, output_file, err)
+
+    def test_allintronic(self):
+        variants = self.inputFiles("vcf/test2.vcf")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("observed-annotate.vcf")
+        expected_file = self.inputFiles("variants-annotate/expected-annotate-I.out")[0]
+        exonic_distance = ""
+        intronic_distance = "-I"
+        dont_skip_single_exon_transcripts = ""
+        params = ["cis-splice-effects", "identify", "-o ", output_file, exonic_distance,
+                  intronic_distance, dont_skip_single_exon_transcripts,
+                  variants, gtf]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 0, err)
+        #self.assertFilesEqual(expected_file, output_file, err)
+
+    def test_allexonic_someintronic(self):
+        variants = self.inputFiles("vcf/test2.vcf")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("observed-annotate.vcf")
+        expected_file = self.inputFiles("variants-annotate/expected-annotate-E-i6.out")[0]
+        exonic_distance = "-E"
+        intronic_distance = "-i 6"
+        dont_skip_single_exon_transcripts = ""
+        params = ["cis-splice-effects", "identify", "-o ", output_file, exonic_distance,
+                  intronic_distance, dont_skip_single_exon_transcripts,
+                  variants, gtf]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 0, err)
+        #self.assertFilesEqual(expected_file, output_file, err)
+
+    def test_allintronic_someexonic(self):
+        variants = self.inputFiles("vcf/test2.vcf")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("observed-annotate.vcf")
+        expected_file = self.inputFiles("variants-annotate/expected-annotate-e6-I.out")[0]
+        exonic_distance = "-e 6"
+        intronic_distance = "-I"
+        dont_skip_single_exon_transcripts = ""
+        params = ["cis-splice-effects", "identify", "-o ", output_file, exonic_distance,
+                  intronic_distance, dont_skip_single_exon_transcripts,
+                  variants, gtf]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 0, err)
+        #self.assertFilesEqual(expected_file, output_file, err)
+
 if __name__ == "__main__":
     main()
