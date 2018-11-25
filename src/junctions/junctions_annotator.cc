@@ -386,9 +386,9 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int c;
     stringstream help_ss;
-    while((c = getopt(argc, argv, "Eo:h")) != -1) {
+    while((c = getopt(argc, argv, "So:h")) != -1) {
         switch(c) {
-            case 'E':
+            case 'S':
                 skip_single_exon_genes_ = false;
                 break;
             case 'o':
@@ -428,7 +428,7 @@ int JunctionsAnnotator::parse_options(int argc, char *argv[]) {
 //Usage statement for this tool
 int JunctionsAnnotator::usage(ostream& out) {
     out << "Usage:\t\t" << "regtools junctions annotate [options] junctions.bed ref.fa annotations.gtf" << endl;
-    out << "Options:\t" << "-E include single exon genes" << endl;
+    out << "Options:\t" << "-S include single exon genes" << endl;
     out << "\t\t" << "-o FILE\tThe file to write output to. [STDOUT]" << endl;
     out << endl;
     return 0;
