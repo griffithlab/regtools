@@ -98,128 +98,233 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         variants = self.inputFiles("vcf/test1.vcf")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
-        expected_file = self.inputFiles("variants-annotate/expected-annotate-e6-i6-S.out")[0]
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
+        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
+        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
         exonic_distance = "-e 6"
         intronic_distance = "-i 6"
         dont_skip_single_exon_transcripts = "-S"
-        params = ["cis-splice-effects", "identify", "-o ", output_file, exonic_distance,
-                  intronic_distance, dont_skip_single_exon_transcripts,
-                  variants, gtf]
+        params = ["cis-splice-effects", "identify", 
+                  exonic_distance, 
+                  intronic_distance, 
+                  dont_skip_single_exon_transcripts, 
+                  "-s 0",
+                  "-o ", output_annotatedjunctions,
+                  "-v ", output_annotatedvariants,
+                  "-j ", output_junctions,
+                  variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0, err)
         #self.assertFilesEqual(expected_file, output_file, err)
 
     def test_allexonic(self):
-        variants = self.inputFiles("vcf/test2.vcf")[0]
+        variants = self.inputFiles("vcf/test1.vcf")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
-        expected_file = self.inputFiles("variants-annotate/expected-annotate-E.out")[0]
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
+        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
+        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
         exonic_distance = "-E"
         intronic_distance = ""
         dont_skip_single_exon_transcripts = ""
-        params = ["cis-splice-effects", "identify", "-o ", output_file, exonic_distance,
-                  intronic_distance, dont_skip_single_exon_transcripts,
-                  variants, gtf]
+        params = ["cis-splice-effects", "identify", 
+                  exonic_distance, 
+                  intronic_distance, 
+                  dont_skip_single_exon_transcripts, 
+                  "-s 0",
+                  "-o ", output_annotatedjunctions,
+                  "-v ", output_annotatedvariants,
+                  "-j ", output_junctions,
+                  variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0, err)
         #self.assertFilesEqual(expected_file, output_file, err)
 
     def test_allintronic(self):
-        variants = self.inputFiles("vcf/test2.vcf")[0]
+        variants = self.inputFiles("vcf/test1.vcf")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
-        expected_file = self.inputFiles("variants-annotate/expected-annotate-I.out")[0]
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
+        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
+        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
         exonic_distance = ""
         intronic_distance = "-I"
         dont_skip_single_exon_transcripts = ""
-        params = ["cis-splice-effects", "identify", "-o ", output_file, exonic_distance,
-                  intronic_distance, dont_skip_single_exon_transcripts,
-                  variants, gtf]
+        params = ["cis-splice-effects", "identify", 
+                  exonic_distance, 
+                  intronic_distance, 
+                  dont_skip_single_exon_transcripts, 
+                  "-s 0",
+                  "-o ", output_annotatedjunctions,
+                  "-v ", output_annotatedvariants,
+                  "-j ", output_junctions,
+                  variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0, err)
         #self.assertFilesEqual(expected_file, output_file, err)
 
     def test_allexonic_someintronic(self):
-        variants = self.inputFiles("vcf/test2.vcf")[0]
+        variants = self.inputFiles("vcf/test1.vcf")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
-        expected_file = self.inputFiles("variants-annotate/expected-annotate-E-i6.out")[0]
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
+        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
+        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
         exonic_distance = "-E"
         intronic_distance = "-i 6"
         dont_skip_single_exon_transcripts = ""
-        params = ["cis-splice-effects", "identify", "-o ", output_file, exonic_distance,
-                  intronic_distance, dont_skip_single_exon_transcripts,
-                  variants, gtf]
+        params = ["cis-splice-effects", "identify", 
+                  exonic_distance, 
+                  intronic_distance, 
+                  dont_skip_single_exon_transcripts, 
+                  "-s 0",
+                  "-o ", output_annotatedjunctions,
+                  "-v ", output_annotatedvariants,
+                  "-j ", output_junctions,
+                  variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0, err)
         #self.assertFilesEqual(expected_file, output_file, err)
 
     def test_allintronic_someexonic(self):
-        variants = self.inputFiles("vcf/test2.vcf")[0]
+        variants = self.inputFiles("vcf/test1.vcf")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
-        expected_file = self.inputFiles("variants-annotate/expected-annotate-e6-I.out")[0]
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
+        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
+        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
         exonic_distance = "-e 6"
         intronic_distance = "-I"
         dont_skip_single_exon_transcripts = ""
-        params = ["cis-splice-effects", "identify", "-o ", output_file, exonic_distance,
-                  intronic_distance, dont_skip_single_exon_transcripts,
-                  variants, gtf]
+        params = ["cis-splice-effects", "identify", 
+                  exonic_distance, 
+                  intronic_distance, 
+                  dont_skip_single_exon_transcripts, 
+                  "-s 0",
+                  "-o ", output_annotatedjunctions,
+                  "-v ", output_annotatedvariants,
+                  "-j ", output_junctions,
+                  variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0, err)
         #self.assertFilesEqual(expected_file, output_file, err)
 
     #Test junctions extract params
     def test_anchor_stranded(self):
-        bam1 = self.inputFiles("bam/test_hcc1395.bam")[0]
-        output_file = self.tempFile("extract.out")
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("observed-annotate.vcf")
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
+        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
+        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
         print "BAM1 is ", bam1
         for anchor in ["", "30"]:
-            expected_file = self.inputFiles("junctions-extract/expected-stranded-a" +
-                                            anchor + ".out")[0]
             if anchor != "":
                 anchor = "-a " + anchor
-            params = ["junctions", "extract", anchor, "-o", output_file, bam1]
+            params = ["cis-splice-effects", "identify", 
+                  anchor,
+                  "-s 0",
+                  "-o ", output_annotatedjunctions,
+                  "-v ", output_annotatedvariants,
+                  "-j ", output_junctions,
+                  variants, bam1, fasta, gtf]
             rv, err = self.execute(params)
             self.assertEqual(rv, 0)
             #self.assertFilesEqual(expected_file, output_file)
 
     def test_anchor(self):
-        bam1 = self.inputFiles("bam/test_hcc1395.bam")[0]
-        output_file = self.tempFile("extract.out")
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("observed-annotate.vcf")
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
+        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
+        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
         print "BAM1 is ", bam1
         for anchor in ["", "30"]:
-            expected_file = self.inputFiles("junctions-extract/expected-a" +
-                                            anchor + ".out")[0]
             if anchor != "":
                 anchor = "-a " + anchor
-            params = ["junctions", "extract", anchor, "-s 0", "-o", output_file, bam1]
+            params = ["cis-splice-effects", "identify", 
+                  anchor,
+                  "-s 0",
+                  "-o ", output_annotatedjunctions,
+                  "-v ", output_annotatedvariants,
+                  "-j ", output_junctions,
+                  variants, bam1, fasta, gtf]
             rv, err = self.execute(params)
             self.assertEqual(rv, 0)
             #self.assertFilesEqual(expected_file, output_file)
 
     def test_intron_size(self):
-        bam1 = self.inputFiles("bam/test_hcc1395.bam")[0]
-        output_file = self.tempFile("extract.out")
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("observed-annotate.vcf")
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
+        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
+        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
         min_intron = "8039"
         max_intron = "8039"
-        expected_file = self.inputFiles("junctions-extract/expected-i" +
-                min_intron + "-I" + max_intron +
-                ".out")[0]
-        params = ["junctions", "extract", "-s 0", "-o", output_file,
-                  "-m", min_intron, "-M", max_intron, bam1]
+        params = ["cis-splice-effects", "identify", 
+                  "-m", min_intron, "-M", max_intron,
+                  "-s 0",
+                  "-o ", output_annotatedjunctions,
+                  "-v ", output_annotatedvariants,
+                  "-j ", output_junctions,
+                  variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
         #self.assertFilesEqual(expected_file, output_file)
 
     def test_region(self):
-        bam1 = self.inputFiles("bam/test_hcc1395.bam")[0]
-        output_file = self.tempFile("extract.out")
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("observed-annotate.vcf")
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
+        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
+        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
         region = "1:22405013-22405020"
-        expected_file = self.inputFiles("junctions-extract/expected-r" +
-                region + ".out")[0]
-        params = ["junctions", "extract", "-s 0", "-o", output_file, "-r", region,
-                  bam1]
+        params = ["cis-splice-effects", "identify", 
+                  "-r", region, 
+                  "-s 0",
+                  "-o ", output_annotatedjunctions,
+                  "-v ", output_annotatedvariants,
+                  "-j ", output_junctions,
+                  variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
         #self.assertFilesEqual(expected_file, output_file)
