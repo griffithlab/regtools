@@ -168,10 +168,8 @@ class JunctionsExtractor {
             output_file_ = "NA";
             region_ = ".";
         }
-        JunctionsExtractor(string bam1, string region1, int strandness1) : bam_(bam1), region_(region1), strandness_(strandness1) {
-            min_anchor_length_ = 8;
-            min_intron_length_ = 70;
-            max_intron_length_ = 500000;
+        JunctionsExtractor(string bam1, string region1, int strandness1, uint32_t min_anchor_length1, uint32_t min_intron_length1, uint32_t max_intron_length1) : 
+            bam_(bam1), region_(region1), strandness_(strandness1), min_anchor_length_(min_anchor_length1), min_intron_length_(min_anchor_length1), max_intron_length_(max_intron_length1) {
             junctions_sorted_ = false;
             output_file_ = "NA";
         }
