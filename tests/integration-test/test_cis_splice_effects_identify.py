@@ -169,5 +169,60 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         self.assertEqual(rv, 0, err)
         #self.assertFilesEqual(expected_file, output_file, err)
 
+    #Test junctions extract params
+    def test_anchor_stranded(self):
+        bam1 = self.inputFiles("bam/test_hcc1395.bam")[0]
+        output_file = self.tempFile("extract.out")
+        print "BAM1 is ", bam1
+        for anchor in ["", "30"]:
+            expected_file = self.inputFiles("junctions-extract/expected-stranded-a" +
+                                            anchor + ".out")[0]
+            if anchor != "":
+                anchor = "-a " + anchor
+            params = ["junctions", "extract", anchor, "-o", output_file, bam1]
+            rv, err = self.execute(params)
+            self.assertEqual(rv, 0)
+            #self.assertFilesEqual(expected_file, output_file)
+
+    def test_anchor(self):
+        bam1 = self.inputFiles("bam/test_hcc1395.bam")[0]
+        output_file = self.tempFile("extract.out")
+        print "BAM1 is ", bam1
+        for anchor in ["", "30"]:
+            expected_file = self.inputFiles("junctions-extract/expected-a" +
+                                            anchor + ".out")[0]
+            if anchor != "":
+                anchor = "-a " + anchor
+            params = ["junctions", "extract", anchor, "-s 0", "-o", output_file, bam1]
+            rv, err = self.execute(params)
+            self.assertEqual(rv, 0)
+            #self.assertFilesEqual(expected_file, output_file)
+
+    def test_intron_size(self):
+        bam1 = self.inputFiles("bam/test_hcc1395.bam")[0]
+        output_file = self.tempFile("extract.out")
+        min_intron = "8039"
+        max_intron = "8039"
+        expected_file = self.inputFiles("junctions-extract/expected-i" +
+                min_intron + "-I" + max_intron +
+                ".out")[0]
+        params = ["junctions", "extract", "-s 0", "-o", output_file,
+                  "-m", min_intron, "-M", max_intron, bam1]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 0)
+        #self.assertFilesEqual(expected_file, output_file)
+
+    def test_region(self):
+        bam1 = self.inputFiles("bam/test_hcc1395.bam")[0]
+        output_file = self.tempFile("extract.out")
+        region = "1:22405013-22405020"
+        expected_file = self.inputFiles("junctions-extract/expected-r" +
+                region + ".out")[0]
+        params = ["junctions", "extract", "-s 0", "-o", output_file, "-r", region,
+                  bam1]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 0)
+        #self.assertFilesEqual(expected_file, output_file)
+
 if __name__ == "__main__":
     main()
