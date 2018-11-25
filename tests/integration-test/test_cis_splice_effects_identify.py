@@ -319,7 +319,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         output_junctions = self.tempFile("observed-cse-identify-junctions.out")
         region = "1:22405013-22405020"
         params = ["cis-splice-effects", "identify", 
-                  "-r", region, 
+                  "-r ", region, 
                   "-s 0",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
