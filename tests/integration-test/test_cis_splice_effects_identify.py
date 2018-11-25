@@ -306,28 +306,5 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         self.assertEqual(rv, 0)
         #self.assertFilesEqual(expected_file, output_file)
 
-    def test_region(self):
-        variants = self.inputFiles("vcf/test1.vcf")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
-        output_file = self.tempFile("observed-annotate.vcf")
-        variants = self.inputFiles("vcf/test1.vcf")[0]
-        bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
-        fasta = self.inputFiles("fa/test_chr22.fa")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
-        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
-        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
-        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
-        region = "1:22405013-22405020"
-        params = ["cis-splice-effects", "identify", 
-                  "-r ", region, 
-                  "-s 0",
-                  "-o ", output_annotatedjunctions,
-                  "-v ", output_annotatedvariants,
-                  "-j ", output_junctions,
-                  variants, bam1, fasta, gtf]
-        rv, err = self.execute(params)
-        self.assertEqual(rv, 0)
-        #self.assertFilesEqual(expected_file, output_file)
-
 if __name__ == "__main__":
     main()
