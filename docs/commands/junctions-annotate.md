@@ -20,7 +20,7 @@ Gene Annotation databases such as Ensembl/RefSeq/UCSC etc. The goal of the annot
 ###Options
 | Option  | Description |
 | ------  | ----------- |
-| -E      | Do not skip single exon genes. The default is to skip the single exon genes while annotating junctions.|
+| -S      | Do not skip single exon genes. The default is to skip the single exon genes while annotating junctions.|
 | -o      | File to write output to. STDOUT by default. The output format is described [here](#output)|
 | -h      | Display help message for this command.|
 
