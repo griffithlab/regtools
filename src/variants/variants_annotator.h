@@ -135,6 +135,26 @@ class VariantsAnnotator {
             vcf_record_ = bcf_init();
         }
         //constructor
+        VariantsAnnotator(string vcf_f, GtfParser gp1, string vcf_out, uint32_t intronic_min_distance, uint32_t exonic_min_distance, bool all_intronic_space, bool all_exonic_space, bool skip_single_exon_genes) : vcf_(vcf_f),
+                              gtf_(gp1),
+                              vcf_out_(vcf_out),
+                              all_intronic_space_(false),
+                              all_exonic_space_(false),
+                              intronic_min_distance_(2),
+                              exonic_min_distance_(3),
+                              skip_single_exon_genes_(true),
+                              vcf_fh_in_(NULL), vcf_header_in_(NULL),
+                              vcf_fh_out_(NULL), vcf_header_out_(NULL),
+                              vcf_record_(NULL) {
+            vcf_record_ = bcf_init();
+            intronic_min_distance_ = intronic_min_distance;
+            cerr << "exonic_min_distance_ is " << exonic_min_distance_ << endl;
+            exonic_min_distance_ = exonic_min_distance;
+            all_intronic_space_ = all_intronic_space;
+            all_exonic_space_ = all_exonic_space;
+            skip_single_exon_genes_ = skip_single_exon_genes;
+        }
+        //constructor
         VariantsAnnotator(string vcf_f, GtfParser gp1,
                           bool all_exonic, bool all_intronic) : vcf_(vcf_f),
                               gtf_(gp1),
