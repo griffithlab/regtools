@@ -66,3 +66,9 @@ useful comments and code.
 ## License
 
 The project is licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Stable release with DOI
+
+[![DOI](https://zenodo.org/badge/35841695.svg)](https://zenodo.org/badge/latestdoi/35841695)
+
+
