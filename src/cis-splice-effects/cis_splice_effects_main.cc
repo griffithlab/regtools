@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <stdexcept>
 #include "common.h"
 #include "cis_splice_effects_identifier.h"
+#include "cis_splice_effects_associator.h"
 
 using namespace std;
 
@@ -53,6 +54,7 @@ int cis_splice_effects_identify(int argc, char* argv[]) {
 int cis_splice_effects_usage(ostream &out = cout) {
     out << "Usage:\t\t" << "regtools cis-splice-effects <command> [options]" << endl;
     out << "Command:\t" << "identify\t\tIdentify cis splicing effects." << endl;
+    out << "\t\tassociate\tAssociate extracted junctions with variants" << endl;
     out << endl;
     return 0;
 }
@@ -64,6 +66,9 @@ int cis_splice_effects_main(int argc, char* argv[]) {
     }
     if(string(argv[1]) == "identify") {
         return cis_splice_effects_identify(argc - 1, argv + 1);
+    }
+    if(string(argv[1]) == "associate") {
+        return cis_splice_effects_associate(argc - 1, argv + 1);
     }
     return cis_splice_effects_usage(std::cout);
 }
