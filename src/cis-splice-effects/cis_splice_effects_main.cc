@@ -50,6 +50,25 @@ int cis_splice_effects_identify(int argc, char* argv[]) {
     return 0;
 }
 
+//Main command for associate; pretty much a duplicate
+int cis_splice_effects_identify(int argc, char* argv[]) {
+    CisSpliceEffectsAssociator csea1;
+    try {
+        csea1.parse_options(argc, argv);
+        csea1.identify();
+    } catch(const common::cmdline_help_exception& e) {
+        cerr << e.what() << endl;
+        return 0;
+    } catch (const std::runtime_error &e) {
+        cerr << e.what() << endl;
+        return 1;
+    } catch (const std::logic_error &e) {
+        cerr << e.what() << endl;
+        return 1;
+    }
+    return 0;
+}
+
 //Usage for cis-splice-effects subcommands
 int cis_splice_effects_usage(ostream &out = cout) {
     out << "Usage:\t\t" << "regtools cis-splice-effects <command> [options]" << endl;
