@@ -33,8 +33,7 @@ DEALINGS IN THE SOFTWARE.  */
 //Usage for this tool
 void CisSpliceEffectsAssociator::usage(ostream& out) {
     out << "Usage:" 
-        << "\t\t" << "regtools cis-splice-effects associate [options] variants.vcf"
-        << "\t\t " << "junctions.bed ref.fa annotations.gtf" << endl;
+        << "\t\t" << "regtools cis-splice-effects associate [options] variants.vcf junctions.bed ref.fa annotations.gtf" << endl;
     out << "Options:" << endl;
     out << "\t\t" << "-o STR\tOutput file containing the aberrant splice junctions with annotations. [STDOUT]" << endl;
     out << "\t\t" << "-v STR\tOutput file containing variants annotated as splice relevant (VCF format)." << endl;
@@ -212,33 +211,24 @@ vector<Junction> CisSpliceEffectsAssociator::parse_BED_to_junctions(){
     AnnotatedJunction line;
     Junction junc;
     line.reset();
-    try {
-        anno.open_junctions();
-        while(anno.get_single_junction(line)) {
-            junc.chrom = common::str_to_num(line.fields[0]);
-            junc.start = common::str_to_num(line.fields[1]);
-            junc.end = common::str_to_num(line.fields[2]);
-            junc.name = line.fields[3];
-            junc.read_count = common::str_to_num(line.fields[4]);
-            junc.strand = line.fields[5];
-            junc.thick_start = common::str_to_num(line.fields[6]);
-            junc.thick_end = common::str_to_num(line.fields[7]);
-            junc.color = line.fields[8];
-            junc.nblocks = common::str_to_num(line.fields[9]);
-            junc.has_left_min_anchor = true;
-            junc.has_right_min_anchor = true;
-            junctions.push_back(junc); // are we making a copy or just adding a pointer?
-            line.reset();
-        }
-        anno.close_junctions();
-    } catch(const common::cmdline_help_exception& e) {
-        cerr << e.what() << endl;
-        return 0;
-    } catch(const runtime_error& e) {
-        cerr << e.what() << endl;
-        return 1;
+    anno.open_junctions();
+    while(anno.get_single_junction(line)) {
+        junc.chrom = common::str_to_num(line.fields[0]);
+        junc.start = common::str_to_num(line.fields[1]);
+        junc.end = common::str_to_num(line.fields[2]);
+        junc.name = line.fields[3];
+        junc.read_count = common::str_to_num(line.fields[4]);
+        junc.strand = line.fields[5];
+        junc.thick_start = common::str_to_num(line.fields[6]);
+        junc.thick_end = common::str_to_num(line.fields[7]);
+        junc.color = line.fields[8];
+        junc.nblocks = common::str_to_num(line.fields[9]);
+        junc.has_left_min_anchor = true;
+        junc.has_right_min_anchor = true;
+        junctions.push_back(junc); // are we making a copy or just adding a pointer?
+        line.reset();
     }
-    return junctions;
+    anno.close_junctions();
 }
 
 //The workhorse

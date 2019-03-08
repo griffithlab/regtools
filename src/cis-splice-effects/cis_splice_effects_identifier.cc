@@ -33,8 +33,7 @@ DEALINGS IN THE SOFTWARE.  */
 //Usage for this tool
 void CisSpliceEffectsIdentifier::usage(ostream& out) {
     out << "Usage:" 
-        << "\t\t" << "regtools cis-splice-effects identify [options] variants.vcf"
-        << "\t\t " << "alignments.bam ref.fa annotations.gtf" << endl;
+        << "\t\t" << "regtools cis-splice-effects identify [options] variants.vcf alignments.bam ref.fa annotations.gtf" << endl;
     out << "Options:" << endl;
     out << "\t\t" << "-o STR\tOutput file containing the aberrant splice junctions with annotations. [STDOUT]" << endl;
     out << "\t\t" << "-v STR\tOutput file containing variants annotated as splice relevant (VCF format)." << endl;
