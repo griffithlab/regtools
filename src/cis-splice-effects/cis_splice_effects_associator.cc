@@ -215,16 +215,16 @@ vector<Junction> CisSpliceEffectsAssociator::parse_BED_to_junctions(){
     try {
         anno.open_junctions();
         while(anno.get_single_junction(line)) {
-            junc.chrom = line.fields[0];
-            junc.start = line.fields[1];
-            junc.end = line.fields[2];
+            junc.chrom = common::str_to_num(line.fields[0]);
+            junc.start = common::str_to_num(line.fields[1]);
+            junc.end = common::str_to_num(line.fields[2]);
             junc.name = line.fields[3];
-            junc.read_count = line.fields[4];
+            junc.read_count = common::str_to_num(line.fields[4]);
             junc.strand = line.fields[5];
-            junc.thick_start = line.fields[6];
-            junc.thick_end = line.fields[7];
+            junc.thick_start = common::str_to_num(line.fields[6]);
+            junc.thick_end = common::str_to_num(line.fields[7]);
             junc.color = line.fields[8];
-            junc.nblocks = line.fields[9];
+            junc.nblocks = common::str_to_num(line.fields[9]);
             junc.has_left_min_anchor = true;
             junc.has_right_min_anchor = true;
             junctions.push_back(junc); // are we making a copy or just adding a pointer?

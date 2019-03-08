@@ -12,5 +12,6 @@ include_directories(../gtf/
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__STDC_LIMIT_MACROS")
 
 add_library(cis-splice-effects
+    cis_splice_effects_associator.cc
     cis_splice_effects_identifier.cc
     cis_splice_effects_main.cc)

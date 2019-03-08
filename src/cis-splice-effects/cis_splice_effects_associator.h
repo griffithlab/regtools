@@ -113,6 +113,8 @@ class CisSpliceEffectsAssociator {
         }
         //Parse command line arguments
         void parse_options(int argc, char* argv[]);
+        //parse BED into vector of junctions
+        vector<Junction> parse_BED_to_junctions();
         //Check if files exist
         void file_qc();
         //Identify cis splicing effects
