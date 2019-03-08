@@ -51,11 +51,11 @@ int cis_splice_effects_identify(int argc, char* argv[]) {
 }
 
 //Main command for associate; pretty much a duplicate
-int cis_splice_effects_identify(int argc, char* argv[]) {
+int cis_splice_effects_associate(int argc, char* argv[]) {
     CisSpliceEffectsAssociator csea1;
     try {
         csea1.parse_options(argc, argv);
-        csea1.identify();
+        csea1.associate();
     } catch(const common::cmdline_help_exception& e) {
         cerr << e.what() << endl;
         return 0;
