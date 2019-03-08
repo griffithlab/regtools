@@ -208,27 +208,28 @@ string CisSpliceEffectsAssociator::get_junction_name(int i) {
 vector<Junction> CisSpliceEffectsAssociator::parse_BED_to_junctions(){
     vector<Junction> junctions;
     JunctionsAnnotator anno(bed_);
-    AnnotatedJunction line;
+    BED line;
     Junction junc;
-    line.reset();
     anno.open_junctions();
     while(anno.get_single_junction(line)) {
-        junc.chrom = common::str_to_num(line.fields[0]);
-        junc.start = common::str_to_num(line.fields[1]);
-        junc.end = common::str_to_num(line.fields[2]);
+        junc.chrom = line.fields[0];
+        junc.thick_start = line.start;
+        junc.thick_end = line.end;
+        anno.adjust_junction_ends(line);
+        junc.start = line.start;
+        junc.end = line.end-1; //will block ends need to be fixed?
         junc.name = line.fields[3];
-        junc.read_count = common::str_to_num(line.fields[4]);
+        junc.score = line.fields[4];
+        junc.read_count = common::str_to_num(junc.score);
         junc.strand = line.fields[5];
-        junc.thick_start = common::str_to_num(line.fields[6]);
-        junc.thick_end = common::str_to_num(line.fields[7]);
         junc.color = line.fields[8];
         junc.nblocks = common::str_to_num(line.fields[9]);
         junc.has_left_min_anchor = true;
         junc.has_right_min_anchor = true;
         junctions.push_back(junc); // are we making a copy or just adding a pointer?
-        line.reset();
     }
     anno.close_junctions();
+    return junctions;
 }
 
 //The workhorse

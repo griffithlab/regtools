@@ -367,6 +367,7 @@ string JunctionsAnnotator::get_reference_sequence(string position) {
     int len;
     faidx_t *fai = fai_load(ref_.c_str());
     char *s = fai_fetch(fai, position.c_str(), &len);
+    cerr << "position = " << position << endl;
     if(s == NULL)
         throw runtime_error("Unable to extract FASTA sequence "
                              "for position " + position + "\n\n");
