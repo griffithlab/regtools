@@ -33,7 +33,7 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
     #Test default options (but with RF strandedness).
     def test_default_stranded(self):
         variants = self.inputFiles("vcf/test1.vcf")[0]
-        bed1 = self.inputFiles("bed/test_hcc1395_junctions.bed")[0]
+        bed1 = self.inputFiles("cis-splice-effects-associate/junctions_extract.bed")[0]
         fasta = self.inputFiles("fa/test_chr22.fa")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
@@ -56,7 +56,7 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
     #Test default options (but with unstranded).
     def test_default(self):
         variants = self.inputFiles("vcf/test1.vcf")[0]
-        bed1 = self.inputFiles("bed/test_hcc1395_junctions.bed")[0]
+        bed1 = self.inputFiles("cis-splice-effects-associate/junctions_extract.bed")[0]
         fasta = self.inputFiles("fa/test_chr22.fa")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
@@ -99,7 +99,7 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
         variants = self.inputFiles("vcf/test1.vcf")[0]
-        bed1 = self.inputFiles("bed/test_hcc1395_junctions.bed")[0]
+        bed1 = self.inputFiles("cis-splice-effects-associate/junctions_extract.bed")[0]
         fasta = self.inputFiles("fa/test_chr22.fa")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
@@ -125,7 +125,7 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
         variants = self.inputFiles("vcf/test1.vcf")[0]
-        bed1 = self.inputFiles("bed/test_hcc1395_junctions.bed")[0]
+        bed1 = self.inputFiles("cis-splice-effects-associate/junctions_extract.bed")[0]
         fasta = self.inputFiles("fa/test_chr22.fa")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
@@ -151,7 +151,7 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
         variants = self.inputFiles("vcf/test1.vcf")[0]
-        bed1 = self.inputFiles("bed/test_hcc1395_junctions.bed")[0]
+        bed1 = self.inputFiles("cis-splice-effects-associate/junctions_extract.bed")[0]
         fasta = self.inputFiles("fa/test_chr22.fa")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
@@ -177,7 +177,7 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
         variants = self.inputFiles("vcf/test1.vcf")[0]
-        bed1 = self.inputFiles("bed/test_hcc1395_junctions.bed")[0]
+        bed1 = self.inputFiles("cis-splice-effects-associate/junctions_extract.bed")[0]
         fasta = self.inputFiles("fa/test_chr22.fa")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
@@ -203,7 +203,7 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
         variants = self.inputFiles("vcf/test1.vcf")[0]
-        bed1 = self.inputFiles("bed/test_hcc1395_junctions.bed")[0]
+        bed1 = self.inputFiles("cis-splice-effects-associate/junctions_extract.bed")[0]
         fasta = self.inputFiles("fa/test_chr22.fa")[0]
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
