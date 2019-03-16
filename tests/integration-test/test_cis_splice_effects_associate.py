@@ -65,7 +65,7 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
         expected_annotatedjunctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-annotatedjunctions.out")[0]
         expected_annotatedvariants = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-annotatedvariants.out")[0]
         expected_junctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-junctions.out")[0]
-        params = ["cis-splice-effects", "associate", "-s 0",
+        params = ["cis-splice-effects", "associate",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -112,7 +112,6 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
                   exonic_distance, 
                   intronic_distance, 
                   dont_skip_single_exon_transcripts, 
-                  "-s 0",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -139,7 +138,6 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
                   exonic_distance, 
                   intronic_distance, 
                   dont_skip_single_exon_transcripts, 
-                  "-s 0",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -166,7 +164,6 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
                   exonic_distance, 
                   intronic_distance, 
                   dont_skip_single_exon_transcripts, 
-                  "-s 0",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -193,7 +190,6 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
                   exonic_distance, 
                   intronic_distance, 
                   dont_skip_single_exon_transcripts, 
-                  "-s 0",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -220,7 +216,6 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
                   exonic_distance, 
                   intronic_distance, 
                   dont_skip_single_exon_transcripts, 
-                  "-s 0",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -228,83 +223,6 @@ class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
         rv, err = self.execute(params)
         self.assertEqual(rv, 0, err)
         #self.assertFilesEqual(expected_file, output_file, err)
-
-    #Test junctions extract params
-    def test_anchor_stranded(self):
-        variants = self.inputFiles("vcf/test1.vcf")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
-        output_file = self.tempFile("observed-annotate.vcf")
-        variants = self.inputFiles("vcf/test1.vcf")[0]
-        bed1 = self.inputFiles("bed/test_hcc1395_junctions.bed")[0]
-        fasta = self.inputFiles("fa/test_chr22.fa")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
-        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
-        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
-        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
-        print "bed1 is ", bed1
-        for anchor in ["", "30"]:
-            if anchor != "":
-                anchor = "-a " + anchor
-            params = ["cis-splice-effects", "associate", 
-                  anchor,
-                  "-s 0",
-                  "-o ", output_annotatedjunctions,
-                  "-v ", output_annotatedvariants,
-                  "-j ", output_junctions,
-                  variants, bed1, fasta, gtf]
-            rv, err = self.execute(params)
-            self.assertEqual(rv, 0)
-            #self.assertFilesEqual(expected_file, output_file)
-
-    def test_anchor(self):
-        variants = self.inputFiles("vcf/test1.vcf")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
-        output_file = self.tempFile("observed-annotate.vcf")
-        variants = self.inputFiles("vcf/test1.vcf")[0]
-        bed1 = self.inputFiles("bed/test_hcc1395_junctions.bed")[0]
-        fasta = self.inputFiles("fa/test_chr22.fa")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
-        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
-        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
-        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
-        print "bed1 is ", bed1
-        for anchor in ["", "30"]:
-            if anchor != "":
-                anchor = "-a " + anchor
-            params = ["cis-splice-effects", "associate", 
-                  anchor,
-                  "-s 0",
-                  "-o ", output_annotatedjunctions,
-                  "-v ", output_annotatedvariants,
-                  "-j ", output_junctions,
-                  variants, bed1, fasta, gtf]
-            rv, err = self.execute(params)
-            self.assertEqual(rv, 0)
-            #self.assertFilesEqual(expected_file, output_file)
-
-    def test_intron_size(self):
-        variants = self.inputFiles("vcf/test1.vcf")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
-        output_file = self.tempFile("observed-annotate.vcf")
-        variants = self.inputFiles("vcf/test1.vcf")[0]
-        bed1 = self.inputFiles("bed/test_hcc1395_junctions.bed")[0]
-        fasta = self.inputFiles("fa/test_chr22.fa")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
-        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
-        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
-        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
-        min_intron = "8039"
-        max_intron = "8039"
-        params = ["cis-splice-effects", "associate", 
-                  "-m", min_intron, "-M", max_intron,
-                  "-s 0",
-                  "-o ", output_annotatedjunctions,
-                  "-v ", output_annotatedvariants,
-                  "-j ", output_junctions,
-                  variants, bed1, fasta, gtf]
-        rv, err = self.execute(params)
-        self.assertEqual(rv, 0)
-        #self.assertFilesEqual(expected_file, output_file)
 
 if __name__ == "__main__":
     main()
