@@ -30,29 +30,6 @@ from integrationtest import IntegrationTest, main
 import unittest
 
 class TestCisSpliceEffectsAssociate(IntegrationTest, unittest.TestCase):
-    #Test default options (but with RF strandedness).
-    def test_default_stranded(self):
-        variants = self.inputFiles("vcf/test1.vcf")[0]
-        bed1 = self.inputFiles("cis-splice-effects-associate/junctions_extract.bed")[0]
-        fasta = self.inputFiles("fa/test_chr22.fa")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
-        output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
-        output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
-        output_junctions = self.tempFile("observed-cse-identify-junctions.out")
-        expected_annotatedjunctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-stranded-annotatedjunctions.out")[0]
-        expected_annotatedvariants = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-stranded-annotatedvariants.out")[0]
-        expected_junctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-stranded-junctions.out")[0]
-        params = ["cis-splice-effects", "associate",
-                  "-o ", output_annotatedjunctions,
-                  "-v ", output_annotatedvariants,
-                  "-j ", output_junctions,
-                  variants, bed1, fasta, gtf]
-        rv, err = self.execute(params)
-        self.assertEqual(rv, 0, err)
-        self.assertFilesEqual(expected_annotatedjunctions, output_annotatedjunctions, err)
-        self.assertFilesEqual(expected_annotatedvariants, output_annotatedvariants, err)
-        self.assertFilesEqual(expected_junctions, output_junctions, err)
-
     #Test default options (but with unstranded).
     def test_default(self):
         variants = self.inputFiles("vcf/test1.vcf")[0]
