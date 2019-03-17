@@ -158,7 +158,6 @@ class JunctionsExtractor {
     public:
         //Default constructor
         JunctionsExtractor() {
-            //cerr << "default constructor called" << endl;
             min_anchor_length_ = 8;
             min_intron_length_ = 70;
             max_intron_length_ = 500000;
