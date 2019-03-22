@@ -77,6 +77,10 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
         usage();
         throw runtime_error("Error parsing inputs!(2)\n\n");
     }
+    if(strandness_ == -1){
+        usage(std::cerr);
+        throw runtime_error("Please supply strand specificity with '-s' option!\n\n");
+    }
     cerr << "Minimum junction anchor length: " << min_anchor_length_ << endl;
     cerr << "Minimum intron length: " << min_intron_length_ << endl;
     cerr << "Maximum intron length: " << max_intron_length_ << endl;
@@ -99,7 +103,7 @@ int JunctionsExtractor::usage(ostream& out) {
     out << "\t\t" << "-r STR\tThe region to identify junctions \n"
         << "\t\t\t " << "in \"chr:start-end\" format. Entire BAM by default." << endl;
     out << "\t\t" << "-s INT\tStrand specificity of RNA library preparation \n"
-        << "\t\t\t " << "(0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR). [1]" << endl;
+        << "\t\t\t " << "(0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR). REQUIRED" << endl;
     out << endl;
     return 0;
 }

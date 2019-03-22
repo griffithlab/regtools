@@ -162,7 +162,7 @@ class JunctionsExtractor {
             min_intron_length_ = 70;
             max_intron_length_ = 500000;
             junctions_sorted_ = false;
-            strandness_ = 1;
+            strandness_ = -1;
             bam_ = "NA";
             output_file_ = "NA";
             region_ = ".";
