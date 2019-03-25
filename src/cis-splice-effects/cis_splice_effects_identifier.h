@@ -100,7 +100,7 @@ class CisSpliceEffectsIdentifier {
                                        all_intronic_space_(false),
                                        all_exonic_space_(false),
                                        skip_single_exon_genes_(true),
-                                       strandness_(1),
+                                       strandness_(-1),
                                        min_anchor_length_(8),
                                        min_intron_length_(70),
                                        max_intron_length_(500000) {}
