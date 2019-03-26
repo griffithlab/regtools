@@ -78,7 +78,7 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
         throw runtime_error("Error parsing inputs!(2)\n\n");
     }
     if(strandness_ == -1){
-        usage(std::cerr);
+        usage();
         throw runtime_error("Please supply strand specificity with '-s' option!\n\n");
     }
     cerr << "Minimum junction anchor length: " << min_anchor_length_ << endl;
