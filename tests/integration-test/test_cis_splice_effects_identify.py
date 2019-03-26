@@ -320,7 +320,6 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
 
     def test_no_gtf(self):
         variants = self.inputFiles("vcf/test1.vcf")[0]
-        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("observed-annotate.vcf")
         variants = self.inputFiles("vcf/test1.vcf")[0]
         bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
@@ -328,7 +327,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         output_file = self.tempFile("extract.out")
         params = ["cis-splice-effects", "identify",
                   "-s 0",
-                  variants, bam1, fasta, gtf]
+                  variants, bam1, fasta]
         rv, err = self.execute(params)
         self.assertEqual(rv, 1)
 
