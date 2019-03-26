@@ -39,7 +39,7 @@ class TestExtract(IntegrationTest, unittest.TestCase):
                                             anchor + ".out")[0]
             if anchor != "":
                 anchor = "-a " + anchor
-            params = ["junctions", "extract", "-s 1", anchor, "-o", output_file, bam1]
+            params = ["junctions", "extract", anchor, "-s 1", "-o", output_file, bam1]
             rv, err = self.execute(params)
             self.assertEqual(rv, 0)
             self.assertFilesEqual(expected_file, output_file)
