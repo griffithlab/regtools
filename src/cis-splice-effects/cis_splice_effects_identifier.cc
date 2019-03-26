@@ -39,7 +39,7 @@ void CisSpliceEffectsIdentifier::usage(ostream& out) {
     out << "\t\t" << "-v STR\tOutput file containing variants annotated as splice relevant (VCF format)." << endl;
     out << "\t\t" << "-j STR\tOutput file containing the aberrant junctions in BED12 format." << endl;
     out << "\t\t" << "-s INT\tStrand specificity of RNA library preparation \n"
-        << "\t\t\t " << "(0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR). [1]" << endl;
+        << "\t\t\t " << "(0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR). REQUIRED" << endl;
     out << "\t\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum \n"
         << "\t\t\t " << "anchor length on both sides are reported. [8]" << endl;
     out << "\t\t" << "-m INT\tMinimum intron length. [70]" << endl;
@@ -165,6 +165,10 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
        gtf_ == "NA"){
         usage(std::cerr);
         throw runtime_error("Error parsing inputs!(2)\n\n");
+    }
+    if(strandness_ == -1){
+        usage(std::cerr);
+        throw runtime_error("Please supply strand specificity with '-s' option!\n\n");
     }
     file_qc();
     cerr << "Variant file: " << vcf_ << endl;

@@ -39,7 +39,7 @@ class TestExtract(IntegrationTest, unittest.TestCase):
                                             anchor + ".out")[0]
             if anchor != "":
                 anchor = "-a " + anchor
-            params = ["junctions", "extract", anchor, "-o", output_file, bam1]
+            params = ["junctions", "extract", anchor, "-s 1", "-o", output_file, bam1]
             rv, err = self.execute(params)
             self.assertEqual(rv, 0)
             self.assertFilesEqual(expected_file, output_file)
@@ -87,6 +87,18 @@ class TestExtract(IntegrationTest, unittest.TestCase):
     def test_no_bam(self):
         output_file = self.tempFile("extract.out")
         params = ["junctions", "extract", "-s 0", "-o", output_file]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 1)
+
+    def test_missing_bam(self):
+        output_file = self.tempFile("extract.out")
+        params = ["junctions", "extract", "-s 0", "-o", output_file, "does_not_exist.bam"]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 1)
+
+    def test_no_strandness(self):
+        output_file = self.tempFile("extract.out")
+        params = ["junctions", "extract", "-o", output_file]
         rv, err = self.execute(params)
         self.assertEqual(rv, 1)
 

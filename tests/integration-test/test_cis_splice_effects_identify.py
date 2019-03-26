@@ -42,7 +42,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         expected_annotatedjunctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-stranded-annotatedjunctions.out")[0]
         expected_annotatedvariants = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-stranded-annotatedvariants.out")[0]
         expected_junctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-stranded-junctions.out")[0]
-        params = ["cis-splice-effects", "identify",
+        params = ["cis-splice-effects", "identify", "-s 1",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -298,13 +298,54 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         params = ["cis-splice-effects", "identify", 
                   "-m", min_intron, "-M", max_intron,
                   "-s 0",
-                  "-o ", output_annotatedjunctions,
-                  "-v ", output_annotatedvariants,
-                  "-j ", output_junctions,
                   variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
         #self.assertFilesEqual(expected_file, output_file)
+
+    def test_missing_bam(self):
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("observed-annotate.vcf")
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        bam1 = "does_not_exist.bam"
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("extract.out")
+        params = ["cis-splice-effects", "identify",
+                  "-s 0",
+                  variants, bam1, fasta, gtf]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 1)
+
+    def test_no_gtf(self):
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        output_file = self.tempFile("observed-annotate.vcf")
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        output_file = self.tempFile("extract.out")
+        params = ["cis-splice-effects", "identify",
+                  "-s 0",
+                  variants, bam1, fasta]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 1)
+
+    def test_window_size(self):
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("observed-annotate.vcf")
+        variants = self.inputFiles("vcf/test1.vcf")[0]
+        bam1 = self.inputFiles("bam/test_hcc1395.2.bam")[0]
+        fasta = self.inputFiles("fa/test_chr22.fa")[0]
+        gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
+        output_file = self.tempFile("extract.out")
+        params = ["cis-splice-effects", "identify",
+                  "-s 0",
+                  "-w 5",
+                  variants, bam1, fasta, gtf]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 0)
 
 if __name__ == "__main__":
     main()
