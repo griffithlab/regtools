@@ -343,7 +343,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         output_file = self.tempFile("extract.out")
         params = ["cis-splice-effects", "identify",
                   "-s 0",
-                  "-w 5"
+                  "-w 5",
                   variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
