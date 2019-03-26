@@ -298,9 +298,6 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         params = ["cis-splice-effects", "identify", 
                   "-m", min_intron, "-M", max_intron,
                   "-s 0",
-                  "-o ", output_annotatedjunctions,
-                  "-v ", output_annotatedvariants,
-                  "-j ", output_junctions,
                   variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
@@ -317,9 +314,6 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         output_file = self.tempFile("extract.out")
         params = ["cis-splice-effects", "identify",
                   "-s 0",
-                  "-o ", output_annotatedjunctions,
-                  "-v ", output_annotatedvariants,
-                  "-j ", output_junctions,
                   variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 1)
@@ -334,9 +328,6 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         output_file = self.tempFile("extract.out")
         params = ["cis-splice-effects", "identify",
                   "-s 0",
-                  "-o ", output_annotatedjunctions,
-                  "-v ", output_annotatedvariants,
-                  "-j ", output_junctions,
                   variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 1)
@@ -353,9 +344,6 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         params = ["cis-splice-effects", "identify",
                   "-s 0",
                   "-w 5"
-                  "-o ", output_annotatedjunctions,
-                  "-v ", output_annotatedvariants,
-                  "-j ", output_junctions,
                   variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
