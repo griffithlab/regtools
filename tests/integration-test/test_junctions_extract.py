@@ -90,6 +90,18 @@ class TestExtract(IntegrationTest, unittest.TestCase):
         rv, err = self.execute(params)
         self.assertEqual(rv, 1)
 
+    def test_missing_bam(self):
+        output_file = self.tempFile("extract.out")
+        params = ["junctions", "extract", "-s 0", "-o", output_file, "does_not_exist.bam"]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 1)
+
+    def test_no_strandness(self):
+        output_file = self.tempFile("extract.out")
+        params = ["junctions", "extract", "-o", output_file]
+        rv, err = self.execute(params)
+        self.assertEqual(rv, 1)
+
     def test_help(self):
         output_file = self.tempFile("extract.out")
         params = ["junctions", "extract", "-h"]
