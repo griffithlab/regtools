@@ -34,7 +34,7 @@ class JunctionsExtractTest : public ::testing::Test {
 
 TEST_F(JunctionsExtractTest, ParseInput) {
     int argc = 2;
-    char * argv[] = {"extract", "-s 0", "test_input.bam"};
+    char * argv[] = {"extract", "-s", "0", "test_input.bam"};
     int ret = jc1.parse_options(argc, argv);
     string expected_bam("test_input.bam");
     ASSERT_EQ(expected_bam, jc1.get_bam());
