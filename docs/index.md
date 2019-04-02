@@ -1,6 +1,6 @@
-# regtools
+#RegTools
 
-regtools is a set of tools that integrate DNA-seq and RNA-seq data to help interpret mutations in a regulatory and splicing context.
+RegTools is a set of tools that integrate DNA-seq and RNA-seq data to help interpret mutations in a regulatory and splicing context.
 
 ##Features
 
@@ -25,7 +25,7 @@ Clone and install regtools by running:
 ```
     regtools --help
 ```
-For information about the individual regtools commands, please see [the Commands page](commands/commands.md)
+For information about the individual RegTools commands, please see [the Commands page](commands/commands.md)
 
 ##Contribute
 
@@ -40,7 +40,7 @@ Github issues are another option to contact the project about potential bugs.
 
 ##Acknowledgements
 
-regtools uses several open-source libraries. We would like to thank the
+RegTools uses several open-source libraries. We would like to thank the
 developers of htslib and bedtools. We would also like to thank Travis Abbott for
 useful comments and code.
 
