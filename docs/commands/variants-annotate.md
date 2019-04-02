@@ -15,8 +15,10 @@ The `regtools variants annotate` command is used to annotate variants of interes
 ###Options
 | Option  | Description |
 | ------  | ----------- |
-| -e      | Minimum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in exonic space, i.e a coding variant. [default = 3] |
-| -i      | Minimum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in intronic space. [default = 2] |
+| -i      | Maximum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in intronic space. [default = 2] |
+| -e      | Maximum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in exonic space, i.e a coding variant. [default = 3] |
+| -I      | Annotate variants in intronic space within a transcript (not to be used with -i).
+| -E      | Annotate variants in exonic space within a transcript (not to be used with -e).
 | -S      | Dont skip single exon transcripts. The default is to skip the single exon transcripts. |
 | -o      | Name of output file, this file will be in the VCF format. [STDOUT] |
 
@@ -28,7 +30,7 @@ The output file is in the VCF format. The annotation results are described using
 | genes             |A comma separated list of unique genes that the variants falls in.|
 | transcripts       |A comma separated list of transcripts that the variants falls in. |
 | distances         |A comma separated list of distances from the start or stop of an exon. This distance is min(distance_from_start_of_exon, distance_from_end_of_exon). The number of elements in the list is same as the number of transcripts in the 'transcripts' field and in the same order. The distance needs to be less than or equal to the parameters specified by the -i and -e options.|
-| annotations       |A comma separated list of annotations in the same order as the 'transcripts'. The number of elements in this list is the same as the number of transcripts in the 'transcripts' field and in the same order, i.e each annotation corresponds to a different transcript. The valid values for this field are 'splicing_exonic' and 'splicing_intronic'. If the variant lies within the distance specified by '-e' option (3 b.p by default) inside an exon, it is annotated as 'splicing_exonic'. If the variant lies outside the exon within the distance specified by the '-i' option (2 b.p by default), it is annotated as 'splicing_intronic'.|
+| annotations       |A comma separated list of annotations in the same order as the 'transcripts'. The number of elements in this list is the same as the number of transcripts in the 'transcripts' field and in the same order, i.e each annotation corresponds to a different transcript. The valid values for this field are 'splicing_exonic' and 'splicing_intronic'. If the variant lies within the distance specified by '-e' option (3 b.p by default) inside an exon, it is annotated as 'splicing_exonic'. If the variant lies outside the exon within the distance specified by the '-i' option (2 b.p by default), it is annotated as 'splicing_intronic'. Note that even when all intronic or exonic variants are considered with the -I or -E options, they are labelled simply as "intronic" or "exonic", respectively.|
 
 ####Example output line
 ```bash

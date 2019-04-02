@@ -13,11 +13,12 @@ The `junctions extract` command can be used to extract exon-exon junctions from 
 | Option  | Description |
 | ------  | ----------- |
 | -a      | Minimum anchor length. 8bp by default. Junctions having a minimum overlap of this much on both ends are reported. Note - the required overlap can be observed amongst separate reads, for example one read might have sufficient left overlap and another read might have sufficient right overlap, this is sufficient for the junction to be reported. No mismatches are allowed in the anchor regions.|
-| -i      | Minimum intron size. 70bp by default. The intron size is the same as junction.end - junction.start. (Not to be confused with chromStart and chromEnd below, the required blockSizes need to be added/subtracted.)|
-| -I      | Maximum intron size. 500,000bp by default. The intron size the same as junction.end - junction.start. (Not to be confused with chromStart and chromEnd below, the required blockSizes need to be added/subtracted.)|
+| -m      | Minimum intron size. 70bp by default. The intron size is the same as junction.end - junction.start. (Not to be confused with chromStart and chromEnd below, the required blockSizes need to be added/subtracted.)|
+| -M      | Maximum intron size. 500,000bp by default. The intron size the same as junction.end - junction.start. (Not to be confused with chromStart and chromEnd below, the required blockSizes need to be added/subtracted.)|
 | -o      | File to write output to. STDOUT by default.|
-| -r      | Region to extract junctions in. This is specified in the format "chr:start-end" If not specified, junctions are extracted from the entire BAM file.|
+| -r      | Region to extract junctions in. This is specified in the format "chr:start-end". If not specified, junctions are extracted from the entire BAM file.|
 | -h      | Display help message for this command.|
+| -s      | Strand specificity of RNA library preparation, where 0 = unstranded, 1 = first-strand/RF, 2 = second-strand/FR. The default is 1 (RF). This option is meant to be used if no XS tags are present in the input BAM.
 
 ###Output
 The output is in the BED12 format which is described in detail [here.](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) Each line is an exon-exon junction as explained below.

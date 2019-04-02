@@ -1,4 +1,4 @@
-/*  cis_splice_effects_identifier.cc -- 'cis-splice-effects identify' methods
+/*  cis_splice_effects_associator.cc -- 'cis-splice-effects associate' methods
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -25,21 +25,19 @@ DEALINGS IN THE SOFTWARE.  */
 #include <stdexcept>
 #include <set>
 #include "common.h"
-#include "cis_splice_effects_identifier.h"
+#include "cis_splice_effects_associator.h"
 #include "junctions_annotator.h"
 #include "junctions_extractor.h"
 #include "variants_annotator.h"
 
 //Usage for this tool
-void CisSpliceEffectsIdentifier::usage(ostream& out) {
+void CisSpliceEffectsAssociator::usage(ostream& out) {
     out << "Usage:" 
-        << "\t\t" << "regtools cis-splice-effects identify [options] variants.vcf alignments.bam ref.fa annotations.gtf" << endl;
+        << "\t\t" << "regtools cis-splice-effects associate [options] variants.vcf junctions.bed ref.fa annotations.gtf" << endl;
     out << "Options:" << endl;
     out << "\t\t" << "-o STR\tOutput file containing the aberrant splice junctions with annotations. [STDOUT]" << endl;
     out << "\t\t" << "-v STR\tOutput file containing variants annotated as splice relevant (VCF format)." << endl;
     out << "\t\t" << "-j STR\tOutput file containing the aberrant junctions in BED12 format." << endl;
-    out << "\t\t" << "-s INT\tStrand specificity of RNA library preparation \n"
-        << "\t\t\t " << "(0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR). REQUIRED" << endl;
     out << "\t\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum \n"
         << "\t\t\t " << "anchor length on both sides are reported. [8]" << endl;
     out << "\t\t" << "-m INT\tMinimum intron length. [70]" << endl;
@@ -60,7 +58,7 @@ void CisSpliceEffectsIdentifier::usage(ostream& out) {
 }
 
 //Return stream to write output to
-void CisSpliceEffectsIdentifier::close_ostream() {
+void CisSpliceEffectsAssociator::close_ostream() {
     if(ofs_.is_open())
         ofs_.close();
 }
@@ -68,7 +66,7 @@ void CisSpliceEffectsIdentifier::close_ostream() {
 //Return stream to write output to
 //If output file is not empty, attempt to open
 //If output file is empty, set to cout
-void CisSpliceEffectsIdentifier::set_ostream() {
+void CisSpliceEffectsAssociator::set_ostream() {
     if(output_file_ == "NA") {
         common::copy_stream(cout, ofs_);
     } else {
@@ -86,24 +84,24 @@ void CisSpliceEffectsIdentifier::set_ostream() {
 }
 
 //Do QC on files
-void CisSpliceEffectsIdentifier::file_qc() {
-    if(vcf_ == "NA" || bam_ == "NA" ||
+void CisSpliceEffectsAssociator::file_qc() {
+    if(vcf_ == "NA" || bed_ == "NA" ||
        ref_ == "NA" || gtf_ == "NA") {
         usage(std::cout);
         throw runtime_error("Error parsing inputs!(2)\n\n");
     }
-    if(!common::file_exists(vcf_) || !common::file_exists(bam_) ||
+    if(!common::file_exists(vcf_) || !common::file_exists(bed_) ||
        !common::file_exists(ref_) || !common::file_exists(gtf_)) {
         throw runtime_error("Please make sure input files exist.\n\n");
     }
 }
 
 //Parse command line options
-void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
+void CisSpliceEffectsAssociator::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     stringstream help_ss;
     char c;
-    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:IShs:a:m:M:")) != -1) {
+    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:ISha:m:M:")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
@@ -135,18 +133,6 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
             case 'h':
                 usage(help_ss);
                 throw common::cmdline_help_exception(help_ss.str());
-            case 's':
-                strandness_ = atoi(optarg);
-                break;
-            case 'a':
-                min_anchor_length_ = atoi(optarg);
-                break;
-            case 'm':
-                min_intron_length_ = atoi(optarg);
-                break;
-            case 'M':
-                max_intron_length_ = atoi(optarg);
-                break;
             default:
                 usage(std::cerr);
                 throw runtime_error("Error parsing inputs!(1)\n\n");
@@ -154,25 +140,21 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     }
     if(argc - optind >= 4) {
         vcf_ = string(argv[optind++]);
-        bam_ = string(argv[optind++]);
+        bed_ = string(argv[optind++]);
         ref_ = string(argv[optind++]);
         gtf_ = string(argv[optind++]);
     }
     if(optind < argc ||
        vcf_ == "NA" ||
-       bam_ == "NA" ||
+       bed_ == "NA" ||
        ref_ == "NA" ||
        gtf_ == "NA"){
         usage(std::cerr);
         throw runtime_error("Error parsing inputs!(2)\n\n");
     }
-    if(strandness_ == -1){
-        usage(std::cerr);
-        throw runtime_error("Please supply strand specificity with '-s' option!\n\n");
-    }
     file_qc();
     cerr << "Variant file: " << vcf_ << endl;
-    cerr << "Alignment file: " << bam_ << endl;
+    cerr << "Junctions BED file: " << bed_ << endl;
     cerr << "Reference fasta file: " << ref_ << endl;
     cerr << "Annotation file: " << gtf_ << endl;
     if(window_size_ != 0) {
@@ -189,8 +171,8 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     cerr << endl;
 }
 
-//Call the junctions annotator
-void CisSpliceEffectsIdentifier::annotate_junctions(const GtfParser& gp1) {
+//Call the junctions annotator; duplication of identify
+void CisSpliceEffectsAssociator::annotate_junctions(const GtfParser& gp1) { 
     JunctionsAnnotator ja1(ref_, gp1);
     ja1.set_gtf_parser(gp1);
     set_ostream();
@@ -213,15 +195,43 @@ void CisSpliceEffectsIdentifier::annotate_junctions(const GtfParser& gp1) {
     close_ostream();
 }
 
-//get name for the junction
-string CisSpliceEffectsIdentifier::get_junction_name(int i) {
+//get name for the junction; duplication of identify
+string CisSpliceEffectsAssociator::get_junction_name(int i) {
     stringstream name_ss;
     name_ss << "JUNC" << setfill('0') << setw(8) << i;
     return name_ss.str();
 }
 
+//parse BED into vector of junctions
+vector<Junction> CisSpliceEffectsAssociator::parse_BED_to_junctions(){
+    vector<Junction> junctions;
+    JunctionsAnnotator anno(bed_);
+    BED line;
+    Junction junc;
+    anno.open_junctions();
+    while(anno.get_single_junction(line)) {
+        junc.chrom = line.fields[0];
+        junc.thick_start = line.start;
+        junc.thick_end = line.end;
+        anno.adjust_junction_ends(line);
+        junc.start = line.start;
+        junc.end = line.end-1; //will block ends need to be fixed?
+        junc.name = line.fields[3];
+        junc.score = line.fields[4];
+        junc.read_count = common::str_to_num(junc.score);
+        junc.strand = line.fields[5];
+        junc.color = line.fields[8];
+        junc.nblocks = common::str_to_num(line.fields[9]);
+        junc.has_left_min_anchor = true;
+        junc.has_right_min_anchor = true;
+        junctions.push_back(junc); // are we making a copy or just adding a pointer?
+    }
+    anno.close_junctions();
+    return junctions;
+}
+
 //The workhorse
-void CisSpliceEffectsIdentifier::identify() {
+void CisSpliceEffectsAssociator::associate() {
     //GTF parser object
     GtfParser gp1(gtf_);
     gp1.load();
@@ -231,6 +241,8 @@ void CisSpliceEffectsIdentifier::identify() {
     if(write_annotated_variants_)
         va.open_vcf_out();
     cerr << endl;
+    //Get junctions from BED
+    vector<Junction> junctions = parse_BED_to_junctions();
     //Annotate each variant and pay attention to splicing related ones
     while(va.read_next_record()) {
         AnnotatedVariant v1 = va.annotate_record_with_transcripts();
@@ -245,27 +257,18 @@ void CisSpliceEffectsIdentifier::identify() {
             cerr << endl;
             if(write_annotated_variants_)
                 va.write_annotation_output(v1);
-            //Extract junctions near this variant
-            JunctionsExtractor je1(bam_, variant_region, strandness_, min_anchor_length_, min_intron_length_, max_intron_length_);
-            je1.identify_junctions_from_BAM();
-            vector<Junction> junctions = je1.get_all_junctions();
             //Add all the junctions to the unique set
             for (size_t i = 0; i < junctions.size(); i++) {
                 //Allow partial overlap - either junction start or end is within window
-                if((junctions[i].start >= v1.cis_effect_start && junctions[i].start <= v1.cis_effect_end) ||
-                   (junctions[i].end <= v1.cis_effect_end && junctions[i].end >= v1.cis_effect_start)) {
-                   unique_junctions_.insert(junctions[i]);
-                   //add to the map of junctions to variants
-                   junction_to_variant_[junctions[i]].insert(v1);
+                if(junctions[i].chrom ==v1.chrom && 
+                    ((junctions[i].start >= v1.cis_effect_start && 
+                        junctions[i].start <= v1.cis_effect_end) ||
+                    (junctions[i].end <= v1.cis_effect_end && 
+                        junctions[i].end >= v1.cis_effect_start))) {
+                    unique_junctions_.insert(junctions[i]);
+                    //add to the map of junctions to variants
+                    junction_to_variant_[junctions[i]].insert(v1);
                 }
-                //Didn't delete since we might add an option to do this in the future
-                //Don't allow partial overlap - if window is specified junction has to lie entirely within window
-                // if(common::coordinate_diff(junctions[i].start, v1.start) < window_size_ &&
-                //    common::coordinate_diff(junctions[i].end, v1.start) <= window_size_) {
-                //        unique_junctions_.insert(junctions[i]);
-                //        //add to the map of junctions to variants
-                //        junction_to_variant_[junctions[i]].insert(v1);
-                // }
             }
         }
     }

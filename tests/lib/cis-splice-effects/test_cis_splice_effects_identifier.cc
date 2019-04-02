@@ -62,6 +62,17 @@ TEST_F(CisSpliceEffectsIdentifierTest, ParseInput3) {
     EXPECT_THROW(csei1.parse_options(argc, argv), common::cmdline_help_exception);
 }
 
+//Check for missing files
+TEST_F(CisSpliceEffectsIdentifierTest, ParseInput5) {
+    int argc = 5;
+    char * argv[] = {"identify",
+                     "test_does_not_exist.vcf",
+                     "test.fa",
+                     "test.gtf",
+                     "test.bam"};
+    EXPECT_THROW(csei1.parse_options(argc, argv), std::runtime_error);
+}
+
 //Test if constructor works as expected.
 TEST_F(CisSpliceEffectsIdentifierTest, ConstructorTest) {
     EXPECT_EQ(csei1.vcf(), "NA");
