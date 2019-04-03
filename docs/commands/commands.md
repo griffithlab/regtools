@@ -13,6 +13,7 @@ This set of tools helps identify and work with aberrant splicing events near var
 Below are links to detailed explanations of the `cis-splice-effects` sub-commands:
 
 - [identify](cis-splice-effects-identify.md)
+- [associate](cis-splice-effects-associate.md)
 
 ##cis-ase
 This set of tools helps identify and work with allele-specific-expression near variants, these could be somatic variants or germline polymorphisms/mutations. These variants are hypothesized to act in cis and affect how the gene is transcribed.
