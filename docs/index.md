@@ -36,7 +36,7 @@ For information about the individual RegTools commands, please see [the Commands
 ##Citation
 You can find a bioRxiv preprint describing our intial validation of RegTools [here](https://www.biorxiv.org/content/10.1101/436634v2)
 
-##Data availibity
+##Data availability
 We have recently applied RegTools to the TCGA data. As part of our commitment to open-access data sharing, we have 
 made the output files from `junctions annotate` and `cis-splice-effects identify` available for download via AWS S3. 
 
