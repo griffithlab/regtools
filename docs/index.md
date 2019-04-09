@@ -16,18 +16,18 @@ regtools is a set of tools that integrate DNA-seq and RNA-seq data to help inter
 
 Clone and install regtools by running:
 ```
-    git clone https://github.com/griffithlab/regtools
-    cd regtools/
-    mkdir build
-    cd build/
-    cmake ..
-    make
+git clone https://github.com/griffithlab/regtools
+cd regtools/
+mkdir build
+cd build/
+cmake ..
+make
 ```
 
 ##Usage
 
 ```
-    regtools --help
+regtools --help
 ```
 For information about the individual RegTools commands, please see [the Commands page](commands/commands.md)
 
@@ -35,6 +35,14 @@ For information about the individual RegTools commands, please see [the Commands
 
 - [Issue Tracker](https://github.com/griffithlab/regtools/issues)
 - [Source Code](https://github.com/griffithlab/regtools)
+
+##Citation
+You can find a bioRxiv preprint describing our intial validation of RegTools [here](https://www.biorxiv.org/content/10.1101/436634v2)
+
+##Data availibity
+We have recently applied RegTools to the TCGA data. As part of our commitment to open-access data sharing, we have 
+made the output files from `junctions annotate` and `cis-splice-effects identify` available for download via AWS S3. 
+
 
 ##Support
 
