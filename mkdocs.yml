@@ -4,6 +4,7 @@ pages:
 - Commands:
     - 'Index of commands': 'commands/commands.md'
     - 'cis-splice-effects identify': 'commands/cis-splice-effects-identify.md'
+    - 'cis-splice-effects associate': 'commands/cis-splice-effects-associate.md'
     - 'cis-ase identify': 'commands/cis-ase-identify.md'
     - 'junctions extract': 'commands/junctions-extract.md'
     - 'junctions annotate': 'commands/junctions-annotate.md'
