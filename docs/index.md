@@ -1,10 +1,7 @@
 # RegTools
 
-<<<<<<< HEAD
-RegTools is a set of tools that integrate DNA-seq and RNA-seq data to help interpret mutations in a regulatory and splicing context.
-=======
-regtools is a set of tools that integrate DNA-seq and RNA-seq data to help interpret mutations in a regulatory and splicing context. You can find the source code at our [GitHub repository](https://github.com/griffithlab/regtools) or just use our [Docker image](https://hub.docker.com/r/griffithlab/regtools/) without need for installation.
->>>>>>> 1f998a6848ebc8fabb738d75dd1bd2413ca9b6b4
+
+RegTools is a set of tools that integrate DNA-seq and RNA-seq data to help interpret mutations in a regulatory and splicing context. You can find the source code at our [GitHub repository](https://github.com/griffithlab/regtools) or just use our [Docker image](https://hub.docker.com/r/griffithlab/regtools/) without need for installation.
 
 ##Features
 
@@ -39,9 +36,9 @@ For information about the individual RegTools commands, please see [the Commands
 ##Citation
 You can find a bioRxiv preprint describing our intial validation of RegTools [here](https://www.biorxiv.org/content/10.1101/436634v2)
 
-##Data availibity
+##Data availability
 We have recently applied RegTools to the TCGA data. As part of our commitment to open-access data sharing, we have 
-made the output files from `junctions annotate` and `cis-splice-effects identify` available for download via AWS S3. 
+made the output files from `junctions annotate` and `cis-splice-effects identify` available for download via AWS S3. For information on how to download this data, please refer to our datamed.org entries located here: [junctions annotate results](https://datamed.org/display-item.php?repository=0075&id=AWlw6n1M3J68XfbUFuJP&query=regtools) and [cis-splice-effects identify results](https://datamed.org/display-item.php?repository=0075&id=AWlw6n1E3J68XfbUFuJN&query=regtools)
 
 
 ##Support
