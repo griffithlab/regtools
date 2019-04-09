@@ -1,16 +1,16 @@
 [csei]: ../images/csei_examples.png
 
 ###Synopsis
-The `cis-splice-effects identify` command is used to identify splicing misregulation events. This command takes in a list of variants in the VCF format and RNAseq alignments produced with a splice-aware aligner in the BAM format. The tool then proceeds to identify non-canonical splicing junctions near the variant sites.
+The `cis-splice-effects associate` command is used to identify splicing misregulation events. This command is similar to `cis-splice-effects identify`, but takes the BED output of `junctions extract` in lieu of a BAM file with RNA alignments. The tool then proceeds to associate non-canonical splicing junctions near the variant sites.
 
 ###Usage
-`regtools cis-splice-effects identify [options] variants.vcf alignments.bam ref.fa annotations.gtf`
+`regtools cis-splice-effects associate [options] variants.vcf junctions.bed ref.fa annotations.gtf`
 
 ###Input
 | Input                  | Description |
 | ------                 | ----------- |
 | variants.vcf | Variant call in VCF format from which to look for cis-splice-effects.|
-| alignments.bam | Aligned RNAseq BAM produced with a splice aware aligner, that has been indexed for example with `samtools index`. We have tested this command with alignments from TopHat.|
+| junctions.bed | BED file of junctions to look through for evidence of splice events. The file is expected to be in the [BED12 format](junctions-extract.md#output) of the `junctions extract` output. |
 | ref.fa          | The reference FASTA file. The donor and acceptor sequences used in the "splice-site" column of the annotated junctions are extracted from the FASTA file. |
 | annotations.gtf | The GTF file specifies the transcriptome that is used to annotate the junctions and variants. For examples, the Ensembl GTFs for release78 are [here](ftp://ftp.ensembl.org/pub/release-78/gtf/).|
 
@@ -23,7 +23,7 @@ The `cis-splice-effects identify` command is used to identify splicing misregula
 | -v STR	|	Output file containing variants annotated as splice relevant (VCF format).	|
 | -j STR	|	Output file containing the aberrant junctions in BED12 format.	|
 | -s INT	|	Strand specificity of RNA library preparation, where 0 = unstranded/XS, 1 = first-strand/RF, 2 = second-strand/FR. This option is required. If your alignments contain XS tags, these will be used in the "unstranded" mode. |
-| -w INT	|	Window size in b.p to identify splicing events in. The tool identifies events in variant.start +/- w basepairs. Default behaviour is to look at the window between previous and next exons.	|
+| -w INT	|	Window size in b.p to associate splicing events in. The tool identifies events in variant.start +/- w basepairs. Default behaviour is to look at the window between previous and next exons.	|
 | -e INT	|	Maximum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in exonic space, i.e a coding variant. [3]	|
 | -i INT	|	Maximum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in intronic space. [2]	|
 | -I	|	Annotate variants in intronic space within a transcript(not to be used with -i).	|
