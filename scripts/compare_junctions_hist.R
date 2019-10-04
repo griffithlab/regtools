@@ -9,13 +9,19 @@ library(foreach)
 library(doParallel)
 registerDoParallel(cores=32)
 
-system.time({
-# get options tag
-#argc = length(commandArgs())
-tag = paste("_", "default", sep="")
+debug = F
 
-if ( substr(tag, 2, 3) == "--"){
-  stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
+system.time({
+if (debug){
+  tag = paste("_", "default", sep="")
+} else {
+  # get options tag
+  argc = length(commandArgs())
+  tag = paste("_", commandArgs(trailingOnly = F)[argc], sep="")
+
+  if ( substr(tag, 2, 3) == "--"){
+    stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
+  }
 }
 
 ## All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
@@ -23,15 +29,16 @@ all_splicing_variants = unique(data.table::fread(paste("all_splicing_variants", 
 colnames(all_splicing_variants) <- c("chrom", "start", "end", "samples")
 
 all_splicing_variants = as.data.table(aggregate(samples ~ chrom + start + end, paste, data=all_splicing_variants))
-all_splicing_variants$key <- paste0(all_splicing_variants$chrom, ":", all_splicing_variants$start, "-", all_splicing_variants$end)
+all_splicing_variants$key <- paste0(all_splicing_variants$chrom, ":", all_splicing_variants$start, "-", all_splicing_variants$end) #this key is just a 1bp-long chrom:start-stop designed to match the regtools output variant_info column
 
-## Get all of the samples 
+## Get all of the samples
 all_samples = strsplit(scan("dir_names.tsv", what="", sep="\n"), "[[:space:]]+")
 
 ################################################################################
 ##### Helper functions #########################################################
 ################################################################################
 
+# basically combines all the cse_identify_filtered_compare files for this cohort
 get_sample_data <- function(sample){
   
   file_name = paste("samples/", sample, "/output/cse_identify_filtered_compare", tag,".tsv", sep = "")
@@ -63,8 +70,8 @@ get_sample_data <- function(sample){
 ##### Combine cse_identify_filtered_compare.tsv files for each sample ##########
 ################################################################################
 
-# this is regtools output per sample
-df <- rbindlist(lapply(all_samples, get_sample_data))
+# this is regtools compare output across samples (so it contains variant-junction lines even from samples without variant)
+df <- rbindlist(lapply(all_samples, get_sample_data)) # eventually becomes all_cse_identify_data in function a
 df$info <- paste(df$chrom, df$start, 
                  df$end, df$anchor, 
                  df$variant_info, sep = "_")
@@ -74,15 +81,14 @@ df$info <- paste(df$chrom, df$start,
 ################################################################################
 
 a <- function(x, all_cse_identify_data){
-  
-  ## Get data from samples with variant
-  variant_samples <- unlist(x$samples)
+  ## x comes from all_splicing_variants, so this just gives the samples with the variant
+  variant_samples <- unlist(x$samples) 
   
   ##############################################################################
   ##### Get junction and variant information for variant samples ###############
   ##############################################################################
   
-  ## Get the data from sample with the variant and the significant junctions
+  ## Get junctions from concatenated regtools output associated with each variant, only if the data came from a sample actually containing the variant
   variant_junctions_data <- all_cse_identify_data[all_cse_identify_data$variant_info==x$key & all_cse_identify_data$sample %in% variant_samples,]
   
   ## Make dataset with the sample and the junction/variant information
@@ -95,9 +101,9 @@ a <- function(x, all_cse_identify_data){
   variant_junctions_data$norm_score <- variant_junctions_data$score / variant_junctions_data$score.tmp
   
   # Aggregate data across junction-samples
-  if (nrow(variant_junctions_data)[[1]] > 0){
-    variant_junctions_aggr = variant_junctions_data[, list(average_norm_score=mean(norm_score),total_score=sum(score)), 
-                                                    by=list(chrom,start,end,name,strand,anchor,variant_info,info)]
+  if (nrow(variant_junctions_data)[[1]] > 0){ # names column refers to names that regtools gave each junction in the variant output (only will be multiple if variant and junction was found in multiple samples)
+    variant_junctions_aggr = variant_junctions_data[, list(names=list(name),mean_norm_score_variant=mean(norm_score),sd_norm_score_variant=sd(norm_score),norm_scores_variant=list(norm_score),total_score_variant=sum(score)), 
+                                                    by=list(chrom,start,end,strand,anchor,variant_info,info)]
     
   } else {
     return(data.table())
@@ -105,12 +111,12 @@ a <- function(x, all_cse_identify_data){
   
   ## Identify mutated samples
   a <- function(x, tempData){
-    return(paste(as.character(tempData[info == x, "sample"]$sample), collapse="|"))
+    return(paste(as.character(tempData[info == x, "sample"]$sample), collapse=",")) # for super-junction aggregated across samples with the variant, get list of samples with variant (and junction)
   }
   variant_junctions_aggr$sample <- sapply(variant_junctions_aggr$info, a, tempData = sample_data)
   
   ##############################################################################
-  ##### Get junction and variant information for non-variant samples###############
+  ##### Get junction and variant information for non-variant samples ###########
   ##############################################################################
   
   ## Samples without variant
@@ -130,12 +136,21 @@ a <- function(x, all_cse_identify_data){
   colnames(summed_non_variant_scores) <- c("sample", "score.tmp")
   non_variant_junctions_data <- merge(non_variant_junctions_data, summed_non_variant_scores, by="sample")
   non_variant_junctions_data$norm_score <- non_variant_junctions_data$score / non_variant_junctions_data$score.tmp
-  
-  
 
+  # Aggregate data across junction-samples
+  if (nrow(variant_junctions_data)[[1]] > 0){
+    non_variant_junctions_aggr = non_variant_junctions_data[, list(mean_norm_score_non=mean(norm_score),sd_norm_score_non=sd(norm_score),norm_scores_non=sd(norm_score),total_score_non=sum(score)), 
+                                                    by=list(chrom,start,end,strand,anchor,variant_info,info)]
+  } else {
+    return(data.table())
+  }
   
   # Generate histogram of normalized junction scores
   collapsed_norm_scores = non_variant_junctions_data[, list(norm_scores=list(norm_score)), by=list(chrom,start,end,strand)]
+  
+  # Add non-variant sample aggregate stats to output
+  variant_junctions_aggr = merge(x=variant_junctions_aggr, y=non_variant_junctions_aggr,by= 
+                c("chrom","start","end","strand","anchor","variant_info","info"),all.x=T)
   
   # split out what p-values can be calculated on vs not
   collapsed_norm_scores$key <- paste(collapsed_norm_scores$chrom, collapsed_norm_scores$start, collapsed_norm_scores$end, collapsed_norm_scores$strand, sep='.')
@@ -149,7 +164,7 @@ a <- function(x, all_cse_identify_data){
     start = trimws(junction_data[["start"]])
     end = trimws(junction_data[["end"]])
     strand = trimws(junction_data[["strand"]])
-    variant_norm_score = junction_data[["average_norm_score"]]
+    variant_norm_score = junction_data[["mean_norm_score_variant"]]
     ### pass this variable
     i = which(collapsed_norm_scores$chrom == chrom & collapsed_norm_scores$start == start & collapsed_norm_scores$end == end & collapsed_norm_scores$strand == strand)  
     if (length(i)){
@@ -186,16 +201,33 @@ a <- function(x, all_cse_identify_data){
     variant_junctions_aggr <- variant_junctions_aggr_norun_pvalues
   }
   
-  return(variant_junctions_aggr)
-  
+  return(variant_junctions_aggr) 
 }
 
-regtools_data <- adply(all_splicing_variants, 1, a, all_cse_identify_data=df, .parallel=TRUE)
+# for each iteration (i.e. line in all_splicing_variants),
+# return a dataframe of regtools info and stats, basically what you end up seeing in regtools_data
+# so the samples column comes from all_splicing_variants, since adply uses rbind.fill, which fills in missing columns
+regtools_data <- adply(all_splicing_variants, 1, a, all_cse_identify_data=df, .parallel=!debug)
 
-#regtools_data <- rbindlist(regtools_data, fill=TRUE)
+paste_commas <- function(v){
+  return(paste(v,collapse = ","))
+}
 
 regtools_data <- regtools_data[order(anchor, sample, pvalue)]
-regtools_data$samples <- paste(regtools_data$samples)
-})
-write.table(regtools_data, file=paste("compare_junctions/hist/", "junction_pvalues", tag, ".tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
+regtools_data$norm_scores_variant <- unlist(lapply(regtools_data$norm_scores_variant,paste_commas))
+regtools_data$norm_scores_non <- unlist(lapply(regtools_data$norm_scores_non,paste_commas))
+regtools_data$samples <- unlist(lapply(regtools_data$samples,paste_commas))
+regtools_data$names <- unlist(lapply(regtools_data$names,paste_commas))
+regtools_data$sd_norm_score_variant[is.na(regtools_data$sd_norm_score_variant)] = 0
+regtools_data$mean_norm_score_non[is.na(regtools_data$mean_norm_score_non)] = 0
+regtools_data$sd_norm_score_non[is.na(regtools_data$sd_norm_score_non)] = 0
+regtools_data$total_score_variant[is.na(regtools_data$total_score_variant)] = 0
+regtools_data$total_score_non[is.na(regtools_data$total_score_non)] = 0
 
+regtools_data = subset(regtools_data, select = !(names(regtools_data) %in% c("key")))
+colnames(regtools_data)[colnames(regtools_data)=="sample"] <- "variant_junction_samples"
+colnames(regtools_data)[colnames(regtools_data)=="samples"] <- "variant_samples"
+colnames(regtools_data)[colnames(regtools_data)=="info"] <- "variant_junction_info"
+})
+
+write.table(regtools_data, file=paste("compare_junctions/hist/", "junction_pvalues", tag, ".tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
