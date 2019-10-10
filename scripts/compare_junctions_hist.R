@@ -139,7 +139,7 @@ a <- function(x, all_cse_identify_data){
 
   # Aggregate data across junction-samples
   if (nrow(variant_junctions_data)[[1]] > 0){
-    non_variant_junctions_aggr = non_variant_junctions_data[, list(mean_norm_score_non=mean(norm_score),sd_norm_score_non=sd(norm_score),norm_scores_non=sd(norm_score),total_score_non=sum(score)), 
+    non_variant_junctions_aggr = non_variant_junctions_data[, list(mean_norm_score_non=mean(norm_score),sd_norm_score_non=sd(norm_score),norm_scores_non=list(norm_score),total_score_non=sum(score)), 
                                                     by=list(chrom,start,end,strand,anchor,variant_info,info)]
   } else {
     return(data.table())
