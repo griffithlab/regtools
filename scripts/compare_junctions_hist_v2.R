@@ -6,11 +6,9 @@ setwd("~/Desktop/regtools/CHOL")
 
 # load libraries
 library(data.table)
-library(graphics)
-library(plyr)
-library(foreach)
-library(doParallel)
-registerDoParallel(cores=4)
+library(profvis)
+
+
 
 debug = F
 
@@ -58,11 +56,10 @@ get_sample_data <- function(sample){
 
 # this is regtools compare output across samples (so it contains variant-junction lines even from samples without variant)
 dt <- rbindlist(lapply(all_samples, get_sample_data))
-dt <- dt[, lapply(.SD, function(x) unlist(tstrsplit(x, ",", fixed=TRUE))),
-                                       by = c("chrom", "start", "end", "name", "score", "strand",
-                                              "splice_site", "acceptors_skipped", "exons_skipped",
-                                              "donors_skipped", "anchor", "known_donor", "known_acceptor",
-                                              "known_junction", "genes", "transcripts", "sample")][!is.na(variant_info)]
+dt <- dt[!is.na(variant_info)]
+dt <- dt[, variant_info := as.list(strsplit(variant_info, ",", fixed=TRUE))]
+#dt <- dt[,.(variant_info = unlist(variant_info)), by = setdiff(names(dt), 'variant_info')]
+dt <- dt[rep(dt[,.I], lengths(variant_info))][, variant_info := unlist(dt$variant_info)][]
 
 dt$info <- paste(dt$chrom, dt$start, 
                  dt$end, dt$anchor, 
