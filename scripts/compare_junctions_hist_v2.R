@@ -43,12 +43,15 @@ all_samples = strsplit(scan("dir_names.tsv", what="", sep="\n"), "[[:space:]]+")
 ################################################################################
 
 # basically combines all the cse_identify_filtered_compare files for this cohort
-get_sample_data <- function(sample){
+get_sample_data <- function(sample, all_splicing_variants){
   file_name = paste("samples/", sample, "/output/cse_identify_filtered_compare_", tag,".tsv", sep = "")
   cse_identify_data = data.table::fread(file_name, sep = '\t', header = T, stringsAsFactors = FALSE, strip.white = TRUE)
   cse_identify_data$sample <- sample
   cse_identify_data <- cse_identify_data[,.(sample,variant_info,chrom,start,end,strand,anchor,score,name)]
-  print(sample)
+  cse_identify_data <- cse_identify_data[!is.na(variant_info)]
+  cse_identify_data <- cse_identify_data[, variant_info := as.list(strsplit(variant_info, ",", fixed=TRUE))]
+  cse_identify_data <- cse_identify_data[rep(cse_identify_data[,.I], lengths(variant_info))][, variant_info := unlist(cse_identify_data$variant_info)][]
+  cse_identify_data <- cse_identify_data[variant_info %chin% all_splicing_variants$key]
   return(cse_identify_data)
 }
 
@@ -57,13 +60,7 @@ get_sample_data <- function(sample){
 ################################################################################
 
 # this is regtools compare output across samples (so it contains variant-junction lines even from samples without variant)
-dt <- rbindlist(lapply(all_samples, get_sample_data))
-print("test1")
-dt <- dt[!is.na(variant_info)]
-dt <- dt[, variant_info := as.list(strsplit(variant_info, ",", fixed=TRUE))]
-print("test2")
-dt <- dt[rep(dt[,.I], lengths(variant_info))][, variant_info := unlist(dt$variant_info)][]
-print("test3")
+dt <- rbindlist(lapply(all_samples, get_sample_data, all_splicing_variants=all_splicing_variants))
 
 dt[,info := paste(chrom, start, end, anchor, variant_info, sep="_")]
 
@@ -72,16 +69,14 @@ dt[,info := paste(chrom, start, end, anchor, variant_info, sep="_")]
 # make a sample/variant_info key
 dt[,key := paste0(variant_info, "_", sample)]
 
-# first we care about variants in all_splicing data only
-dt <- dt[variant_info %chin% all_splicing_variants$key]
-
 print("zl")
 cse_identify_v1 <- dt
-print("kc")
-cse_identify_v2 <- dt
-print("yy")
 rm(dt)
-print("another print")
+print("kc")
+cse_identify_v2 <- cse_identify_v1
+print("yy")
+
+
 
 ######### aggregate scores for variant/samples identified in cse_identify ######
 
