@@ -47,6 +47,7 @@ get_sample_data <- function(sample){
   file_name = paste("samples/", sample, "/output/cse_identify_filtered_compare_", tag,".tsv", sep = "")
   cse_identify_data = data.table::fread(file_name, sep = '\t', header = T, stringsAsFactors = FALSE, strip.white = TRUE)
   cse_identify_data$sample <- sample
+  cse_identify_data <- cse_identify_data[,.(sample,variant_info,chrom,start,end,strand,anchor,score,name)]
   return(cse_identify_data)
 }
 
@@ -58,7 +59,6 @@ get_sample_data <- function(sample){
 dt <- rbindlist(lapply(all_samples, get_sample_data))
 dt <- dt[!is.na(variant_info)]
 dt <- dt[, variant_info := as.list(strsplit(variant_info, ",", fixed=TRUE))]
-#dt <- dt[,.(variant_info = unlist(variant_info)), by = setdiff(names(dt), 'variant_info')]
 dt <- dt[rep(dt[,.I], lengths(variant_info))][, variant_info := unlist(dt$variant_info)][]
 
 dt$info <- paste(dt$chrom, dt$start, 
