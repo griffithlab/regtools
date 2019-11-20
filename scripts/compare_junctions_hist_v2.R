@@ -110,9 +110,6 @@ cse_identify_v2 <- dt
 # make a sample/variant_info key
 cse_identify_v2$key <- paste0(cse_identify_v2$variant_info, "_", cse_identify_v2$sample)
 
-# first we care about variants in all_splicing data only
-cse_identify_v2 <- cse_identify_v2[variant_info %chin% all_splicing_variants$key]
-
 # second, we just want entries where the variant is not in the sample we care about
 cse_identify_v2 <- cse_identify_v2[!key %chin% all_splicing_variants$key2]
 
@@ -120,10 +117,6 @@ print("test5")
 
 cse_identify_v2[,score.tmp := sum(score), by=.(sample, variant_info)]
 cse_identify_v2[,norm_score := score/score.tmp, by=.(sample, variant_info)]
-
-# work on variants which have a sample to go with them first
-cse_identify_v2 <- cse_identify_v2[variant_info %chin% all_splicing_variants$key]
-
 
 # this will work for now but can be improved I think
 a <- function(x){
