@@ -2,7 +2,7 @@
 # Rscript --vanilla compare_junctions_hist.R <tag>
 
 # set dir
-setwd("~/Desktop/regtools/CHOL")
+setwd("~/Desktop/CHOL")
 
 # load libraries
 library(data.table)
@@ -140,14 +140,17 @@ rm(cse_identify_v1)
 rm(cse_identify_v2)
 
 # zeroes need to be added in for some samples
-a <- function(x, y){
-  toAdd <- y - length(x)
+a <- function(x, y, z){
+  toAdd <- y - length(x) - length(z)
   toAdd <- rep(0.0000000, toAdd)
   x <- c(x, toAdd)
   return(x)
 }
-regtools_data$norm_scores_non <- lapply(regtools_data$norm_scores_non, a, length(all_samples))
+x <- mapply(a, regtools_data$norm_scores_non, length(all_samples), regtools_data$samples)
+x = split(x, rep(1:ncol(x), each = nrow(x)))
+regtools_data$norm_scores_non = x
 print("test7")
+
 ################ calculate p-values ############################################
 
 a <- function(x){
@@ -175,9 +178,23 @@ print("test8")
 paste_commas <- function(v){
    return(paste(v,collapse = ","))
 }
-
 regtools_data$norm_scores_variant <- unlist(lapply(regtools_data$norm_scores_variant,paste_commas))
 regtools_data$norm_scores_non <- unlist(lapply(regtools_data$norm_scores_non,paste_commas))
-write.table(regtools_data, file=paste("compare_junctions/hist/", "junction_pvalues", tag, ".tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
+columns_to_keep = c('samples', "chrom.x", "start.x", "end.x", 'strand.x', 'anchor.x', 'variant_info.x', 'names', 'info',
+                    'mean_norm_score_variant', 'sd_norm_score_variant', 'norm_scores_variant', 'total_score_variant', 
+                    'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non', 'total_score_non', 
+                    'p_value')
+regtools_data = subset(regtools_data, select=columns_to_keep)
+colnames(regtools_data) <- c("samples", "chrom", "start", "end", "strand", "anchor", "variant_info",
+                             "names", 'variant_junction_info', "mean_norm_score_variant", "sd_norm_score_variant",
+                             "norm_scores_variant", "total_score_variant", 'mean_norm_score_non', 'sd_norm_score_non',
+                             'norm_scores_non', 'total_score_non', 'p_value')
+regtools_data$sd_norm_score_variant[is.na(regtools_data$sd_norm_score_variant)] = 0
+regtools_data$mean_norm_score_non[is.na(regtools_data$mean_norm_score_non)] = 0
+regtools_data$sd_norm_score_non[is.na(regtools_data$sd_norm_score_non)] = 0
+regtools_data$total_score_variant[is.na(regtools_data$total_score_variant)] = 0
+regtools_data$total_score_non[is.na(regtools_data$total_score_non)] = 0
+
+write.table(regtools_data, file=paste("compare_junctions/hist/", "junction_pvalues_", tag, ".tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
 
 
