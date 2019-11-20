@@ -65,20 +65,27 @@ print("test2")
 dt <- dt[rep(dt[,.I], lengths(variant_info))][, variant_info := unlist(dt$variant_info)][]
 print("test3")
 
-dt$info <- paste(dt$chrom, dt$start, 
-                 dt$end, dt$anchor, 
-                 dt$variant_info, sep = "_")
+dt[,info := paste(chrom, start, end, anchor, variant_info, sep="_")]
 
+################ subset out entries where we can for now #######################
 
-############### new enhancements start here ####################################
+# make a sample/variant_info key
+dt[,key := paste0(variant_info, "_", sample)]
+
+# first we care about variants in all_splicing data only
+dt <- dt[variant_info %chin% all_splicing_variants$key]
+
+print("zl")
+cse_identify_v1 <- dt
+print("kc")
+cse_identify_v2 <- dt
+print("yy")
+rm(dt)
+print("another print")
 
 ######### aggregate scores for variant/samples identified in cse_identify ######
 
-# save a copy
-cse_identify_v1 <- dt
-
 # key files with variant and sample keys
-cse_identify_v1$key <- paste0(cse_identify_v1$variant_info, "_", cse_identify_v1$sample)
 all_splicing_variants$key2 <- paste0(all_splicing_variants$key, "_",all_splicing_variants$samples)
 
 # work on variants which have a sample to go with them first
@@ -103,15 +110,6 @@ colnames(cse_identify_v1) <- c("samples", "key", "chrom", "start", "end", "stran
                                "norm_scores_variant", "total_score_variant")
 
 ################ aggrregate variants with no sample ############################
-
-# save a copy
-cse_identify_v2 <- dt
-
-# make a sample/variant_info key
-cse_identify_v2$key <- paste0(cse_identify_v2$variant_info, "_", cse_identify_v2$sample)
-
-# first we care about variants in all_splicing data only
-cse_identify_v2 <- cse_identify_v2[variant_info %chin% all_splicing_variants$key]
 
 # second, we just want entries where the variant is not in the sample we care about
 cse_identify_v2 <- cse_identify_v2[!key %chin% all_splicing_variants$key2]
