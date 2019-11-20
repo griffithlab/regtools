@@ -48,6 +48,7 @@ get_sample_data <- function(sample){
   cse_identify_data = data.table::fread(file_name, sep = '\t', header = T, stringsAsFactors = FALSE, strip.white = TRUE)
   cse_identify_data$sample <- sample
   cse_identify_data <- cse_identify_data[,.(sample,variant_info,chrom,start,end,strand,anchor,score,name)]
+  print(sample)
   return(cse_identify_data)
 }
 
@@ -57,9 +58,12 @@ get_sample_data <- function(sample){
 
 # this is regtools compare output across samples (so it contains variant-junction lines even from samples without variant)
 dt <- rbindlist(lapply(all_samples, get_sample_data))
+print("test1")
 dt <- dt[!is.na(variant_info)]
 dt <- dt[, variant_info := as.list(strsplit(variant_info, ",", fixed=TRUE))]
+print("test2")
 dt <- dt[rep(dt[,.I], lengths(variant_info))][, variant_info := unlist(dt$variant_info)][]
+print("test3")
 
 dt$info <- paste(dt$chrom, dt$start, 
                  dt$end, dt$anchor, 
@@ -88,6 +92,8 @@ cse_identify_v1[,sd_norm_score_variant := sd(score_norm), .(sample,variant_info,
 cse_identify_v1[,total_score_variant := sum(score), .(sample,variant_info,chrom,start,end,strand,anchor,info)]
 cse_identify_v1 <- cse_identify_v1
 
+print("test4")
+
 # subset and rename columns to match the original output
 cse_identify_v1 <- cse_identify_v1[,c("sample", "variant_info", "chrom", "start", "end", "strand", "anchor",
                                       "variant_info", "info", "name", "mean_norm_score_variant",
@@ -110,6 +116,8 @@ cse_identify_v2 <- cse_identify_v2[variant_info %chin% all_splicing_variants$key
 # second, we just want entries where the variant is not in the sample we care about
 cse_identify_v2 <- cse_identify_v2[!key %chin% all_splicing_variants$key2]
 
+print("test5")
+
 cse_identify_v2[,score.tmp := sum(score), by=.(sample, variant_info)]
 cse_identify_v2[,norm_score := score/score.tmp, by=.(sample, variant_info)]
 
@@ -130,6 +138,8 @@ cse_identify_v2 <- split(cse_identify_v2, cse_identify_v2$variant_info)
 cse_identify_v2 <- lapply(cse_identify_v2, a)
 cse_identify_v2 <- rbindlist(cse_identify_v2)
 
+print("test6")
+
 ################ Merge the two DT's we've been working on together #############
 
 regtools_data <- merge(cse_identify_v1, cse_identify_v2, by="info", all.x = TRUE)
@@ -142,7 +152,7 @@ a <- function(x, y){
   return(x)
 }
 regtools_data$norm_scores_non <- lapply(regtools_data$norm_scores_non, a, length(all_samples))
-
+print("test7")
 ################ calculate p-values ############################################
 
 a <- function(x){
@@ -164,7 +174,7 @@ a <- function(x){
 }
 
 regtools_data$p_value <- apply(regtools_data, 1, a)
-
+print("test8")
 
 
 paste_commas <- function(v){
