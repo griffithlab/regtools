@@ -1,35 +1,27 @@
 # compare_junctions_hist.R
 # Rscript --vanilla compare_junctions_hist.R <tag>
 
-# set dir
-setwd("~/Desktop/CHOL")
 
 # load libraries
 library(data.table)
-library(profvis)
-
-
 
 debug = F
 
-# system.time({
-# if (debug){
-#   tag = paste("_", "default", sep="")
-# } else {
-#   # get options tag
-#   argc = length(commandArgs())
-#   tag = paste("_", commandArgs(trailingOnly = F)[argc], sep="")
-# 
-#   if ( substr(tag, 2, 3) == "--"){
-#     stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
-#   }
-# }
-
-tag <- "default"
-sample <- "TCGA-3X-AAV9-01A"
+system.time({
+if (debug){
+  tag = paste("_", "default", sep="")
+} else {
+  # get options tag
+  args = commandArgs(trailingOnly = TRUE)
+  tag = args[1]
+  input_file = args[2]
+  if ( substr(tag, 2, 3) == "--"){
+    stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
+  }
+}
 
 ## All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
-all_splicing_variants = unique(data.table::fread(paste("all_splicing_variants_", tag, ".bed",sep=""), sep = '\t', header = T, stringsAsFactors = FALSE))
+all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE))
 colnames(all_splicing_variants) <- c("chrom", "start", "end", "samples")
 
 # all_splicing_variants = as.data.table(aggregate(samples ~ chrom + start + end, paste, data=all_splicing_variants)) # I don't think this is doing anything?
@@ -196,6 +188,6 @@ regtools_data$sd_norm_score_non[is.na(regtools_data$sd_norm_score_non)] = 0
 regtools_data$total_score_variant[is.na(regtools_data$total_score_variant)] = 0
 regtools_data$total_score_non[is.na(regtools_data$total_score_non)] = 0
 
-write.table(regtools_data, file=paste("compare_junctions/hist/", "junction_pvalues_", tag, ".tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
+write.table(regtools_data, file=paste(input_file, "_out.tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
 
-
+})
