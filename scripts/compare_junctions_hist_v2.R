@@ -173,7 +173,7 @@ paste_commas <- function(v){
 }
 regtools_data$norm_scores_variant <- unlist(lapply(regtools_data$norm_scores_variant,paste_commas))
 regtools_data$norm_scores_non <- unlist(lapply(regtools_data$norm_scores_non,paste_commas))
-columns_to_keep = c('samples', "chrom.x", "start.x", "end.x", 'strand.x', 'anchor.x', 'variant_info.x', 'info',
+columns_to_keep = c('sample', "chrom.x", "start.x", "end.x", 'strand.x', 'anchor.x', 'variant_info.x', 'info',
                     'names', 'mean_norm_score_variant', 'sd_norm_score_variant', 'norm_scores_variant',
                     'total_score_variant', 'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non',
                     'total_score_non', 'p_value')
