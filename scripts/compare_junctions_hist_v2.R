@@ -22,7 +22,7 @@ if (debug){
 
 ## All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
 input_file = args[2]
-all_splicing_variants = unique(data.table::fread(str(input_file)), sep = '\t', header = T, stringsAsFactors = FALSE)
+all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE)
 colnames(all_splicing_variants) <- c("chrom", "start", "end", "samples")
 
 # all_splicing_variants = as.data.table(aggregate(samples ~ chrom + start + end, paste, data=all_splicing_variants)) # I don't think this is doing anything?
