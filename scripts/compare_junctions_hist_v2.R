@@ -21,7 +21,8 @@ if (debug){
 }
 
 ## All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
-all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE))
+input_file = args[2]
+all_splicing_variants = unique(data.table::fread(str(input_file)), sep = '\t', header = T, stringsAsFactors = FALSE)
 colnames(all_splicing_variants) <- c("chrom", "start", "end", "samples")
 
 # all_splicing_variants = as.data.table(aggregate(samples ~ chrom + start + end, paste, data=all_splicing_variants)) # I don't think this is doing anything?
@@ -172,16 +173,15 @@ paste_commas <- function(v){
 }
 regtools_data$norm_scores_variant <- unlist(lapply(regtools_data$norm_scores_variant,paste_commas))
 regtools_data$norm_scores_non <- unlist(lapply(regtools_data$norm_scores_non,paste_commas))
-regtools_data = merge(x=regtools_data, y=all_splicing_variants, by.x=c('variant_info.x'), by.y=c('key'),all.x=T)
 columns_to_keep = c('samples', "chrom.x", "start.x", "end.x", 'strand.x', 'anchor.x', 'variant_info.x', 'info',
                     'names', 'mean_norm_score_variant', 'sd_norm_score_variant', 'norm_scores_variant',
-                    'total_score_variant', 'sample', 'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non',
+                    'total_score_variant', 'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non',
                     'total_score_non', 'p_value')
 regtools_data = subset(regtools_data, select=columns_to_keep)
 colnames(regtools_data) <- c("variant_samples", "chrom", "start", "end", "strand", "anchor", "variant_info",
                             'variant_junction_info', "names","mean_norm_score_variant", "sd_norm_score_variant",
-                             "norm_scores_variant", "total_score_variant", 'variant_junction_samples', 
-                            'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non', 'total_score_non', 'p_value')
+                             "norm_scores_variant", "total_score_variant", 'mean_norm_score_non',
+                            'sd_norm_score_non', 'norm_scores_non', 'total_score_non', 'p_value')
 regtools_data$sd_norm_score_variant[is.na(regtools_data$sd_norm_score_variant)] = 0
 regtools_data$mean_norm_score_non[is.na(regtools_data$mean_norm_score_non)] = 0
 regtools_data$sd_norm_score_non[is.na(regtools_data$sd_norm_score_non)] = 0
