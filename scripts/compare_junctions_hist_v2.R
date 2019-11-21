@@ -20,7 +20,10 @@ if (debug){
   }
 }
 
-## All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
+# tag = 'default'
+# input_file = '~/Desktop/CHOL/all_splicing_variants_default.bed'
+  
+# All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
 input_file = args[2]
 all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE)
 colnames(all_splicing_variants) <- c("chrom", "start", "end", "samples")
