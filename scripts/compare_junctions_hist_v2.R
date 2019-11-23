@@ -4,25 +4,27 @@
 
 # load libraries
 library(data.table)
+library(plyr)
+library(tidyverse)
 
 debug = F
 
-system.time({
-if (debug){
-  tag = paste("_", "default", sep="")
-} else {
-  # get options tag
-  args = commandArgs(trailingOnly = TRUE)
-  tag = args[1]
-  input_file = args[2]
-  if ( substr(tag, 2, 3) == "--"){
-    stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
-  }
-}
+# system.time({
+# if (debug){
+#   tag = paste("_", "default", sep="")
+# } else {
+#   # get options tag
+#   args = commandArgs(trailingOnly = TRUE)
+#   tag = args[1]
+#   input_file = args[2]
+#   if ( substr(tag, 2, 3) == "--"){
+#     stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
+#   }
+# }
+ 
+tag = 'I'
+input_file = '~/Desktop/CHOL/all_splicing_variants_I.bed'
 
-# tag = 'I'
-# input_file = '~/Desktop/CHOL/all_splicing_variants_I.bed'
-#   
 # All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
 input_file = args[2]
 all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE)
@@ -84,18 +86,21 @@ cse_identify_v1 <- cse_identify_v1[key %chin% all_splicing_variants$key2]
 
 # perform the required calculations for this subset
 cse_identify_v1[,score.tmp := sum(score), by=.(sample, variant_info)]
-cse_identify_v1[,score_norm := score/score.tmp]
+cse_identify_v1[,score_norm := score/score.tmp, by=.(sample, variant_info)]
 cse_identify_v1[,mean_norm_score_variant := mean(score_norm), by=.(sample,variant_info,chrom,start,end,strand,anchor,info)]
-cse_identify_v1[,sd_norm_score_variant := sd(score_norm), .(sample,variant_info,chrom,start,end,strand,anchor,info)]
-cse_identify_v1[,total_score_variant := sum(score), .(sample,variant_info,chrom,start,end,strand,anchor,info)]
+cse_identify_v1[,sd_norm_score_variant := sd(score_norm), .(variant_info,chrom,start,end,strand,anchor,info)]
+cse_identify_v1[,total_score_variant := sum(score), .(variant_info,chrom,start,end,strand,anchor,info)]
 cse_identify_v1 <- cse_identify_v1
+cse_identify_v1_tmp = ddply(cse_identify_v1, .(variant_info, chrom, start, end, strand, anchor, info), summarise, mean_norm_score_variant=mean(mean_norm_score_variant), name=paste(name,collapse = ','), sample=paste(sample,collapse = ','), norm_scores_variant=paste(score_norm, collapse = ','))
+cse_identify_v1 = merge(cse_identify_v1, cse_identify_v1_tmp, by=c('variant_info', 'chrom', "start", "end", "strand", "anchor", 'info'))
+rm(cse_identify_v1_tmp)
 
 print("test4")
 
 # subset and rename columns to match the original output
-cse_identify_v1 <- cse_identify_v1[,c("sample", "variant_info", "chrom", "start", "end", "strand", "anchor",
-                                      "variant_info", "info", "name", "mean_norm_score_variant",
-                                      "sd_norm_score_variant", "score_norm", "total_score_variant")]
+cse_identify_v1 <- cse_identify_v1[,c("sample.y", "variant_info", "chrom", "start", "end", "strand", "anchor",
+                                      "variant_info", "info", "name.y", "mean_norm_score_variant.y",
+                                      "sd_norm_score_variant", "norm_scores_variant", "total_score_variant")]
 colnames(cse_identify_v1) <- c("sample", "key", "chrom", "start", "end", "strand", "anchor", "variant_info",
                                "info", "names", "mean_norm_score_variant", "sd_norm_score_variant",
                                "norm_scores_variant", "total_score_variant")
@@ -137,7 +142,8 @@ rm(cse_identify_v2)
 
 # zeroes need to be added in for some samples
 a <- function(x, y, z){
-  toAdd <- y - length(x) - length(z)
+  toAdd <- y - length(x) - str_count(z, ',') - 1
+  # browser()
   toAdd <- rep(0.0000000, toAdd)
   x <- c(x, toAdd)
   return(x)
@@ -150,18 +156,23 @@ print("test7")
 ################ calculate p-values ############################################
 
 a <- function(x){
-  variant_norm_score = as.numeric(x$norm_scores_variant)
-  if(length(x$norm_scores_non) <= 1){
+  variant_norm_score = as.numeric(unlist(strsplit(x[['norm_scores_variant']], ',', fixed=TRUE)))
+  if(length(x[['norm_scores_non']]) <= 1){
     return(0)
-  } 
+  }
+
   all_norm_scores = c(x$norm_scores_non, variant_norm_score)
   countable = rank(all_norm_scores)
-  non_variant_norm_scores_ranked = head(countable, -1)
-  variant_norm_score_ranked = tail(countable, 1)
+  num_samples = str_count(x$norm_scores_variant, ',') + 1
+  non_variant_norm_scores_ranked = head(countable, (-1 * num_samples))
+  variant_norm_score_ranked = tail(countable, num_samples)
   histinfo = hist(non_variant_norm_scores_ranked, 
                   breaks = seq(0.5, max(non_variant_norm_scores_ranked)+1.5, by=1), plot=F)
   mids = histinfo$mids
   cd = cumsum(histinfo$density)
+  # if(x$info == "chr1_729955_735423_D_chr1:809966-809967"){
+  #   browser()
+  # }
   underestimate = max(which(mids <= variant_norm_score_ranked))
   pvalue = 1-cd[underestimate]
   return(pvalue)
@@ -176,22 +187,23 @@ paste_commas <- function(v){
 }
 regtools_data$norm_scores_variant <- unlist(lapply(regtools_data$norm_scores_variant,paste_commas))
 regtools_data$norm_scores_non <- unlist(lapply(regtools_data$norm_scores_non,paste_commas))
-regtools_data = merge(x=regtools_data, y=all_splicing_variants, by.x=c('variant_info.x'), by.y=c('key'),all.x=T)
-columns_to_keep = c('samples', "chrom.x", "start.x", "end.x", 'strand.x', 'anchor.x', 'variant_info.x', 'info',
+columns_to_keep = c('sample', "chrom.x", "start.x", "end.x", 'strand.x', 'anchor.x', 'variant_info.x', 'info',
                     'names', 'mean_norm_score_variant', 'sd_norm_score_variant', 'norm_scores_variant',
-                    'total_score_variant', 'sample', 'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non',
+                    'total_score_variant', 'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non',
                     'total_score_non', 'p_value')
 regtools_data = subset(regtools_data, select=columns_to_keep)
 colnames(regtools_data) <- c("variant_samples", "chrom", "start", "end", "strand", "anchor", "variant_info",
                              'variant_junction_info', "names","mean_norm_score_variant", "sd_norm_score_variant",
-                             "norm_scores_variant", "total_score_variant", 'variant_junction_samples', 
+                             "norm_scores_variant", "total_score_variant", 
                              'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non', 'total_score_non', 'p_value')
 regtools_data$sd_norm_score_variant[is.na(regtools_data$sd_norm_score_variant)] = 0
 regtools_data$mean_norm_score_non[is.na(regtools_data$mean_norm_score_non)] = 0
 regtools_data$sd_norm_score_non[is.na(regtools_data$sd_norm_score_non)] = 0
 regtools_data$total_score_variant[is.na(regtools_data$total_score_variant)] = 0
 regtools_data$total_score_non[is.na(regtools_data$total_score_non)] = 0
+regtools_data = regtools_data %>% distinct()
+
 
 write.table(regtools_data, file=paste(input_file, "_out.tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
 
-})
+# })
