@@ -229,7 +229,7 @@ void JunctionsExtractor::print_all_junctions(ostream& out) {
 
 //Get the strand from the XS aux tag
 void JunctionsExtractor::set_junction_strand_XS(bam1_t *aln, Junction& j1) {
-    uint8_t *p = bam_aux_get(aln, "XS");
+    uint8_t *p = bam_aux_get(aln, strand_tag_.c_str());
     if(p != NULL) {
         char strand = bam_aux2A(p);
         strand ? j1.strand = string(1, strand) : j1.strand = string(1, '?');
