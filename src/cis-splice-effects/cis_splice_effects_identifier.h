@@ -80,6 +80,8 @@ class CisSpliceEffectsIdentifier {
         bool skip_single_exon_genes_;
         //strandness of data
         int strandness_;
+        //tag used in BAM to denote strand, default "XS"
+        string strand_tag_;
         //Minimum anchor length for junctions
         //Junctions need atleast this many bp overlap
         // on both ends.
@@ -101,6 +103,7 @@ class CisSpliceEffectsIdentifier {
                                        all_exonic_space_(false),
                                        skip_single_exon_genes_(true),
                                        strandness_(-1),
+                                       strand_tag_("XS"),
                                        min_anchor_length_(8),
                                        min_intron_length_(70),
                                        max_intron_length_(500000) {}

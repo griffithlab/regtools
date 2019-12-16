@@ -40,6 +40,7 @@ void CisSpliceEffectsIdentifier::usage(ostream& out) {
     out << "\t\t" << "-j STR\tOutput file containing the aberrant junctions in BED12 format." << endl;
     out << "\t\t" << "-s INT\tStrand specificity of RNA library preparation \n"
         << "\t\t\t " << "(0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR). REQUIRED" << endl;
+    out << "\t\t" << "-t STR\tTag used in bam to label strand. [XS]" << endl;
     out << "\t\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum \n"
         << "\t\t\t " << "anchor length on both sides are reported. [8]" << endl;
     out << "\t\t" << "-m INT\tMinimum intron length. [70]" << endl;
@@ -103,7 +104,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     stringstream help_ss;
     char c;
-    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:IShs:a:m:M:")) != -1) {
+    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:ISht:s:a:m:M:")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
@@ -137,6 +138,9 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
                 throw common::cmdline_help_exception(help_ss.str());
             case 's':
                 strandness_ = atoi(optarg);
+                break;
+            case 't':
+                strand_tag_ = string(optarg);
                 break;
             case 'a':
                 min_anchor_length_ = atoi(optarg);
@@ -246,7 +250,7 @@ void CisSpliceEffectsIdentifier::identify() {
             if(write_annotated_variants_)
                 va.write_annotation_output(v1);
             //Extract junctions near this variant
-            JunctionsExtractor je1(bam_, variant_region, strandness_, min_anchor_length_, min_intron_length_, max_intron_length_);
+            JunctionsExtractor je1(bam_, variant_region, strandness_, strand_tag_, min_anchor_length_, min_intron_length_, max_intron_length_);
             je1.identify_junctions_from_BAM();
             vector<Junction> junctions = je1.get_all_junctions();
             //Add all the junctions to the unique set
