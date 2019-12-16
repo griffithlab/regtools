@@ -41,7 +41,7 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int c;
     stringstream help_ss;
-    while((c = getopt(argc, argv, "ha:m:M:o:r:s:")) != -1) {
+    while((c = getopt(argc, argv, "ha:m:M:o:r:t:s:")) != -1) {
         switch(c) {
             case 'a':
                 min_anchor_length_ = atoi(optarg);
@@ -57,6 +57,9 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
                 break;
             case 'r':
                 region_ = string(optarg);
+                break;
+            case 't':
+                strand_tag_ = string(optarg);
                 break;
             case 'h':
                 usage(help_ss);
@@ -104,6 +107,8 @@ int JunctionsExtractor::usage(ostream& out) {
         << "\t\t\t " << "in \"chr:start-end\" format. Entire BAM by default." << endl;
     out << "\t\t" << "-s INT\tStrand specificity of RNA library preparation \n"
         << "\t\t\t " << "(0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR). REQUIRED" << endl;
+    out << "\t\t" << "-t STR\tTag used in bam to label strand. [XS]" << endl;
+        
     out << endl;
     return 0;
 }
@@ -224,7 +229,7 @@ void JunctionsExtractor::print_all_junctions(ostream& out) {
 
 //Get the strand from the XS aux tag
 void JunctionsExtractor::set_junction_strand_XS(bam1_t *aln, Junction& j1) {
-    uint8_t *p = bam_aux_get(aln, "XS");
+    uint8_t *p = bam_aux_get(aln, strand_tag_.c_str());
     if(p != NULL) {
         char strand = bam_aux2A(p);
         strand ? j1.strand = string(1, strand) : j1.strand = string(1, '?');

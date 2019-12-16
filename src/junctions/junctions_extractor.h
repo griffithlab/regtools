@@ -155,6 +155,8 @@ class JunctionsExtractor {
         string region_;
         //strandness of data; 0 = unstranded, 1 = RF, 2 = FR
         int strandness_;
+        //tag used in BAM to denote strand, default "XS"
+        string strand_tag_;
     public:
         //Default constructor
         JunctionsExtractor() {
@@ -163,6 +165,7 @@ class JunctionsExtractor {
             max_intron_length_ = 500000;
             junctions_sorted_ = false;
             strandness_ = -1;
+            strand_tag_ = "XS";
             bam_ = "NA";
             output_file_ = "NA";
             region_ = ".";
