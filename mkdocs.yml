@@ -9,5 +9,6 @@ pages:
     - 'junctions extract': 'commands/junctions-extract.md'
     - 'junctions annotate': 'commands/junctions-annotate.md'
     - 'variants annotate': 'commands/variants-annotate.md'
+- Example Workflow: 'workflow.md'
 - About: 'about.md'
 theme: mkdocs
