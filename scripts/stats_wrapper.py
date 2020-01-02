@@ -10,10 +10,15 @@ input_parser.add_argument(
     'tag',
     help="Variant tag parameter used to run RegTools.",
 )
+input_parser.add_argument(
+    'cohort_directory',
+    help="Path to directory containing cohort files.",
+)
 
 args = input_parser.parse_args()
 
 tag = args.tag
+cohort_dir = args.cohort_directory
 
 lines_per_file = 50000
 smallfile = None
@@ -30,7 +35,7 @@ with open(f'all_splicing_variants_{tag}.bed', 'r') as bigfile:
 #get chunks
 files = glob.glob('small_file_*')
 for file in files:
-    subprocess.run(f'Rscript --vanilla /home/ec2-user/workspace/regtools/scripts/compare_junctions_hist_v2.R {tag} {file}')
+    subprocess.run(f'Rscript --vanilla /home/ec2-user/workspace/regtools/scripts/compare_junctions_hist_v2.R {tag} {cohort_dir}/{file}')
 output_files = glob.glob("*_out.tsv")
 output_files.sort()  # glob lacks reliable ordering, so impose your own if output order matters
 with open(f'junction_pvalues_{tag}.tsv', 'wb') as outfile:
