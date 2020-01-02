@@ -45,7 +45,7 @@ get_sample_data <- function(sample, all_splicing_variants){
   file_name = paste("samples/", sample, "/output/cse_identify_filtered_compare_", tag,".tsv", sep = "")
   cse_identify_data = data.table::fread(file_name, sep = '\t', header = T, stringsAsFactors = FALSE, strip.white = TRUE)
   cse_identify_data$sample <- sample
-  cse_identify_data <- cse_identify_data[,.(sample,variant_info,chrom,start,end,strand,anchor,score,name)]
+  cse_identify_data <- cse_identify_data[,.(sample,variant_info,chrom,start,end,strand,anchor,score,name,genes)]
   cse_identify_data <- cse_identify_data[!is.na(variant_info)]
   cse_identify_data <- cse_identify_data[, variant_info := as.list(strsplit(variant_info, ",", fixed=TRUE))]
   cse_identify_data <- cse_identify_data[rep(cse_identify_data[,.I], lengths(variant_info))][, variant_info := unlist(cse_identify_data$variant_info)][]
@@ -99,10 +99,10 @@ print("test4")
 
 # subset and rename columns to match the original output
 cse_identify_v1 <- cse_identify_v1[,c("sample.y", "variant_info", "chrom", "start", "end", "strand", "anchor",
-                                      "variant_info", "info", "name.y", "mean_norm_score_variant.y",
+                                      "variant_info", "info", "genes","name.y", "mean_norm_score_variant.y",
                                       "sd_norm_score_variant", "norm_scores_variant", "total_score_variant")]
 colnames(cse_identify_v1) <- c("sample", "key", "chrom", "start", "end", "strand", "anchor", "variant_info",
-                               "info", "names", "mean_norm_score_variant", "sd_norm_score_variant",
+                               "info", "genes", "names", "mean_norm_score_variant", "sd_norm_score_variant",
                                "norm_scores_variant", "total_score_variant")
 
 ################ aggrregate variants with no sample ############################
@@ -188,12 +188,12 @@ paste_commas <- function(v){
 regtools_data$norm_scores_variant <- unlist(lapply(regtools_data$norm_scores_variant,paste_commas))
 regtools_data$norm_scores_non <- unlist(lapply(regtools_data$norm_scores_non,paste_commas))
 columns_to_keep = c('sample', "chrom.x", "start.x", "end.x", 'strand.x', 'anchor.x', 'variant_info.x', 'info',
-                    'names', 'mean_norm_score_variant', 'sd_norm_score_variant', 'norm_scores_variant',
+                    'genes', 'names', 'mean_norm_score_variant', 'sd_norm_score_variant', 'norm_scores_variant',
                     'total_score_variant', 'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non',
                     'total_score_non', 'p_value')
 regtools_data = subset(regtools_data, select=columns_to_keep)
-colnames(regtools_data) <- c("variant_samples", "chrom", "start", "end", "strand", "anchor", "variant_info",
-                             'variant_junction_info', "names","mean_norm_score_variant", "sd_norm_score_variant",
+colnames(regtools_data) <- c("junction_samples", "chrom", "start", "end", "strand", "anchor", "variant_info",
+                             'variant_junction_info', 'genes', "names","mean_norm_score_variant", "sd_norm_score_variant",
                              "norm_scores_variant", "total_score_variant", 
                              'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non', 'total_score_non', 'p_value')
 regtools_data$sd_norm_score_variant[is.na(regtools_data$sd_norm_score_variant)] = 0
@@ -201,6 +201,19 @@ regtools_data$mean_norm_score_non[is.na(regtools_data$mean_norm_score_non)] = 0
 regtools_data$sd_norm_score_non[is.na(regtools_data$sd_norm_score_non)] = 0
 regtools_data$total_score_variant[is.na(regtools_data$total_score_variant)] = 0
 regtools_data$total_score_non[is.na(regtools_data$total_score_non)] = 0
+all_splicing_variants <- as.data.table(all_splicing_variants)
+tmp <- all_splicing_variants[order(key)]
+tmp <- ddply(tmp, .(chrom, start, end, key), summarise, samples=paste(samples,collapse = ','))
+regtools_data = merge(regtools_data, tmp, by.x=c('variant_info'), by.y=c('key'))
+columns_to_keep = c('samples', 'variant_info', 'genes', 'junction_samples', "chrom.x", "start.x", "end.x", 'strand', 'anchor', 'variant_junction_info',
+                    'names', 'mean_norm_score_variant', 'sd_norm_score_variant', 'norm_scores_variant',
+                    'total_score_variant', 'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non',
+                    'total_score_non', 'p_value')
+regtools_data = subset(regtools_data, select=columns_to_keep)
+colnames(regtools_data) <- c('variant_samples', 'variant_info', 'genes', 'junction_samples', "chrom.x", "start.x", "end.x", 'strand', 'anchor', 'variant_junction_info',
+                             'names', 'mean_norm_score_variant', 'sd_norm_score_variant', 'norm_scores_variant',
+                             'total_score_variant', 'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non',
+                             'total_score_non', 'p_value')
 regtools_data = regtools_data %>% distinct()
 
 
