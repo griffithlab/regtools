@@ -2,6 +2,7 @@ import glob
 import subprocess
 import os
 import argparse
+import shutil
 
 input_parser = argparse.ArgumentParser(
     description="Run RegTools stats script",
