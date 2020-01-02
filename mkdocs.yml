@@ -1,4 +1,4 @@
-site_name: regtools
+site_name: RegTools
 pages:
 - Home: 'index.md'
 - Commands:
