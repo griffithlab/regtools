@@ -22,6 +22,6 @@ for tag in tags:
     #get chunks
     files = glob.glob('small_file_*')
     for file in files:
-        subprocess.run(f'Rscript --vanilla /home/ec2-user/workspace/data/compare_junctions_hist_v2.R {tag} {file}')
-    subprocess.run(f"awk 'FNR==1 && NR!=1 { while (/^<header>/) getline; } 1 {print} ' small_file*.txt > junction_pvalues_{tag}.tsv")
+        subprocess.run(f'Rscript --vanilla /home/ec2-user/workspace/regtools/scripts/compare_junctions_hist_v2.R {tag} {file}')
+    subprocess.run(f"awk 'FNR==1 && NR!=1 { while (/^<header>/) getline; } 1 {print} ' *_out.tsv > junction_pvalues_{tag}.tsv")
     os.remove('small_file*')
