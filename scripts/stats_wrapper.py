@@ -22,7 +22,7 @@ cohort_dir = args.cohort_directory
 
 lines_per_file = 50000
 smallfile = None
-with open(f'{cohort_dir}/all_splicing_variants_{tag}.tsv', 'r') as bigfile:
+with open(f'{cohort_dir}/all_splicing_variants_{tag}.bed', 'r') as bigfile:
     for lineno, line in enumerate(bigfile):
         if lineno % lines_per_file == 0:
             if smallfile:
