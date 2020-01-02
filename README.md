@@ -16,7 +16,7 @@ in a regulatory and splicing context.
 
 ## Installation
 
-Clone and install regtools by running:
+Clone and install regtools by running the following:
 ```
     git clone https://github.com/griffithlab/regtools
     cd regtools/
