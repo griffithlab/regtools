@@ -1,15 +1,29 @@
 import glob
 import subprocess
 import os
+import argparse
 
-tags = ['default', 'i50e5', 'E', 'I']
-cwd = os.getcwd()
+input_parser = argparse.ArgumentParser(
+    description="Run RegTools stats script",
+)
+input_parser.add_argument(
+    'tag',
+    help="Variant tag parameter used to run RegTools.",
+)
+input_parser.add_argument(
+    'cohort_directory',
+    help="Path to directory containing cohort files.",
+)
 
+args = input_parser.parse_args()
+
+tag = args.tag
+cohort_dir = args.cohort_directory
 
 for tag in tags:
     lines_per_file = 50000
     smallfile = None
-    with open(f'all_splicing_variants_{tag}.tsv', 'r') as bigfile:
+    with open(f'{cohort_dir}/all_splicing_variants_{tag}.tsv', 'r') as bigfile:
         for lineno, line in enumerate(bigfile):
             if lineno % lines_per_file == 0:
                 if smallfile:
