@@ -31,7 +31,7 @@ with open(f'all_splicing_variants_{tag}.bed', 'r') as bigfile:
 #get chunks
 files = glob.glob('small_file_*')
 for file in files:
-    subprocess.run(f'Rscript --vanilla /home/ec2-user/workspace/regtools/scripts/compare_junctions_hist_v2.R {tag} {cwd}/{file}')
+    subprocess.run(f'Rscript --vanilla /home/ec2-user/workspace/regtools/scripts/compare_junctions_hist_v2.R {tag} ~{cwd}/{file}')
 output_files = glob.glob("*_out.tsv")
 output_files.sort()  # glob lacks reliable ordering, so impose your own if output order matters
 with open(f'junction_pvalues_{tag}.tsv', 'wb') as outfile:
