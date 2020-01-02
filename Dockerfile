@@ -70,6 +70,3 @@ RUN make install
 
 # install R packages
 RUN R --vanilla -e 'install.packages(c("data.table", "sequenza", "plyr", "tidyverse"), repos = "http://cran.us.r-project.org")'
-
-#################################################################################
-############################ Install Python #####################################
