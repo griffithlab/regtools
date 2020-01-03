@@ -5,6 +5,7 @@
 # load libraries
 library(data.table)
 library(plyr)
+library(tidyverse)
 
 debug = F
 
@@ -20,12 +21,11 @@ if (debug){
     stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
   }
 }
- 
+
 # tag = 'I'
 # input_file = '~/Desktop/CHOL/all_splicing_variants_I.bed'
 
 # All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
-input_file = args[2]
 all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE)
 colnames(all_splicing_variants) <- c("chrom", "start", "end", "samples")
 
@@ -158,7 +158,6 @@ a <- function(x, y, z){
   return(x)
 }
 x <- mapply(a, regtools_data$norm_scores_non, length(all_samples), regtools_data$samples)
-x = split(x, rep(1:ncol(x), each = nrow(x)))
 regtools_data$norm_scores_non = x
 print("test7")
 
@@ -214,6 +213,6 @@ all_splicing_variants <- as.data.table(all_splicing_variants)
 regtools_data = regtools_data %>% distinct()
 
 
-write.table(regtools_data, file=paste(input_file, "_out.tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
+write.table(regtools_data, file=paste(input_file, "_out_test.tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
 
 })
