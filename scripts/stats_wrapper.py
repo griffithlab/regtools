@@ -28,8 +28,6 @@ with open(f'all_splicing_variants_{tag}.bed', 'r') as bigfile:
                 smallfile.close()
             small_filename = 'small_file_{}.txt'.format(lineno + lines_per_file)
             smallfile = open(small_filename, "w")
-            if num_small_file > 1:
-                smallfile.write(f'chrom\tstart\tend\tsamples')
         smallfile.write(line)
     if smallfile:
         num_small_file += 1
@@ -49,5 +47,6 @@ with open(f'junction_pvalues_{tag}.tsv', 'wb') as outfile:
             # Block copy rest of file from input to output without parsing
             shutil.copyfileobj(infile, outfile)
             print(fname + " has been imported.")
-os.remove('small_file*')
+for file in files:
+    os.remove(file)
 
