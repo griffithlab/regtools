@@ -158,7 +158,7 @@ a <- function(x, y, z){
   return(x)
 }
 x <- mapply(a, regtools_data$norm_scores_non, length(all_samples), regtools_data$samples)
-x = split(x, rep(1:ncol(x), each = nrow(x)))
+# x = split(x, rep(1:ncol(x), each = nrow(x)))
 regtools_data$norm_scores_non = x
 print("test7")
 
