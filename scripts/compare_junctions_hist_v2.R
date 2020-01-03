@@ -9,21 +9,21 @@ library(tidyverse)
 
 debug = F
 
-# system.time({
-# if (debug){
-#   tag = paste("_", "default", sep="")
-# } else {
-#   # get options tag
-#   args = commandArgs(trailingOnly = TRUE)
-#   tag = args[1]
-#   input_file = args[2]
-#   if ( substr(tag, 2, 3) == "--"){
-#     stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
-#   }
-# }
+system.time({
+if (debug){
+  tag = paste("_", "default", sep="")
+} else {
+  # get options tag
+  args = commandArgs(trailingOnly = TRUE)
+  tag = args[1]
+  input_file = args[2]
+  if ( substr(tag, 2, 3) == "--"){
+    stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
+  }
+}
 
-tag = 'I'
-input_file = '~/Desktop/CHOL/all_splicing_variants_I.bed'
+# tag = 'I'
+# input_file = '~/Desktop/CHOL/all_splicing_variants_I.bed'
 
 # All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
 all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE)
@@ -158,7 +158,6 @@ a <- function(x, y, z){
   return(x)
 }
 x <- mapply(a, regtools_data$norm_scores_non, length(all_samples), regtools_data$samples)
-# x = split(x, rep(1:ncol(x), each = nrow(x)))
 regtools_data$norm_scores_non = x
 print("test7")
 
@@ -216,4 +215,4 @@ regtools_data = regtools_data %>% distinct()
 
 write.table(regtools_data, file=paste(input_file, "_out_test.tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
 
-# })
+})
