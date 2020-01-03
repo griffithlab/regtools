@@ -17,7 +17,7 @@ args = input_parser.parse_args()
 tag = args.tag
 cwd = os.getcwd()
 
-lines_per_file = 1000
+lines_per_file = 50000
 smallfile = None
 num_small_file = 0
 with open(f'all_splicing_variants_{tag}.bed', 'r') as bigfile:
