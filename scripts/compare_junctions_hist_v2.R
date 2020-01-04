@@ -232,7 +232,7 @@ regtools_data = subset(regtools_data, select=columns_to_keep)
 colnames(regtools_data) <- c('variant_samples', 'variant_info', 'genes', 'junction_samples', "chrom", "start", "end", 'strand', 'anchor', 'variant_junction_info',
                              'names', 'mean_norm_score_variant', 'sd_norm_score_variant', 'norm_scores_variant',
                              'total_score_variant', 'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non',
-                             'total_score_non', 'p_value')
+                             'total_score_non', 'pvalue')
 regtools_data$sd_norm_score_variant[is.na(regtools_data$sd_norm_score_variant)] = 0
 regtools_data$mean_norm_score_non[is.na(regtools_data$mean_norm_score_non)] = 0
 regtools_data$sd_norm_score_non[is.na(regtools_data$sd_norm_score_non)] = 0
