@@ -47,6 +47,7 @@ with open(f'junction_pvalues_{tag}.tsv', 'wb') as outfile:
             # Block copy rest of file from input to output without parsing
             shutil.copyfileobj(infile, outfile)
             print(fname + " has been imported.")
+files = glob.glob('small_file_*')
 for file in files:
     os.remove(file)
 

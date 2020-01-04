@@ -242,6 +242,6 @@ all_splicing_variants <- as.data.table(all_splicing_variants)
 regtools_data = regtools_data %>% distinct()
 
 
-write.table(regtools_data, file=paste(input_file, "_out_test.tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
+write.table(regtools_data, file=paste(input_file, "_out.tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
 
 })
