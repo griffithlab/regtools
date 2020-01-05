@@ -216,8 +216,8 @@ a <- function(x){
 }
 
 regtools_data$p_value <- apply(regtools_data, 1, a)
-print("test8")
-
+print("Number of rows in data.table")
+print(length(regtools_data$samples))
 
 paste_commas <- function(v){
    return(paste(v,collapse = ","))
