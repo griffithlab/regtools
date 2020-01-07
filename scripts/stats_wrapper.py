@@ -19,18 +19,17 @@ cwd = os.getcwd()
 
 lines_per_file = 25000
 smallfile = None
-num_small_file = 0
 with open(f'all_splicing_variants_{tag}.bed', 'r') as bigfile:
-    num_small_file +=1
+    header = bigfile.readline()
     for lineno, line in enumerate(bigfile):
         if lineno % lines_per_file == 0:
             if smallfile:
                 smallfile.close()
             small_filename = 'small_file_{}.txt'.format(lineno + lines_per_file)
             smallfile = open(small_filename, "w")
+            smallfile.write(header)
         smallfile.write(line)
     if smallfile:
-        num_small_file += 1
         smallfile.close()
 #get chunks
 files = glob.glob('small_file_*')
@@ -54,5 +53,5 @@ else:
     print("Number of output files doesn't match the number of input files that should have been processed")
 files = glob.glob('small_file_*')
 for file in files:
-    os.remove(file)
+     os.remove(file)
 
