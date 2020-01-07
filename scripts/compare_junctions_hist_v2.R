@@ -151,14 +151,43 @@ regtools_data = subset(regtools_data, select=columns_to_keep)
 
 # zeroes need to be added in for some samples
 a <- function(x, y, z){
-  toAdd <- y - length(x) - str_count(z, ',') - 1
+  toAdd <- y - length(x) - 1
   # browser()
   toAdd <- rep(0.0000000, toAdd)
   x <- c(x, toAdd)
   return(x)
 }
 x <- mapply(a, regtools_data$norm_scores_non, length(all_samples), regtools_data$samples)
+
+
+# if (typeof(x) == 'list') {
+#   x <- matrix(pad(unlist(x), ncols),nrow = rows, byrow = TRUE, ncol = cols)
+#   x <- t(x)
+#   }
+# browser()
+
+get_num_zeros_to_rm <- function(z){
+  num_zeroes_to_rm = str_count(z, ',') 
+  return(num_zeroes_to_rm)
+}
+
+num_zeroes_to_rm <- mapply(get_num_zeros_to_rm, regtools_data$samples)
+
+x = split(x, rep(1:ncol(x), each = nrow(x)))
 regtools_data$norm_scores_non = x
+regtools_data$zeroes_to_rm = num_zeroes_to_rm
+
+rm_zeroes <- function(x,y){
+  new_length <- length(x) - y
+  x <- sort(x,decreasing = TRUE)
+  x <- x[1:new_length]
+  return(x)
+}
+
+if (max(num_zeroes_to_rm > 0)) {
+x <- mapply(rm_zeroes, regtools_data$norm_scores_non, regtools_data$zeroes_to_rm)
+regtools_data$norm_scores_non = x
+}
 print("test7")
 
 ################ calculate p-values ############################################
@@ -187,8 +216,8 @@ a <- function(x){
 }
 
 regtools_data$p_value <- apply(regtools_data, 1, a)
-print("test8")
-
+print("Number of rows in data.table")
+print(length(regtools_data$samples))
 
 paste_commas <- function(v){
    return(paste(v,collapse = ","))
@@ -203,7 +232,7 @@ regtools_data = subset(regtools_data, select=columns_to_keep)
 colnames(regtools_data) <- c('variant_samples', 'variant_info', 'genes', 'junction_samples', "chrom", "start", "end", 'strand', 'anchor', 'variant_junction_info',
                              'names', 'mean_norm_score_variant', 'sd_norm_score_variant', 'norm_scores_variant',
                              'total_score_variant', 'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non',
-                             'total_score_non', 'p_value')
+                             'total_score_non', 'pvalue')
 regtools_data$sd_norm_score_variant[is.na(regtools_data$sd_norm_score_variant)] = 0
 regtools_data$mean_norm_score_non[is.na(regtools_data$mean_norm_score_non)] = 0
 regtools_data$sd_norm_score_non[is.na(regtools_data$sd_norm_score_non)] = 0
@@ -213,6 +242,6 @@ all_splicing_variants <- as.data.table(all_splicing_variants)
 regtools_data = regtools_data %>% distinct()
 
 
-write.table(regtools_data, file=paste(input_file, "_out_test.tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
+write.table(regtools_data, file=paste(input_file, "_out.tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
 
 })
