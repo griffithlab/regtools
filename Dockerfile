@@ -26,6 +26,23 @@ RUN apt-get update -y && apt-get install -y \
   build-essential \
   cmake \
   python3
+  
+################################################################################
+####################### Install R ##############################################
+
+# change working dir
+WORKDIR /usr/local/bin
+
+# install R
+RUN wget https://cran.r-project.org/src/base/R-3/R-${r_version}.tar.gz
+RUN tar -zxvf R-${r_version}.tar.gz
+WORKDIR /usr/local/bin/R-${r_version}
+RUN ./configure --prefix=/usr/local/ --with-x=no
+RUN make
+RUN make install
+
+# install R packages
+RUN R --vanilla -e 'install.packages(c("data.table", "plyr", "tidyverse"), repos = "http://cran.us.r-project.org")'
 
 ################################################################################
 ##################### Add Container Labels #####################################
@@ -53,20 +70,3 @@ RUN cd /regtools/build && make
 
 # add regtools executable to path
 ENV PATH="/regtools/build:${PATH}"
-
-################################################################################
-####################### Install R ##############################################
-
-# change working dir
-WORKDIR /usr/local/bin
-
-# install R
-RUN wget https://cran.r-project.org/src/base/R-3/R-${r_version}.tar.gz
-RUN tar -zxvf R-${r_version}.tar.gz
-WORKDIR /usr/local/bin/R-${r_version}
-RUN ./configure --prefix=/usr/local/ --with-x=no
-RUN make
-RUN make install
-
-# install R packages
-RUN R --vanilla -e 'install.packages(c("data.table", "plyr", "tidyverse"), repos = "http://cran.us.r-project.org")'
