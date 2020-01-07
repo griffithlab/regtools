@@ -1,4 +1,11 @@
 ################################################################################
+##################### Add Container Labels #####################################
+LABEL "Regtools_License"="MIT"
+LABEL "Description"="Software package which integrate DNA-seq and RNA-seq data\
+                     to help interpret mutations in a regulatory and splicing\
+                     context."
+
+################################################################################
 ##################### Set Inital Image to work from ############################
 
 # work from latest LTS ubuntu release
@@ -43,13 +50,6 @@ RUN make install
 
 # install R packages
 RUN R --vanilla -e 'install.packages(c("data.table", "plyr", "tidyverse"), repos = "http://cran.us.r-project.org")'
-
-################################################################################
-##################### Add Container Labels #####################################
-LABEL "Regtools_License"="MIT"
-LABEL "Description"="Software package which integrate DNA-seq and RNA-seq data\
-                     to help interpret mutations in a regulatory and splicing\
-                     context."
 
 ################################################################################
 ##################### Install Regtools #########################################
