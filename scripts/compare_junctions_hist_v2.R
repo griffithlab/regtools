@@ -9,21 +9,21 @@ library(tidyverse)
 
 debug = F
 
-system.time({
-if (debug){
-  tag = paste("_", "default", sep="")
-} else {
-  # get options tag
-  args = commandArgs(trailingOnly = TRUE)
-  tag = args[1]
-  input_file = args[2]
-  if ( substr(tag, 2, 3) == "--"){
-    stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
-  }
-}
+# system.time({
+# if (debug){
+#   tag = paste("_", "default", sep="")
+# } else {
+#   # get options tag
+#   args = commandArgs(trailingOnly = TRUE)
+#   tag = args[1]
+#   input_file = args[2]
+#   if ( substr(tag, 2, 3) == "--"){
+#     stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
+#   }
+# }
 
-# tag = 'I'
-# input_file = '~/Desktop/CHOL/all_splicing_variants_I.bed'
+tag = 'E'
+input_file = 'all_splicing_variants_E.bed'
 
 # All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
 all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE)
@@ -159,13 +159,6 @@ a <- function(x, y, z){
 }
 x <- mapply(a, regtools_data$norm_scores_non, length(all_samples), regtools_data$samples)
 
-
-# if (typeof(x) == 'list') {
-#   x <- matrix(pad(unlist(x), ncols),nrow = rows, byrow = TRUE, ncol = cols)
-#   x <- t(x)
-#   }
-# browser()
-
 get_num_zeros_to_rm <- function(z){
   num_zeroes_to_rm = str_count(z, ',') 
   return(num_zeroes_to_rm)
@@ -188,6 +181,22 @@ if (max(num_zeroes_to_rm > 0)) {
 x <- mapply(rm_zeroes, regtools_data$norm_scores_non, regtools_data$zeroes_to_rm)
 regtools_data$norm_scores_non = x
 }
+
+a <- function(x){
+  x <- mean(x)
+  return(x)
+}
+
+x <- mapply(a, regtools_data$norm_scores_non) 
+regtools_data$mean_norm_score_non <- x
+
+a <- function(x){
+  x <- sd(x)
+  return(x)
+}
+
+x <- mapply(a, regtools_data$norm_scores_non) 
+regtools_data$sd_norm_score_non <- x
 print("test7")
 
 ################ calculate p-values ############################################
@@ -244,4 +253,4 @@ regtools_data = regtools_data %>% distinct()
 
 write.table(regtools_data, file=paste(input_file, "_out.tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
 
-})
+# })
