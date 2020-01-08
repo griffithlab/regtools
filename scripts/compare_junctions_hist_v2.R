@@ -9,21 +9,21 @@ library(tidyverse)
 
 debug = F
 
-system.time({
-if (debug){
-  tag = paste("_", "default", sep="")
-} else {
-  # get options tag
-  args = commandArgs(trailingOnly = TRUE)
-  tag = args[1]
-  input_file = args[2]
-  if ( substr(tag, 2, 3) == "--"){
-    stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
-  }
-}
+# system.time({
+# if (debug){
+#   tag = paste("_", "default", sep="")
+# } else {
+#   # get options tag
+#   args = commandArgs(trailingOnly = TRUE)
+#   tag = args[1]
+#   input_file = args[2]
+#   if ( substr(tag, 2, 3) == "--"){
+#     stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
+#   }
+# }
 
-# tag = 'E'
-# input_file = 'all_splicing_variants_E.bed'
+tag = 'E'
+input_file = 'all_splicing_variants_E.bed'
 
 # All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
 all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE)
@@ -150,14 +150,14 @@ regtools_data = subset(regtools_data, select=columns_to_keep)
 
 
 # zeroes need to be added in for some samples
-a <- function(x, y, z){
+a <- function(x, y){
   toAdd <- y - length(x) - 1
   # browser()
   toAdd <- rep(0.0000000, toAdd)
   x <- c(x, toAdd)
   return(x)
 }
-x <- mapply(a, regtools_data$norm_scores_non, length(all_samples), regtools_data$samples)
+x <- mapply(a, regtools_data$norm_scores_non, length(all_samples))
 
 get_num_zeros_to_rm <- function(z){
   num_zeroes_to_rm = str_count(z, ',') 
@@ -182,21 +182,46 @@ x <- mapply(rm_zeroes, regtools_data$norm_scores_non, regtools_data$zeroes_to_rm
 regtools_data$norm_scores_non = x
 }
 
-a <- function(x){
-  x <- mean(x)
+get_mean <- function(x){
+  x <- mean(as.numeric(x))
   return(x)
 }
 
-x <- mapply(a, regtools_data$norm_scores_non) 
+x <- mapply(get_mean, regtools_data$norm_scores_non) 
 regtools_data$mean_norm_score_non <- x
 
-a <- function(x){
-  x <- sd(x)
+get_sd <- function(x){
+  x <- sd(as.numeric(x))
   return(x)
 }
 
-x <- mapply(a, regtools_data$norm_scores_non) 
+x <- mapply(get_sd, regtools_data$norm_scores_non) 
 regtools_data$sd_norm_score_non <- x
+
+a <- function(x, y){
+  # if(y == "TCGA-ZH-A8Y2-01A,TCGA-ZH-A8Y5-01A"){
+  #    browser()
+  # }
+  toAdd <- (str_count(y, ',') + 1) - (str_count(x, ',') + 1) 
+  # browser()
+  if (toAdd > 0) {
+    toAdd <- rep(0.0000000, toAdd)
+    x <- c(x, toAdd)
+  } else {
+    x <- unlist(strsplit(x, ","))
+  }
+  x <- list(x)
+  return(x)
+}
+x <- mapply(a, regtools_data$norm_scores_variant, regtools_data$samples)
+regtools_data$norm_scores_variant = x
+
+x <- mapply(get_mean, regtools_data$norm_scores_variant) 
+regtools_data$mean_norm_score_variant <- x
+
+x <- mapply(get_sd, regtools_data$norm_scores_variant) 
+regtools_data$sd_norm_score_variant <- x
+
 print("test7")
 
 ################ calculate p-values ############################################
@@ -216,9 +241,6 @@ a <- function(x){
                   breaks = seq(0.5, max(non_variant_norm_scores_ranked)+1.5, by=1), plot=F)
   mids = histinfo$mids
   cd = cumsum(histinfo$density)
-  # if(x$info == "chr1_729955_735423_D_chr1:809966-809967"){
-  #   browser()
-  # }
   underestimate = max(which(mids <= variant_norm_score_ranked))
   pvalue = 1-cd[underestimate]
   return(pvalue)
@@ -252,5 +274,5 @@ regtools_data = regtools_data %>% distinct()
 
 
 write.table(regtools_data, file=paste(input_file, "_out.tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
-
-})
+# 
+# })
