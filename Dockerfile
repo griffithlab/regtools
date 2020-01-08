@@ -67,6 +67,9 @@ RUN mkdir build && cd build && cmake .. && make
 ################################################################################
 ###################### set environment path    #################################
 
+# make a build directory for regtools
+WORKDIR /regtools/scripts/
+
 # add regtools executable to path
 ENV PATH="/regtools/build:/usr/local/bin/R-${r_version}:${PATH}"
 
