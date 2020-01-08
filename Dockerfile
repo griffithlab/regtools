@@ -1,11 +1,4 @@
 ################################################################################
-##################### Add Container Labels #####################################
-LABEL "Regtools_License"="MIT"
-LABEL "Description"="Software package which integrate DNA-seq and RNA-seq data\
-                     to help interpret mutations in a regulatory and splicing\
-                     context."
-
-################################################################################
 ##################### Set Inital Image to work from ############################
 
 # work from latest LTS ubuntu release
@@ -35,6 +28,13 @@ RUN apt-get update -y && apt-get install -y \
   python3
   
 ################################################################################
+##################### Add Container Labels #####################################
+LABEL "Regtools_License"="MIT"
+LABEL "Description"="Software package which integrate DNA-seq and RNA-seq data\
+                     to help interpret mutations in a regulatory and splicing\
+                     context."
+
+################################################################################
 ####################### Install R ##############################################
 
 # change working dir
@@ -55,18 +55,21 @@ RUN R --vanilla -e 'install.packages(c("data.table", "plyr", "tidyverse"), repos
 ##################### Install Regtools #########################################
 
 # clone git repository
-RUN git clone https://github.com/griffithlab/regtools.git
+RUN cd / && git clone https://github.com/griffithlab/regtools.git
 
 # make a build directory for regtools
 WORKDIR /regtools/
-RUN mkdir build
+
 
 # compile from source
-RUN cd /regtools/build && cmake ..
-RUN cd /regtools/build && make
+RUN mkdir build && cd build && cmake .. && make
 
 ################################################################################
 ###################### set environment path    #################################
 
+# make a build directory for regtools
+WORKDIR /regtools/scripts/
+
 # add regtools executable to path
-ENV PATH="/regtools/build:${PATH}"
+ENV PATH="/regtools/build:/usr/local/bin/R-${r_version}:${PATH}"
+
