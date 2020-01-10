@@ -22,8 +22,8 @@ debug = F
 #   }
 # }
 
-tag = 'E'
-input_file = 'all_splicing_variants_E.bed'
+tag = 'default'
+input_file = 'all_splicing_variants_default.bed'
 
 # All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
 all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE)
@@ -187,13 +187,13 @@ get_mean <- function(x){
   return(x)
 }
 
-x <- mapply(get_mean, regtools_data$norm_scores_non) 
-regtools_data$mean_norm_score_non <- x
-
 get_sd <- function(x){
   x <- sd(as.numeric(x))
   return(x)
 }
+
+x <- mapply(get_mean, regtools_data$norm_scores_non) 
+regtools_data$mean_norm_score_non <- x
 
 x <- mapply(get_sd, regtools_data$norm_scores_non) 
 regtools_data$sd_norm_score_non <- x
@@ -222,12 +222,21 @@ regtools_data$mean_norm_score_variant <- x
 x <- mapply(get_sd, regtools_data$norm_scores_variant) 
 regtools_data$sd_norm_score_variant <- x
 
+get_min <- function(x){
+  x <- min(as.numeric(x))
+  return(x)
+}
+
+x <- mapply(get_min, regtools_data$norm_scores_variant) 
+regtools_data$min_norm_score_variant <- x
+
 print("test7")
 
 ################ calculate p-values ############################################
 
+# calculate using mean
 a <- function(x){
-  variant_norm_score = as.numeric(unlist(strsplit(x[['norm_scores_variant']], ',', fixed=TRUE)))
+  variant_norm_score = mean(as.numeric(unlist(strsplit(x[['norm_scores_variant']], ',', fixed=TRUE))))
   if(length(x[['norm_scores_non']]) <= 1){
     return(0)
   }
@@ -235,8 +244,8 @@ a <- function(x){
   all_norm_scores = c(x$norm_scores_non, variant_norm_score)
   countable = rank(all_norm_scores)
   num_samples = str_count(x$norm_scores_variant, ',') + 1
-  non_variant_norm_scores_ranked = head(countable, (-1 * num_samples))
-  variant_norm_score_ranked = tail(countable, num_samples)
+  non_variant_norm_scores_ranked = head(countable, -1)
+  variant_norm_score_ranked = tail(countable, 1)
   histinfo = hist(non_variant_norm_scores_ranked, 
                   breaks = seq(0.5, max(non_variant_norm_scores_ranked)+1.5, by=1), plot=F)
   mids = histinfo$mids
@@ -246,7 +255,32 @@ a <- function(x){
   return(pvalue)
 }
 
-regtools_data$p_value <- apply(regtools_data, 1, a)
+# calculate using min
+b <- function(x){
+  variant_norm_score = min(as.numeric(unlist(strsplit(x[['norm_scores_variant']], ',', fixed=TRUE))))
+  if(variant_norm_score == 0){
+    return(1)
+  }
+  if(length(x[['norm_scores_non']]) <= 1){
+    return(0)
+  }
+  
+  all_norm_scores = c(x$norm_scores_non, variant_norm_score)
+  countable = rank(all_norm_scores)
+  num_samples = str_count(x$norm_scores_variant, ',') + 1
+  non_variant_norm_scores_ranked = head(countable, -1)
+  variant_norm_score_ranked = tail(countable, 1)
+  histinfo = hist(non_variant_norm_scores_ranked, 
+                  breaks = seq(0.5, max(non_variant_norm_scores_ranked)+1.5, by=1), plot=F)
+  mids = histinfo$mids
+  cd = cumsum(histinfo$density)
+  underestimate = max(which(mids <= variant_norm_score_ranked))
+  pvalue = 1-cd[underestimate]
+  return(pvalue)
+}
+
+regtools_data$p_value_mean <- apply(regtools_data, 1, a)
+regtools_data$p_value_min <- apply(regtools_data, 1, b)
 print("Number of rows in data.table")
 print(length(regtools_data$samples))
 
@@ -258,12 +292,12 @@ regtools_data$norm_scores_non <- unlist(lapply(regtools_data$norm_scores_non,pas
 columns_to_keep = c('samples', 'variant_info.x', 'genes', 'sample', "chrom.x", "start.x", "end.x", 'strand.x', 'anchor.x', 'info',
                     'names', 'mean_norm_score_variant', 'sd_norm_score_variant', 'norm_scores_variant',
                     'total_score_variant', 'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non',
-                    'total_score_non', 'p_value')
+                    'total_score_non', 'p_value_mean','p_value_min')
 regtools_data = subset(regtools_data, select=columns_to_keep)
 colnames(regtools_data) <- c('variant_samples', 'variant_info', 'genes', 'junction_samples', "chrom", "start", "end", 'strand', 'anchor', 'variant_junction_info',
                              'names', 'mean_norm_score_variant', 'sd_norm_score_variant', 'norm_scores_variant',
                              'total_score_variant', 'mean_norm_score_non', 'sd_norm_score_non', 'norm_scores_non',
-                             'total_score_non', 'pvalue')
+                             'total_score_non', 'p_value_mean','p_value_min')
 regtools_data$sd_norm_score_variant[is.na(regtools_data$sd_norm_score_variant)] = 0
 regtools_data$mean_norm_score_non[is.na(regtools_data$mean_norm_score_non)] = 0
 regtools_data$sd_norm_score_non[is.na(regtools_data$sd_norm_score_non)] = 0
