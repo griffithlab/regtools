@@ -81,7 +81,7 @@ tabix all_variants_sorted.vcf.gz
 
 **Run `regtools cis-splice effects identify` on all samples with all variants (with `$tag` options as example)**
 
-```
+```bash
 for i in samples/*/; do bsub -oo $i/logs/regtools_compare_$tag.lsf regtools cis-splice-effects identify $param -o ${i}/output/cse_identify_filtered_compare_$tag.tsv -j ${i}/output/cse_identify_filtered_compare_$tag.bed -v ${i}/output/cse_identify_filtered_compare_$tag.vcf all_variants_sorted.vcf.gz ${i}/tumor_rna_alignments.bam reference.fa reference.gtf; done
 ```
 
@@ -93,10 +93,10 @@ for i in samples/*/; do bsub -oo $i/logs/regtools_compare_$tag.lsf regtools cis-
 mkdir -p compare_junctions/hist
 ```
 
-**Run `compare_junctions_hist.R` on sample data**
+**Run `stats_wrapper.py` on sample data**
 
 ```bash
-Rscript --vanilla compare_junctions_hist.R <tag>
+python3 stats_wrapper.py <tag>
 ```
 
 **Run `filter_and_BH.R` to adjust p values and filter results**
