@@ -111,6 +111,7 @@ void GtfParser::add_exon_to_transcript_map(Gtf gtf1) {
     string gene_name = parse_attribute(attributes, "gene_name");
     string gene_id = parse_attribute(attributes, "gene_id");
     //create a BED6 object
+    //NOTE: the 'name' column is simply going to be 'exon'
     BED exon = BED(gtf1.seqname, gtf1.start,
                    gtf1.end, gtf1.feature,
                    gtf1.score, gtf1.strand);

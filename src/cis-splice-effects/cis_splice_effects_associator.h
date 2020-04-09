@@ -1,4 +1,4 @@
-/*  cis_splice_effects_identifier.h -- 'cis-splice-effects identify'
+/*  cis_splice_effects_associator.h -- 'cis-splice-effects associate'
 
     Copyright (c) 2015, The Griffith Lab
 
@@ -21,26 +21,24 @@ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
-#ifndef CIS_SPLICE_EFFECTS_IDENTIFIER_
-#define CIS_SPLICE_EFFECTS_IDENTIFIER_
+#ifndef CIS_SPLICE_EFFECTS_ASSOCIATOR_
+#define CIS_SPLICE_EFFECTS_ASSOCIATOR_
 
 #include "junctions_annotator.h"
 #include "junctions_extractor.h"
 #include "variants_annotator.h"
 
-//Workhorse for "cis-splice-effects identify"
-class CisSpliceEffectsIdentifier {
+//Workhorse for "cis-splice-effects associate"
+class CisSpliceEffectsAssociator {
     private:
         //Object that annotates the variants
         VariantsAnnotator va;
-        //Object that extracts the junctions
-        JunctionsExtractor je;
         //Object that annotates the junctions
         JunctionsAnnotator ja;
         //VCF file with variants
         string vcf_;
         //RNAseq alignments
-        string bam_;
+        string bed_;
         //Reference sequence FASTA
         string ref_;
         //GTF file with annotations
@@ -80,8 +78,6 @@ class CisSpliceEffectsIdentifier {
         bool skip_single_exon_genes_;
         //strandness of data
         int strandness_;
-        //tag used in BAM to denote strand, default "XS"
-        string strand_tag_;
         //Minimum anchor length for junctions
         //Junctions need atleast this many bp overlap
         // on both ends.
@@ -92,7 +88,7 @@ class CisSpliceEffectsIdentifier {
         uint32_t max_intron_length_;
     public:
         //Constructor
-        CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"),
+        CisSpliceEffectsAssociator() : vcf_("NA"), output_file_("NA"),
                                        output_junctions_bed_("NA"),
                                        annotated_variant_file_("NA"),
                                        write_annotated_variants_(false),
@@ -102,13 +98,12 @@ class CisSpliceEffectsIdentifier {
                                        all_intronic_space_(false),
                                        all_exonic_space_(false),
                                        skip_single_exon_genes_(true),
-                                       strandness_(-1),
-                                       strand_tag_("XS"),
+                                       strandness_(1),
                                        min_anchor_length_(8),
                                        min_intron_length_(70),
                                        max_intron_length_(500000) {}
         //Destructor
-        ~CisSpliceEffectsIdentifier() {
+        ~CisSpliceEffectsAssociator() {
             if(ofs_.is_open()) {
                 ofs_.close();
             }
@@ -118,10 +113,12 @@ class CisSpliceEffectsIdentifier {
         }
         //Parse command line arguments
         void parse_options(int argc, char* argv[]);
+        //parse BED into vector of junctions
+        vector<Junction> parse_BED_to_junctions();
         //Check if files exist
         void file_qc();
         //Identify cis splicing effects
-        void identify();
+        void associate();
         //Usage for this tool
         void usage(ostream &out);
         //Set ofstream object to appropriate value

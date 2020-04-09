@@ -16,7 +16,7 @@ in a regulatory and splicing context.
 
 ## Installation
 
-Clone and install regtools by running:
+Clone and install regtools by running the following:
 ```
     git clone https://github.com/griffithlab/regtools
     cd regtools/
@@ -25,6 +25,8 @@ Clone and install regtools by running:
     cmake ..
     make
 ```
+
+For convienience we also maintain a docker image available at [https://hub.docker.com/r/griffithlab/regtools/](https://hub.docker.com/r/griffithlab/regtools/)
 
 ## Usage:
 
@@ -55,6 +57,7 @@ If you would like to build the documentation locally, please install
 work on most machines. Then run `mkdocs serve` from within the `regtools`
 base directory.
 
+
 ## Acknowledgements
 
 Regtools uses several open-source libraries. We would like to thank the
@@ -64,3 +67,9 @@ useful comments and code.
 ## License
 
 The project is licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Stable release with DOI
+
+[![DOI](https://zenodo.org/badge/35841695.svg)](https://zenodo.org/badge/latestdoi/35841695)
+
+

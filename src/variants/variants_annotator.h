@@ -148,6 +148,7 @@ class VariantsAnnotator {
                               vcf_record_(NULL) {
             vcf_record_ = bcf_init();
             intronic_min_distance_ = intronic_min_distance;
+            cerr << "exonic_min_distance_ is " << exonic_min_distance_ << endl;
             exonic_min_distance_ = exonic_min_distance;
             all_intronic_space_ = all_intronic_space;
             all_exonic_space_ = all_exonic_space;
@@ -221,15 +222,6 @@ class VariantsAnnotator {
         void set_variant_cis_effect_limits_ps(const vector<BED>& exons,
                                               AnnotatedVariant& variant1,
                                               uint32_t i);
-        //Cis limits for exonic/intronic case - figure out strand here
-        void set_variant_cis_effect_limits_exonic_intronic(const vector<BED>& exons,
-                                                              AnnotatedVariant& variant);
-        //Cis limits for exonic/intronic case - negative strand
-        void set_variant_cis_effect_limits_exonic_intronic_ns(const vector<BED>& exons,
-                                                              AnnotatedVariant& variant);
-        //Cis limits for exonic/intronic case - positive strand
-        void set_variant_cis_effect_limits_exonic_intronic_ps(const vector<BED>& exons,
-                                                              AnnotatedVariant& variant);
 };
 
 inline string variant_set_to_string(const set<AnnotatedVariant> &av1) {
