@@ -111,14 +111,14 @@ Sample_1
 Sample_2
 ```
 
-**`variants_all_sorted.vcf.gz`** - a compressed vcf file containing all variants from all samples.
-**`variants_all_sorted.vcf.gz.tbi`** - an index file for the vcf file mentioned above.
-**`samples/`** - a directory containing each of the samples to be analyzed alongside each other.
-**`Sample_1/`** - a sample directory. This will contain input data files as well as output files from RegTools.
-**`tumor_rna_alignments.bam`** - file containing aligned RNA-seq reads for the given sample.
-**`tumor_rna_alignments.bam.bai`** - index file for the above RNA-seq alignment file.
-**`variants.vcf.gz`** - a compressed vcf file containing all variants from a given samples.
-**`variants.vcf.gz.tbi`** - an index file for the vcf file mentioned above.
+**`variants_all_sorted.vcf.gz`** - a compressed vcf file containing all variants from all samples.\
+**`variants_all_sorted.vcf.gz.tbi`** - an index file for the vcf file mentioned above.\
+**`samples/`** - a directory containing each of the samples to be analyzed alongside each other.\
+**`Sample_1/`** - a sample directory. This will contain input data files as well as output files from RegTools.\
+**`tumor_rna_alignments.bam`** - file containing aligned RNA-seq reads for the given sample.\
+**`tumor_rna_alignments.bam.bai`** - index file for the above RNA-seq alignment file.\
+**`variants.vcf.gz`** - a compressed vcf file containing all variants from a given samples.\
+**`variants.vcf.gz.tbi`** - an index file for the vcf file mentioned above.\
 **`logs/`** - directory containing log or error files for a given sample.
 **`output/`** - directory containing RegTools output files for a given sample.
 **`cse_identify_filtered_*`** - RegTools output files from the initial RegTools run for a given sample. This will contain results for this sample's variants only.
