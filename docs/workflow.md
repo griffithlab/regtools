@@ -2,13 +2,11 @@
 
 This is an example workflow for running RegTools on a cohort of samples. This analysis requires that there be a VCF and RNA bam file for each sample. The workflow described below was used to run our own analysis on TCGA data.
 
-By the end of the analysis, the directory structure should look like the example below. The `*` in the example below refers to the tag/parameter used to run `regtools cis-splice-effects identify` with.
+By the end of the analysis, the directory structure should look like the example below. The `*` in the example below refers to the tag/parameter used to run `regtools cis-splice-effects identify` with. At the bottom of this page, we provide a description of each of these files.
 
 ```bash
 - Project/
   - all_splicing_variants*.bed
-  - paths.tsv
-  - make_vcfs.sh
   - dir_names.tsv
   - variants_all_sorted.vcf.gz
   - variants_all_sorted.vcf.gz.tbi
@@ -16,9 +14,8 @@ By the end of the analysis, the directory structure should look like the example
     - Sample_1/
       - tumor_rna_alignments.bam
       - tumor_rna_alignments.bam.bai
-      - variants.per_gene.vep.vcf.gz
-      - variants.per_gene.vep.vcf.gz.tbi
-      - variants.ensembl
+      - variants.vcf.gz
+      - variants.vcf.gz.tbi
       - logs/
       - output/
         - cse_identify_filtered_*
@@ -27,9 +24,8 @@ By the end of the analysis, the directory structure should look like the example
     - Sample_2/
       - tumor_rna_alignments.bam
       - tumor_rna_alignments.bam.bai
-      - variants.per_gene.vep.vcf.gz
-      - variants.per_gene.vep.vcf.gz.tbi
-      - variants.ensembl
+      - variants.vcf.gz
+      - variants.vcf.gz.tbi
       - logs/
       - output/
         - cse_identify_filtered_*
@@ -104,3 +100,29 @@ python3 stats_wrapper.py <tag>
 ```bash
 Rscript --vanilla filter_and_BH.R <tag>
 ```
+
+## File description
+
+* **`all_splicing_variants*.bed`** - a file containing all of the variants that regtools identified as being associated with a junction for the given parameters used to run `cis-splice-effects identify`.
+* **`dir_names.tsv`** - a file containing a list of each of the sample directories with each directory on a new line. This can be obtained by using `ls samples/ > dir_names.tsv`. For this example, it would look like:
+
+```bash
+Sample_1
+Sample_2
+```
+
+* **`variants_all_sorted.vcf.gz`** - a compressed vcf file containing all variants from all samples.
+* **`variants_all_sorted.vcf.gz.tbi`** - an index file for the vcf file mentioned above.
+* **`samples/`** - a directory containing each of the samples to be analyzed alongside each other.
+* **`Sample_1/`** - a sample directory. This will contain input data files as well as output files from RegTools.
+* **`tumor_rna_alignments.bam`** - file containing aligned RNA-seq reads for the given sample.
+* **`tumor_rna_alignments.bam.bai`** - index file for the above RNA-seq alignment file.
+* **`variants.vcf.gz`** - a compressed vcf file containing all variants from a given samples.
+* **`variants.vcf.gz.tbi`** - an index file for the vcf file mentioned above.
+* **`logs/`** - directory containing log or error files for a given sample.
+* **`output/`** - directory containing RegTools output files for a given sample.
+* **`cse_identify_filtered_*`** - RegTools output files from the initial RegTools run for a given sample. This will contain results for this sample's variants only.
+* **`cse_identify_filtered_compare_*`** - RegTools output files from the second RegTools run for a given sample. This will contain results for all samples' variants.
+* **`variants*.bed`** - a bedfile containing the variants considered to be splicing relevant for a given RegTools parameter. This is used later to make `all_splicing_variants*.bed`.
+* **`compare_junctions/hist/`** - directory containing output from the statistics script analyze all variants across all samples.
+* **`junction_pvalues_*.tsv`** - a file containing the output from the statistic analysis script.
