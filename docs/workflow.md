@@ -106,10 +106,10 @@ Rscript --vanilla filter_and_BH.R <tag>
 * **`all_splicing_variants*.bed`** - a file containing all of the variants that regtools identified as being associated with a junction for the given parameters used to run `cis-splice-effects identify`.
 * **`dir_names.tsv`** - a file containing a list of each of the sample directories with each directory on a new line. This can be obtained by using `ls samples/ > dir_names.tsv`. For this example, it would look like:
 
-```bash
-Sample_1
-Sample_2
-```
+  ```bash
+  Sample_1
+  Sample_2
+  ```
 
 * **`variants_all_sorted.vcf.gz`** - a compressed vcf file containing all variants from all samples.
 * **`variants_all_sorted.vcf.gz.tbi`** - an index file for the vcf file mentioned above.
