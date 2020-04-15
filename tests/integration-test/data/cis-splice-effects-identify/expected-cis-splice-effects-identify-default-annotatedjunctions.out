@@ -1,3 +1,3 @@
 chrom	start	end	name	score	strand	splice_site	acceptors_skipped	exons_skipped	donors_skipped	anchor	known_donor	known_acceptor	known_junction	gene_names	gene_ids	transcripts	variant_info
-22	93668	97252	JUNC00000001	5	+	GT-AG	2	1	2	NDA	1	1	0	EP300	ENSG00000100393	ENST00000263253	22:94626-94627
+22	93668	97252	JUNC00000001	5	+	GT-AG	1	1	1	NDA	1	1	0	EP300	ENSG00000100393	ENST00000263253	22:94626-94627
 
