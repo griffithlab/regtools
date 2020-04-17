@@ -25,6 +25,8 @@ DEALINGS IN THE SOFTWARE.  */
 #ifndef JUNCTIONS_ANNOTATOR_H_
 #define JUNCTIONS_ANNOTATOR_H_
 
+#include <string>
+#include <sstream>
 #include <iostream>
 #include <iterator>
 #include "bedFile.h"
@@ -41,7 +43,7 @@ struct AnnotatedJunction : BED {
     set<string> transcripts_overlap;
     //set of genes that
     //the junction overlaps
-    set<string> genes_overlap;
+    set< vector<string> > genes_overlap;
     //set of exons that the junction
     //overlaps
     set<string> exons_skipped;
@@ -72,7 +74,7 @@ struct AnnotatedJunction : BED {
                 "\t" << "exons_skipped" << "\t" << "donors_skipped" <<
                 "\t" << "anchor" <<
                 "\t" << "known_donor" << "\t" << "known_acceptor" << "\t" << "known_junction" <<
-                "\t" << "genes" << "\t" << "transcripts";
+                "\t" << "gene_names" << "\t" << "gene_ids" << "\t" << "transcripts";
         if(variant_info_exists) {
             out << "\t" << "variant_info";
         }
@@ -90,13 +92,21 @@ struct AnnotatedJunction : BED {
         //See if any genes overlap the junction
         if(genes_overlap.size()) {
             out << "\t";
-            for(set<string>::iterator it = genes_overlap.begin(); it != genes_overlap.end(); ++it) {
+            for(set< vector<string> >::iterator it = genes_overlap.begin(); it != genes_overlap.end(); ++it) {
                 if(it != genes_overlap.begin())
                     out << ",";
-                out << *it;
+                //print gene name
+                out << (*it)[0];
+            }
+            out << "\t";
+            for(set< vector<string> >::iterator it = genes_overlap.begin(); it != genes_overlap.end(); ++it) {
+                if(it != genes_overlap.begin())
+                    out << ",";
+                //print gene name
+                out << (*it)[1];
             }
         } else {
-            out << "\t" << "NA";
+            out << "\t" << "NA" << "\t" << "NA";
         }
         //See if any transcripts overlap the junction
         if(transcripts_overlap.size()) {
