@@ -23,7 +23,7 @@ input_file = f'all_splicing_variants_{tag}.bed'
 lines = open(input_file).readlines()
 count = len(lines)
 if count <= lines_per_file:
-    subprocess.run(f'Rscript --vanilla /home/ec2-user/workspace/data/compare_junctions_hist_v2.R {tag} {input_file}')
+    subprocess.run(f'Rscript --vanilla /home/ec2-user/workspace/regtools/scripts/compare_junctions_hist_v2.R {tag} {input_file}')
 else:
     header = lines[0]
     lines.pop(0)
@@ -52,7 +52,7 @@ files = glob.glob('small_file_*')
 files.sort()
 number_of_in_files = len(files)
 for file in files:
-    subprocess.run(f'Rscript --vanilla compare_junctions_hist_v2.R {tag} {file}', shell=True, check=True)
+    subprocess.run(f'Rscript --vanilla /home/ec2-user/workspace/regtools/scripts/compare_junctions_hist_v2.R {tag} {file}', shell=True, check=True)
 output_files = glob.glob("*_out.tsv")
 output_files.sort()# glob lacks reliable ordering, so impose your own if output order matters
 number_of_out_files = len(output_files)
