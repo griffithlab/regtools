@@ -22,16 +22,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
+#include <sstream>
 #include <cassert>
 #include <cstdlib>
-#include <fstream>
-#include <iostream>
 #include <set>
 #include <stdexcept>
-#include <vector>
 #include <algorithm>
 #include "common.h"
-#include "bedFile.h"
 #include "gtf_parser.h"
 #include "lineFileUtilities.h"
 
@@ -112,6 +109,7 @@ void GtfParser::add_exon_to_transcript_map(Gtf gtf1) {
     Tokenize(gtf1.attributes, attributes, ';');
     string transcript_id = parse_attribute(attributes, "transcript_id");
     string gene_name = parse_attribute(attributes, "gene_name");
+    string gene_id = parse_attribute(attributes, "gene_id");
     //create a BED6 object
     //NOTE: the 'name' column is simply going to be 'exon'
     BED exon = BED(gtf1.seqname, gtf1.start,
@@ -119,7 +117,7 @@ void GtfParser::add_exon_to_transcript_map(Gtf gtf1) {
                    gtf1.score, gtf1.strand);
     if(transcript_id != string("NA")) {
         transcript_map_[transcript_id].exons.push_back(exon);
-        set_transcript_gene(transcript_id, gene_name);
+        set_transcript_gene(transcript_id, gene_name, gene_id);
     }
 }
 
@@ -244,12 +242,14 @@ void GtfParser::set_gtffile(string filename) {
     gtffile_ = filename;
 }
 
-//Get the gene ID using the trancript ID
-string GtfParser::get_gene_from_transcript(string transcript_id) {
+//Get the gene name and gene ID using the trancript ID
+vector<string> GtfParser::get_gene_from_transcript(string transcript_id) {
     if(transcript_to_gene_.count(transcript_id)) {
         return transcript_to_gene_[transcript_id];
     } else {
-        return "NA";
+        string arr[] = {"NA, NA"};
+        vector<string> NA (arr, arr + sizeof(arr)/sizeof(string));
+        return NA;
     }
 }
 
@@ -262,11 +262,14 @@ void GtfParser::load() {
     //print_transcripts();
 }
 
-//Set the gene ID for a trancript ID
-inline void GtfParser::set_transcript_gene(string transcript_id, string gene_id) {
+//Set the gene name and gene ID for a trancript ID
+inline void GtfParser::set_transcript_gene(string transcript_id, string gene_name, string gene_id) {
     //check if key already exists
-    if(transcript_to_gene_.count(transcript_id) == 0)
-        transcript_to_gene_[transcript_id] = gene_id;
+    if(transcript_to_gene_.count(transcript_id) == 0){
+        string arr[] = {gene_name, gene_id};
+        vector<string> gene (arr, arr + sizeof(arr)/sizeof(string));
+        transcript_to_gene_[transcript_id] = gene;
+    }
 }
 
 //Assignment operator
