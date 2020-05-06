@@ -9,7 +9,7 @@ def run(cmd: str) -> None:
 
 cohorts = ['SKCM', 'GBM', 'READ', 'ESCA', 'PAAD', 'SARC',
           'OV', 'KIRP', 'CESC', 'KIRC', 'LIHC', 'STAD', 'BLCA',
-          'COAD', 'LUSC', 'HNSC', 'LGG', 'LUAD', 'UCEC', 'BRCA']]
+          'COAD', 'LUSC', 'HNSC', 'LGG', 'LUAD', 'UCEC', 'BRCA']
 
 for cohort in cohorts:
     os.makedirs(f'{cohort}/samples', exist_ok=True)
