@@ -32,6 +32,6 @@ for cohort in cohorts:
         os.rename(bed_file, f'all_splicing_variants_{tag}.bed')
         run(f'python3 /home/ec2-user/workspace/regtools/scripts/stats_wrapper.py {tag}')
         run(f'Rscript --vanilla /home/ec2-user/workspace/regtools/scripts/filter_and_BH.R {tag}')
-	run(f'aws s3 cp compare_junctions/ s3://regtools-results-unstranded/{cohort}/compare_junctions3/ --recursive)')
-	os.chdir('..')
+    run(f'aws s3 cp compare_junctions/ s3://regtools-results-unstranded/{cohort}/compare_junctions3/ --recursive')
+    os.chdir('..')
     shutil.rmtree(cohort)
