@@ -459,7 +459,7 @@ AnnotatedVariant VariantsAnnotator::annotate_record_with_transcripts() {
            annotations = "NA";
     set<string> unique_genes;
     string chr = std::string(bcf_hdr_id2name(vcf_header_in_, vcf_record_->rid));
-    AnnotatedVariant variant(chr, vcf_record_->pos, (vcf_record_->pos) + 1);
+    AnnotatedVariant variant(chr, vcf_record_->pos, (vcf_record_->pos) + 1, (vcf_record_->d).als);
     //While calculating BINs, incorporate intronic_distance since transcripts
     //which lie within that distance will be relevant.
     BIN start_bin = ((vcf_record_->pos - intronic_min_distance_) >> _binFirstShift);

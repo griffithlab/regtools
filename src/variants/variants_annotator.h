@@ -47,18 +47,21 @@ struct AnnotatedVariant : public BED {
     string annotation;
     CHRPOS cis_effect_start;
     CHRPOS cis_effect_end;
+    string als; // allele string, see bcf_dec_t in vcf.h
     AnnotatedVariant() : overlapping_genes("NA"),
                          overlapping_transcripts("NA"),
                          overlapping_distances("NA"),
                          cis_effect_start(std::numeric_limits<unsigned int>::max()),
-                         cis_effect_end(0) {}
-    AnnotatedVariant(string chr1, CHRPOS start1, CHRPOS end1):
+                         cis_effect_end(0),
+                         als("NA") {}
+    AnnotatedVariant(string chr1, CHRPOS start1, CHRPOS end1, string als):
                          BED(chr1, start1, end1),
                          overlapping_genes("NA"),
                          overlapping_transcripts("NA"),
                          overlapping_distances("NA"),
                          cis_effect_start(std::numeric_limits<unsigned int>::max()),
-                         cis_effect_end(0) {}
+                         cis_effect_end(0),
+                         als(als) {}
 };
 
 inline bool operator<(const AnnotatedVariant& lhs, const AnnotatedVariant& rhs) {
@@ -228,7 +231,7 @@ inline string variant_set_to_string(const set<AnnotatedVariant> &av1) {
     string variant_string;
     for(set<AnnotatedVariant>::iterator i = av1.begin();
             i != av1.end(); i++) {
-        variant_string += common::create_region_string(i->chrom.c_str(), i->start, i->end) + ",";
+        variant_string += common::create_region_string(i->chrom.c_str(), i->start, i->end) + i->als + ",";
     }
     variant_string.erase(variant_string.end() - 1);
     return variant_string;

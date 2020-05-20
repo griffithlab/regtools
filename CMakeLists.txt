@@ -7,7 +7,8 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build-common/cmake)
 include(ProjectHelper)
 include(TestHelper)
 
-
+#VALGRIND
+set(CMAKE_BUILD_TYPE Debug)
 
 #versioning stuff
 set (regtools_VERSION_MAJOR 0)

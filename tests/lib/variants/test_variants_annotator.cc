@@ -31,9 +31,9 @@ class VariantsAnnotatorTest : public ::testing::Test {
 };
 
 TEST_F(VariantsAnnotatorTest, LessThanOperator) {
-    av1 = AnnotatedVariant(std::string("chr1"), 100, 101);
-    av2 = AnnotatedVariant(std::string("chr1"), 100, 101);
-    av3 = AnnotatedVariant(std::string("chr1"), 200, 300);
+    av1 = AnnotatedVariant(std::string("chr1"), 100, 101, "NA");
+    av2 = AnnotatedVariant(std::string("chr1"), 100, 101, "NA");
+    av3 = AnnotatedVariant(std::string("chr1"), 200, 300, "NA");
     ASSERT_EQ(av1, av2);
     ASSERT_LT(av1, av3);
 }
