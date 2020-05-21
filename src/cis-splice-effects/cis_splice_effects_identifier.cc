@@ -230,6 +230,7 @@ void CisSpliceEffectsIdentifier::identify() {
     GtfParser gp1(gtf_);
     gp1.load();
     //variant annotator
+    cerr << "CisSpliceEffectsIdentifier::identify()" << endl;
     VariantsAnnotator va(vcf_, gp1, annotated_variant_file_, intronic_min_distance_, exonic_min_distance_, all_intronic_space_, all_exonic_space_, skip_single_exon_genes_);
     va.open_vcf_in();
     if(write_annotated_variants_)

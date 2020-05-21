@@ -454,12 +454,14 @@ void VariantsAnnotator::get_variant_overlaps_spliceregion(const vector<BED>& exo
 //The line to be annotated is in vcf_record_
 AnnotatedVariant VariantsAnnotator::annotate_record_with_transcripts() {
     string overlapping_genes = "NA",
-           overlapping_transcripts = "NA",
-           overlapping_distances = "NA",
-           annotations = "NA";
+    overlapping_transcripts = "NA",
+    overlapping_distances = "NA",
+    annotations = "NA";
     set<string> unique_genes;
     string chr = std::string(bcf_hdr_id2name(vcf_header_in_, vcf_record_->rid));
-    AnnotatedVariant variant(chr, vcf_record_->pos, (vcf_record_->pos) + 1, (vcf_record_->d).als);
+    
+    bcf_unpack(vcf_record_,BCF_UN_STR);
+    AnnotatedVariant variant(chr, vcf_record_->pos, (vcf_record_->pos) + 1, std::string(vcf_record_->d.allele[0]) + ">" + std::string(vcf_record_->d.allele[1]));
     //While calculating BINs, incorporate intronic_distance since transcripts
     //which lie within that distance will be relevant.
     BIN start_bin = ((vcf_record_->pos - intronic_min_distance_) >> _binFirstShift);
