@@ -51,22 +51,23 @@ donors and junctions in the transcriptome. The known acceptor, donor and junctio
 information is computed from the GTF file and this information is then used to annotate the observed
 junctions.
 
-The junctions are annotated using the following nomenclature(and as shown in the figure below.)
+The junctions are annotated using the following nomenclature (and as shown in the figure below.)
 
-1. DA - This exon-exon junction is present in the transcriptome provided by the user(GTF)
-The ends of this junction are hence known donor and known acceptor sites according to the GTF file.
+1. DA - The ends of this junction are known donor and known acceptor sites according to "annotations.gtf".
+This junction is known to the transcriptome.
 
-2. NDA - This exon-exon junction is not present(novel) in the transcriptome provided by the user(GTF)
-The ends of this junction are known donor and known acceptor sites according to the GTF file.
 
-3. D - This exon-exon junction is not present(novel) in the transcriptome provided by the user(GTF)
-The donor of this junction is a known donor but the acceptor is novel.
+2. NDA - The ends of this junction are known donor and known acceptor sites, according to "annotations.gtf".
+This junction is not known to the transcriptome (novel).
 
-4. A - This exon-exon junction is not present(novel) in the transcriptome provided by the user(GTF)
-The acceptor of this junction is a known acceptor but the donor is novel.
+3. D - The ends of this junction are a known donor site and a novel acceptor site, according to "annotations.gtf".
+This junction is not known to the transcriptome (novel).
 
-5. N - This exon-exon junction is not present(novel) in the transcriptome provided by the user(GTF)
-The ends of this junction are hence not known donor/acceptor sites according to the GTF file.
+4. A - The ends of this junction are a novel donor site and a known acceptor site, according to "annotations.gtf".
+This junction is not known to the transcriptome (novel).
+
+5. N - The ends of this junction are a novel donor site and a novel acceptor site, according to "annotations.gtf".
+This junction is not known to the transcriptome (novel).
 
 
 ![Anchor-annotation example][anchor_annotation]
