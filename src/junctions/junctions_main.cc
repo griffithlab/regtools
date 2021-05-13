@@ -41,7 +41,6 @@ int junctions_usage(ostream &out = cout) {
     return 0;
 }
 
-
 //Run 'junctions extract'
 int junctions_extract(int argc, char *argv[]) {
     JunctionsExtractor extract;

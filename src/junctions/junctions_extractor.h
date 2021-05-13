@@ -52,6 +52,10 @@ struct Junction : BED {
     string color;
     //Number of blocks
     int nblocks;
+    // single cell specific fields
+    unsigned int cell_count;
+    vector<string> barcodes;
+    vector<int> barcode_counts;
     Junction() {
         start = 0;
         end = 0;
@@ -64,6 +68,7 @@ struct Junction : BED {
         name = "NA";
         color = "255,0,0";
         nblocks = 2;
+        cell_count = 0;
     }
     Junction(string chrom1, CHRPOS start1, CHRPOS end1,
              CHRPOS thick_start1, CHRPOS thick_end1,
@@ -81,6 +86,7 @@ struct Junction : BED {
         has_right_min_anchor = false;
         color = "255,0,0";
         nblocks = 2;
+        cell_count = 0;
     }
     //Print junction
     void print(ostream& out) const {
