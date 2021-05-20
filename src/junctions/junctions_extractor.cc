@@ -306,11 +306,13 @@ void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
 void JunctionsExtractor::set_junction_barcode(bam1_t *aln, Junction& j1) {
     uint8_t *p = bam_aux_get(aln, barcode_tag_.c_str());
     if(p != NULL) {
-        char barcode = bam_aux2A(p);
-        j1.barcodes.insert(pair<string, int>(string(1, barcode),1));
+        char *barcode_ptr = bam_aux2Z(p);
+        string barcode (barcode_ptr);
+        cerr << barcode << " DEBUGGING" << endl;
+        j1.barcodes.insert(pair<string, int>(barcode,1));
     } else {
         j1.barcodes.insert(pair<string, int>(string(1, '?'),1));
-        cerr << 'WARNING: No CB tag found for alignment (id = ' << to_string(aln->id) << ')';
+        cerr << "WARNING: No CB tag found for alignment (id = " << to_string(aln->id) << ")" << endl;
         return;
     }
 }
