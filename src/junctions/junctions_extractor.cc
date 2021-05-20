@@ -224,7 +224,7 @@ void JunctionsExtractor::print_all_junctions(ostream& out) {
         fout.open(output_file_.c_str());
     }
     if(output_barcodes_file_!= string("NA")) {
-        fout.open(output_barcodes_file_.c_str());
+        fout_barcodes.open(output_barcodes_file_.c_str());
     }
     //Sort junctions by position
     if(!junctions_sorted_) {
