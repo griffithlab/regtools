@@ -84,6 +84,12 @@ void CisSpliceEffectsIdentifier::set_ostream() {
             throw runtime_error("Unable to open " +
                                 output_junctions_bed_);
     }
+    if(output_barcodes_file_ != "NA") {
+        ofs_barcode_counts_.open(output_barcodes_file_.c_str());
+        if(!ofs_barcode_counts_.is_open())
+            throw runtime_error("Unable to open " +
+                                output_barcodes_file_);
+    }
 }
 
 //Do QC on files
@@ -104,7 +110,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     stringstream help_ss;
     char c;
-    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:ISht:s:a:m:M:")) != -1) {
+    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:ISht:s:a:m:M:b:")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
@@ -151,6 +157,8 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
             case 'M':
                 max_intron_length_ = atoi(optarg);
                 break;
+            case 'b':
+                output_barcodes_file_ = string(optarg);
             default:
                 usage(std::cerr);
                 throw runtime_error("Error parsing inputs!(1)\n\n");
@@ -210,6 +218,9 @@ void CisSpliceEffectsIdentifier::annotate_junctions(const GtfParser& gp1) {
         line.name = j.name = get_junction_name(++i);
         if(output_junctions_bed_ != "NA") {
             j.print(ofs_junctions_bed_);
+        }
+        if(output_barcodes_file_ !="NA") {
+            j.print(ofs_barcode_counts_);
         }
         line.variant_info = variant_set_to_string(junction_to_variant_[j]);
         line.print(ofs_, true);

@@ -49,6 +49,8 @@ class CisSpliceEffectsIdentifier {
         string output_file_;
         //Aberrant splice junctions in BED12 format
         string output_junctions_bed_;
+        //File to write barcodes to
+        string output_barcodes_file_;
         //File to write output to
         string annotated_variant_file_;
         //Flag to indicate whether to write output vcf
@@ -60,6 +62,8 @@ class CisSpliceEffectsIdentifier {
         ofstream ofs_;
         //output stream to output BED12 junctions file
         ofstream ofs_junctions_bed_;
+        //output stream to output barcodes file
+        ofstream ofs_barcode_counts_;
         //Unique set of junctions near splicing variants
         set<Junction> unique_junctions_;
         //Store the variants that mark a junction
@@ -94,6 +98,7 @@ class CisSpliceEffectsIdentifier {
         //Constructor
         CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"),
                                        output_junctions_bed_("NA"),
+                                       output_barcodes_file_("NA"),
                                        annotated_variant_file_("NA"),
                                        write_annotated_variants_(false),
                                        window_size_(0),
@@ -115,6 +120,9 @@ class CisSpliceEffectsIdentifier {
             if(ofs_junctions_bed_.is_open()) {
                 ofs_junctions_bed_.close();
             }
+            if(ofs_barcode_counts_.is_open()) {
+                ofs_barcode_counts_.close();
+            }
         }
         //Parse command line arguments
         void parse_options(int argc, char* argv[]);
@@ -133,6 +141,8 @@ class CisSpliceEffectsIdentifier {
         uint32_t window_size() { return window_size_; }
         //Get the annotated variants file(VCF)
         string annotated_variant_file() { return annotated_variant_file_; }
+        //Get the barcodes file
+        string output_barcodes_file() { return output_barcodes_file_; }
         //Get the file with splice junctions(BED)
         string output_file() { return output_file_; }
         //Get the Input VCF

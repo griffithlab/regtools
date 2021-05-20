@@ -52,10 +52,8 @@ struct Junction : BED {
     string color;
     //Number of blocks
     int nblocks;
-    // single cell specific fields
-    unsigned int cell_count;
-    vector<string> barcodes;
-    vector<int> barcode_counts;
+    // single cell, key is barcode, val is count of that barcode
+    map<string, int> barcodes;
     Junction() {
         start = 0;
         end = 0;
@@ -68,7 +66,6 @@ struct Junction : BED {
         name = "NA";
         color = "255,0,0";
         nblocks = 2;
-        cell_count = 0;
     }
     Junction(string chrom1, CHRPOS start1, CHRPOS end1,
              CHRPOS thick_start1, CHRPOS thick_end1,
@@ -86,7 +83,6 @@ struct Junction : BED {
         has_right_min_anchor = false;
         color = "255,0,0";
         nblocks = 2;
-        cell_count = 0;
     }
     //Print junction
     void print(ostream& out) const {
@@ -97,6 +93,20 @@ struct Junction : BED {
             "\t" << color << "\t" << nblocks <<
             "\t" << start - thick_start << "," << thick_end - end <<
             "\t" << "0," << end - thick_start << endl;
+    }
+
+    void print_barcodes(ostream& out) const {
+        // map - I'm not sure why .begin() is giving me a const_iterator (suggesting barcodes is const-qualified)
+        //  but see map<string, Junction> :: iterator it = junctions_.begin() in JunctionsExtractor::create_junctions_vector()
+        //  ... idk maybe it has something to do with the fact that junctions_ is a private member of a class whereas barcodes is just a struct field?
+        out << barcodes.size() << "\t";
+        for (map<string, int>::const_iterator it = barcodes.begin(); it != barcodes.end(); it++){
+             if (it != barcodes.begin()){
+                 out << ', ';
+             }
+             out << it->first << ': ' << it->second;
+        }
+        out << endl;
     }
 };
 
@@ -157,12 +167,16 @@ class JunctionsExtractor {
         bool junctions_sorted_;
         //File to write output to - optional, write to STDOUT by default
         string output_file_;
+        //File to write barcodes to
+        string output_barcodes_file_;
         //Region to identify junctions, in "chr:start-end" format
         string region_;
         //strandness of data; 0 = unstranded, 1 = RF, 2 = FR
         int strandness_;
         //tag used in BAM to denote strand, default "XS"
         string strand_tag_;
+        //tag used in BAM to denote single cell barcode
+        string barcode_tag_;
     public:
         //Default constructor
         JunctionsExtractor() {
@@ -172,14 +186,18 @@ class JunctionsExtractor {
             junctions_sorted_ = false;
             strandness_ = -1;
             strand_tag_ = "XS";
+            barcode_tag_ = "CB";
             bam_ = "NA";
             output_file_ = "NA";
+            output_barcodes_file_ = "NA";
             region_ = ".";
         }
         JunctionsExtractor(string bam1, string region1, int strandness1, string strand_tag1, uint32_t min_anchor_length1, uint32_t min_intron_length1, uint32_t max_intron_length1) : 
             bam_(bam1), region_(region1), strandness_(strandness1), strand_tag_(strand_tag1), min_anchor_length_(min_anchor_length1), min_intron_length_(min_anchor_length1), max_intron_length_(max_intron_length1) {
             junctions_sorted_ = false;
-            output_file_ = "NA";
+            output_file_ = "NA"; 
+            output_barcodes_file_ = "NA";
+            barcode_tag_ = "CB";
         }
         //Name the junction based on the number of junctions
         // in the map.
@@ -215,6 +233,8 @@ class JunctionsExtractor {
         void set_junction_strand_flag(bam1_t *aln, Junction& j1);
         //Get the strand
         void set_junction_strand(bam1_t *aln, Junction& j1);
+        //Get the barcode
+        void set_junction_barcode(bam1_t *aln, Junction& j1);
 };
 
 #endif

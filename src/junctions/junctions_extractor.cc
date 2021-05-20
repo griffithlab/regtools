@@ -41,8 +41,11 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int c;
     stringstream help_ss;
-    while((c = getopt(argc, argv, "ha:m:M:o:r:t:s:")) != -1) {
+    while((c = getopt(argc, argv, "ha:m:M:o:r:t:s:b:")) != -1) {
         switch(c) {
+            case 'h':
+                usage(help_ss);
+                throw common::cmdline_help_exception(help_ss.str());
             case 'a':
                 min_anchor_length_ = atoi(optarg);
                 break;
@@ -61,11 +64,11 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
             case 't':
                 strand_tag_ = string(optarg);
                 break;
-            case 'h':
-                usage(help_ss);
-                throw common::cmdline_help_exception(help_ss.str());
             case 's':
                 strandness_ = atoi(optarg);
+                break;
+            case 'b':
+                output_barcodes_file_ = string(optarg);
                 break;
             case '?':
             default:
@@ -171,6 +174,18 @@ int JunctionsExtractor::add_junction(Junction j1) {
         j1.score = common::num_to_str(j1.read_count);
     } else { //existing junction
         Junction j0 = junctions_[key];
+        
+        if (output_barcodes_file_ != "NA"){
+            map<string, int>::const_iterator it = j0.barcodes.find(j1.barcodes.begin()->first);
+            if (it != j0.barcodes.end()) {// barcode exists already
+                j1.barcodes = j0.barcodes;
+                j1.barcodes[it->first]++;
+            } else {
+                pair<string, int> tmp_barcode = *j1.barcodes.begin();
+                j1.barcodes = j0.barcodes;
+                j1.barcodes.insert(tmp_barcode);
+            }
+        }
         //increment read count
         j1.read_count = j0.read_count + 1;
         j1.score = common::num_to_str(j1.read_count);
@@ -204,8 +219,12 @@ vector<Junction> JunctionsExtractor::get_all_junctions() {
 //Print all the junctions - this function needs work
 void JunctionsExtractor::print_all_junctions(ostream& out) {
     ofstream fout;
+    ofstream fout_barcodes;
     if(output_file_ != string("NA")) {
         fout.open(output_file_.c_str());
+    }
+    if(output_barcodes_file_!= string("NA")) {
+        fout.open(output_barcodes_file_.c_str());
     }
     //Sort junctions by position
     if(!junctions_sorted_) {
@@ -221,10 +240,14 @@ void JunctionsExtractor::print_all_junctions(ostream& out) {
                 j1.print(fout);
             else
                 j1.print(out);
+            if(fout_barcodes.is_open())
+                j1.print_barcodes(fout_barcodes);
         }
     }
     if(fout.is_open())
         fout.close();
+    if(fout_barcodes.is_open())
+        fout_barcodes.close();
 }
 
 //Get the strand from the XS aux tag
@@ -279,6 +302,19 @@ void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
     }
 }
 
+//Get the the barcode
+void JunctionsExtractor::set_junction_barcode(bam1_t *aln, Junction& j1) {
+    uint8_t *p = bam_aux_get(aln, barcode_tag_.c_str());
+    if(p != NULL) {
+        char barcode = bam_aux2A(p);
+        j1.barcodes.insert(pair<string, int>(string(1, barcode),1));
+    } else {
+        j1.barcodes.insert(pair<string, int>(string(1, '?'),1));
+        cerr << 'WARNING: No CB tag found for alignment (id = ' << to_string(aln->id) << ')';
+        return;
+    }
+}
+
 //Parse junctions from the read and store in junction map
 int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t *aln) {
     int n_cigar = aln->core.n_cigar;
@@ -295,6 +331,9 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
     j1.start = read_pos; //maintain start pos of junction
     j1.thick_start = read_pos;
     set_junction_strand(aln, j1);
+    if (output_barcodes_file_ != "NA"){
+        set_junction_barcode(aln, j1);
+    }
     bool started_junction = false;
     for (int i = 0; i < n_cigar; ++i) {
         char op =
