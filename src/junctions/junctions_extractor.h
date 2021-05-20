@@ -104,7 +104,7 @@ struct Junction : BED {
              if (it != barcodes.begin()){
                  out << ", ";
              }
-             out << it->first << ": " << it->second;
+             out << it->first << ":" << it->second;
         }
         out << endl;
     }

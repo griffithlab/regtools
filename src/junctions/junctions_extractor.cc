@@ -92,6 +92,9 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
     cerr << "Maximum intron length: " << max_intron_length_ << endl;
     cerr << "Alignment: " << bam_ << endl;
     cerr << "Output file: " << output_file_ << endl;
+    if (output_barcodes_file_ != "NA"){
+        cerr << "Barcode file: " << output_barcodes_file_ << endl;
+    }
     cerr << endl;
     return 0;
 }
@@ -308,7 +311,7 @@ void JunctionsExtractor::set_junction_barcode(bam1_t *aln, Junction& j1) {
     if(p != NULL) {
         char *barcode_ptr = bam_aux2Z(p);
         string barcode (barcode_ptr);
-        cerr << barcode << " DEBUGGING" << endl;
+        // cerr << barcode << " DEBUGGING" << endl;
         j1.barcodes.insert(pair<string, int>(barcode,1));
     } else {
         j1.barcodes.insert(pair<string, int>(string(1, '?'),1));
