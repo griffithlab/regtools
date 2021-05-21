@@ -181,10 +181,13 @@ int JunctionsExtractor::add_junction(Junction j1) {
         
         if (output_barcodes_file_ != "NA"){
             unordered_map<string, int>::const_iterator it = j0.barcodes.find(j1.barcodes.begin()->first);
+            
             if (it != j0.barcodes.end()) {// barcode exists already
                 j1.barcodes = j0.barcodes;
                 j1.barcodes[it->first]++;
             } else {
+                // this block is where the slowness happens - not sure if it's the instantiation or the insertion
+                //  well, tried to get around instantion by just inserting into j0 but that made it like another 2x slower so I don't think it's that
                 pair<string, int> tmp_barcode = *j1.barcodes.begin();
                 j1.barcodes = j0.barcodes;
                 j1.barcodes.insert(tmp_barcode);

@@ -103,7 +103,7 @@ struct Junction : BED {
         out << barcodes.size() << "\t";
         for (unordered_map<string, int>::const_iterator it = barcodes.begin(); it != barcodes.end(); it++){
              if (it != barcodes.begin()){
-                 out << ", ";
+                 out << ",";
              }
              out << it->first << ":" << it->second;
         }
