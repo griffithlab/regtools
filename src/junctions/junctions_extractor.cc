@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include "htslib/hts.h"
 #include "htslib/faidx.h"
 #include "htslib/kstring.h"
+#include <unordered_map>
 
 using namespace std;
 
@@ -179,7 +180,7 @@ int JunctionsExtractor::add_junction(Junction j1) {
         Junction j0 = junctions_[key];
         
         if (output_barcodes_file_ != "NA"){
-            map<string, int>::const_iterator it = j0.barcodes.find(j1.barcodes.begin()->first);
+            unordered_map<string, int>::const_iterator it = j0.barcodes.find(j1.barcodes.begin()->first);
             if (it != j0.barcodes.end()) {// barcode exists already
                 j1.barcodes = j0.barcodes;
                 j1.barcodes[it->first]++;

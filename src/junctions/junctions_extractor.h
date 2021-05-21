@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include <iostream>
 #include "bedFile.h"
 #include "htslib/sam.h"
+#include <unordered_map>
 
 using namespace std;
 
@@ -53,7 +54,7 @@ struct Junction : BED {
     //Number of blocks
     int nblocks;
     // single cell, key is barcode, val is count of that barcode
-    map<string, int> barcodes;
+    unordered_map<string, int> barcodes;
     Junction() {
         start = 0;
         end = 0;
@@ -100,7 +101,7 @@ struct Junction : BED {
         //  but see map<string, Junction> :: iterator it = junctions_.begin() in JunctionsExtractor::create_junctions_vector()
         //  ... idk maybe it has something to do with the fact that junctions_ is a private member of a class whereas barcodes is just a struct field?
         out << barcodes.size() << "\t";
-        for (map<string, int>::const_iterator it = barcodes.begin(); it != barcodes.end(); it++){
+        for (unordered_map<string, int>::const_iterator it = barcodes.begin(); it != barcodes.end(); it++){
              if (it != barcodes.begin()){
                  out << ", ";
              }
