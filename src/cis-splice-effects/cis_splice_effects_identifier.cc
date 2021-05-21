@@ -220,7 +220,7 @@ void CisSpliceEffectsIdentifier::annotate_junctions(const GtfParser& gp1) {
             j.print(ofs_junctions_bed_);
         }
         if(output_barcodes_file_ !="NA") {
-            j.print(ofs_barcode_counts_);
+            j.print_barcodes(ofs_barcode_counts_);
         }
         line.variant_info = variant_set_to_string(junction_to_variant_[j]);
         line.print(ofs_, true);
