@@ -25,7 +25,8 @@ os:
 
 jobs:
     include:
-        - osx_image: xcode12.5
+	- os: osx
+          osx_image: xcode12.5
 
 notifications:
     email:
