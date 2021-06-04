@@ -22,7 +22,7 @@ The `cis-splice-effects identify` command is used to identify splicing misregula
 | -o STR	|	Output file containing the aberrant splice junctions with annotations. [STDOUT]	|
 | -v STR	|	Output file containing variants annotated as splice relevant (VCF format).	|
 | -j STR	|	Output file containing the aberrant junctions in BED12 format.	|
-| -s INT	|	Strand specificity of RNA library preparation, where 0 = unstranded/XS, 1 = first-strand/RF, 2 = second-strand/FR. This option is required. If your alignments contain XS tags, these will be used in the "unstranded" mode. |
+| -s INT	|	Strand specificity of RNA library preparation, where 0 = unstranded/XS, 1 = first-strand/RF, 2 = second-strand/FR. This option is required. If your alignments contain XS tags, these will be used in the "unstranded" mode. If you are unsure, we have created this [table](https://rnabio.org/module-09-appendix/0009/12/01/StrandSettings/) to help. |
 | -w INT	|	Window size in b.p to identify splicing events in. The tool identifies events in variant.start +/- w basepairs. Default behaviour is to look at the window between previous and next exons.	|
 | -e INT	|	Maximum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in exonic space, i.e a coding variant. [3]	|
 | -i INT	|	Maximum distance from the start/end of an exon to annotate a variant as relevant to splicing, the variant is in intronic space. [2]	|
