@@ -16,19 +16,10 @@ jobs:
     # well on Windows or Mac.  You can convert this to a matrix build if you need
     # cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    name: ${{ matrix.os }}, gfortran-${{ matrix.ver }}
-    strategy: 
-      os: [ubuntu-latest, macos-latest]
-    
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v2
-    
-    - name: Install packages (macOS)
-        if: contains(matrix.os,'macos')
-        run: |
-          brew update || brew install lcov || gem install coveralls-lcov
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -44,7 +35,11 @@ jobs:
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -V
-      
+
+    - name: Install dependencies
+      shell: bash
+      run: sudo apt-get update ; sudo apt-get install lcov
+
     - name: Coverage
       run: cd build && lcov -c -d . -o cov.txt && lcov -e cov.txt "*/regtools/src/*" -o coverage.run.filtered.1 && lcov -r coverage.run.filtered.1 "*src/utils/*" "*/tests/*" -o coverage.run.filtered
       
