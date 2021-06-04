@@ -34,7 +34,7 @@ class IntegrationTest():
         return rv
 
     def execute(self, args):
-        print "args ", args
+        print(args ), args
         cmdline = "%s %s" %(self.exe_path, " ".join(args))
         vglog_file = self.tempFile("valgrind.log")
         return ValgrindWrapper(shlex.split(cmdline), vglog_file).run()
