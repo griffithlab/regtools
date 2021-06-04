@@ -34,7 +34,7 @@ class IntegrationTest():
         return rv
 
     def execute(self, args):
-        print "args ", args
+        print("args ", args)
         cmdline = "%s %s" %(self.exe_path, " ".join(args))
         vglog_file = self.tempFile("valgrind.log")
         return ValgrindWrapper(shlex.split(cmdline), vglog_file).run()
@@ -69,7 +69,7 @@ class IntegrationTest():
 
 def main():
     if len(sys.argv) < 2:
-        print "Error: required argument (path to test executable) missing"
+        print('Error: required argument (path to test executable) missing')
         sys.exit(1)
     IntegrationTest.exe_path = sys.argv.pop()
     unittest.main()
