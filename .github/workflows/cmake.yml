@@ -36,9 +36,11 @@ jobs:
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -V
       
+    - name: Coverage
+      run: cd build && lcov -c -d . -o cov.txt && lcov -e cov.txt "*/regtools/src/*" -o coverage.run.filtered.1 && lcov -r coverage.run.filtered.1 "*src/utils/*" "*/tests/*" -o coverage.run.filtered
+      
     - name: Coveralls
       uses: coverallsapp/github-action@master
-      run: cd build && lcov -c -d . -o cov.txt && lcov -e cov.txt "*/regtools/src/*" -o coverage.run.filtered.1 && lcov -r coverage.run.filtered.1 "*src/utils/*" "*/tests/*" -o coverage.run.filtered
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: coverage.run.filtered
