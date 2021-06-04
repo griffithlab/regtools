@@ -241,7 +241,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         output_annotatedjunctions = self.tempFile("observed-cse-identify.out")
         output_annotatedvariants = self.tempFile("observed-cse-identify-variants.out")
         output_junctions = self.tempFile("observed-cse-identify-junctions.out")
-        print "BAM1 is ", bam1
+        print("BAM1 is ", bam1)
         for anchor in ["", "30"]:
             if anchor != "":
                 anchor = "-a " + anchor
