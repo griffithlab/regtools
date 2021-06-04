@@ -69,7 +69,7 @@ class IntegrationTest():
 
 def main():
     if len(sys.argv) < 2:
-        print "Error: required argument (path to test executable) missing"
+        print('Error: required argument (path to test executable) missing')
         sys.exit(1)
     IntegrationTest.exe_path = sys.argv.pop()
     unittest.main()
