@@ -55,7 +55,7 @@ RUN R --vanilla -e 'install.packages(c("data.table", "plyr", "tidyverse"), repos
 ##################### Install Regtools #########################################
 
 # clone git repository
-RUN cd / && git clone https://github.com/griffithlab/regtools.git
+RUN cd / && git clone -b singlecell https://github.com/griffithlab/regtools.git
 
 # make a build directory for regtools
 WORKDIR /regtools/
