@@ -56,13 +56,14 @@ RUN R --vanilla -e 'install.packages(c("data.table", "plyr", "tidyverse"), repos
 
 # removed this due to docker build pulling the correct branch already and the below command actually overwriting the desired branch to master
 # clone git repository
+ADD . /regtools
 # RUN cd / && git clone -b singlecell https://github.com/griffithlab/regtools.git
 
 # make a build directory for regtools
-WORKDIR /
+WORKDIR /regtools
 
 # compile from source
-# RUN mkdir build && cd build && cmake .. && make
+RUN mkdir build && cd build && cmake .. && make
 
 ################################################################################
 ###################### set environment path    #################################
@@ -72,5 +73,5 @@ WORKDIR /scripts/
 
 
 # add regtools executable to path
-# ENV PATH="/regtools/build:/usr/local/bin/R-${r_version}:${PATH}"
- ENV PATH="/build:/usr/local/bin/R-${r_version}:${PATH}"
+ENV PATH="/regtools/build:/usr/local/bin/R-${r_version}:${PATH}"
+# ENV PATH="/build:/usr/local/bin/R-${r_version}:${PATH}"
