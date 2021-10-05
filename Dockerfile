@@ -60,7 +60,6 @@ RUN R --vanilla -e 'install.packages(c("data.table", "plyr", "tidyverse"), repos
 RUN pip3 install spliceai
 RUN pip3 install --upgrade tensorflow
 RUN pip3 install keras==2.4.3
-# RUN pip3 install --upgrade tensorflow-gpu
 
 ################################################################################
 ##################### Install Regtools #########################################
