@@ -25,8 +25,8 @@ library(tidyverse)
   setwd('/Users/kcotto/Projects/regtools/scrna/regtools_cse_per_cell')
 
   # tag = 'E'
-  sample_names = '/Users/kcotto/Projects/regtools/scrna/Rep1_sample_names.tsv'
-  input_file = '/Users/kcotto/Projects/regtools/scrna/samples_w_variant/per_rep/Rep1_tumor_splice_variants.bed'
+  sample_names = '/Users/kcotto/Projects/regtools/scrna/Rep1_aCD4_sample_names.tsv'
+  input_file = '/Users/kcotto/Projects/regtools/scrna/samples_w_variant/per_rep_condition_pair/Rep1_aCD4_tumor_splice_variants.bed'
   
   # All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
   all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE)
