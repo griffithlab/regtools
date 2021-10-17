@@ -236,6 +236,8 @@ class JunctionsExtractor {
         void set_junction_strand(bam1_t *aln, Junction& j1);
         //Get the barcode
         void set_junction_barcode(bam1_t *aln, Junction& j1);
+        //Get the reference bases at a position
+        string get_reference_sequence(string position);
 };
 
 #endif

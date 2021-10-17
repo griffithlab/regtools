@@ -475,3 +475,43 @@ void JunctionsExtractor::create_junctions_vector() {
         junctions_vector_.push_back(j1);
     }
 }
+
+// I'm stealing these from JunctionsAnnotator - so there's some code redundancy - YYF
+//Get the reference sequence at a particular coordinate
+string JunctionsExtractor::get_reference_sequence(string position) {
+    int len;
+    faidx_t *fai = fai_load(ref_.c_str());
+    char *s = fai_fetch(fai, position.c_str(), &len);
+    cerr << "position = " << position << endl;
+    if(s == NULL)
+        throw runtime_error("Unable to extract FASTA sequence "
+                             "for position " + position + "\n\n");
+    std::string seq(s);
+    free(s);
+    fai_destroy(fai);
+    return seq;
+}
+
+//Get the splice_site bases
+// note this was basically just taken from junctions annotator but now line is a Junction not an AnnotatedJunction
+//  so the end is off by 1 and I'm returning a string since i will just be checking it and then tossing/not saving as a member
+string JunctionsExtractor::get_splice_site(Junction & line) {
+    string position1 = line.chrom + ":" +
+                      common::num_to_str(line.start + 1) + "-" + common::num_to_str(line.start + 2);
+    string position2 = line.chrom + ":" +
+                      common::num_to_str(line.end + 1 - 2 ) + "-" + common::num_to_str(line.end + 1 - 1);
+    string seq1, seq2, splice_site;
+    try {
+        seq1 = get_reference_sequence(position1);
+        seq2 = get_reference_sequence(position2);
+    } catch (const runtime_error& e) {
+        throw e;
+    }
+    if(line.strand == "-") {
+        seq1 = common::rev_comp(seq1);
+        seq2 = common::rev_comp(seq2);
+        splice_site = seq2 + "-" + seq1;
+    } else {
+        splice_site = seq1 + "-" + seq2;
+    }
+    return splice_site;
