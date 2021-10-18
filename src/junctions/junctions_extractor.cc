@@ -66,7 +66,16 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
                 strand_tag_ = string(optarg);
                 break;
             case 's':
-                strandness_ = atoi(optarg);
+                switch(string(optarg)){
+                    case 'XS':
+                        strandness_ = 0;
+                    case 'RF':
+                        strandness_ = 1;
+                    case 'FR':
+                        strandness_ = 2;
+                    case 'intron-motif':
+                        strandness_ = 3;
+                }
                 break;
             case 'b':
                 output_barcodes_file_ = string(optarg);
@@ -278,7 +287,7 @@ void JunctionsExtractor::set_junction_strand_flag(bam1_t *aln, Junction& j1) {
     int mate_reversed = (flag >> 5) % 2;
     int first_in_pair = (flag >> 6) % 2;
     int second_in_pair = (flag >> 7) % 2;
-    // strandness_ is 0 for unstranded, 1 for RF, and 2 for FR
+    // strandness_ is 1 for RF, and 2 for FR
     int bool_strandness = strandness_ - 1;
     int first_strand = !bool_strandness ^ first_in_pair ^ reversed;
     int second_strand = !bool_strandness ^ second_in_pair ^ mate_reversed;
@@ -299,13 +308,23 @@ void JunctionsExtractor::set_junction_strand_flag(bam1_t *aln, Junction& j1) {
     return;
 }
 
+//Get strand based on splice-site/intron motif
+void JunctionsExtractor::set_junction_strand_intron_motif(string intron_motif, Junction& j1) {
+    unordered_set<string> plus_motifs = {"GTAG","GCAG","ATAC"};
+    unordered_set<string> minus_motifs = {"CTAC","CTGC","GTAT"};
+    // compare intron_motif and set string like:
+    // j1.strand = string(1, '?');
+}
+
 //Get the strand
-void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1) {
+void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1, string intron_motif) {
     // if unstranded data
-    if (strandness_ > 0){
-        return set_junction_strand_flag(aln, j1);
-    } else {
+    if (strandness_ == 0){
         return set_junction_strand_XS(aln, j1);
+    } else if (strandness_ == 3){
+        return set_junction_strand_intron_motif(intron_motif, j1);
+    } else {
+        return set_junction_strand_flag(aln, j1);
     }
 }
 
@@ -339,7 +358,8 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
     j1.chrom = chr;
     j1.start = read_pos; //maintain start pos of junction
     j1.thick_start = read_pos;
-    set_junction_strand(aln, j1);
+    string intron_motif;
+    
     if (output_barcodes_file_ != "NA"){
         set_junction_barcode(aln, j1);
     }
@@ -356,9 +376,12 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                     j1.thick_end = j1.end;
                     //Start the first one and remains started
                     started_junction = true;
+                    // YYF get intron_motif
+                    // j1.start, j1.start + 1, j1.end - 2 , j1.end - 1
                 } else {
                     //Add the previous junction
                     try {
+                        set_junction_strand(aln, j1, intron_motif);
                         add_junction(j1);
                     } catch (const std::logic_error& e) {
                         cout << e.what() << '\n';
@@ -369,6 +392,7 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                     j1.thick_end = j1.end;
                     //For clarity - the next junction is now open
                     started_junction = true;
+                    // YYF reset intron_motif?
                 }
                 break;
             case '=':
@@ -386,6 +410,7 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                     j1.thick_start = j1.start;
                 } else {
                     try {
+                        set_junction_strand(aln, j1, intron_motif);
                         add_junction(j1);
                     } catch (const std::logic_error& e) {
                         cout << e.what() << '\n';
@@ -402,6 +427,7 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                     j1.thick_start = j1.start;
                 else {
                     try {
+                        set_junction_strand(aln, j1, intron_motif);
                         add_junction(j1);
                     } catch (const std::logic_error& e) {
                         cout << e.what() << '\n';
@@ -421,6 +447,7 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
     }
     if(started_junction) {
         try {
+            set_junction_strand(aln, j1, intron_motif);
             add_junction(j1);
         } catch (const std::logic_error& e) {
             cout << e.what() << '\n';
@@ -475,43 +502,3 @@ void JunctionsExtractor::create_junctions_vector() {
         junctions_vector_.push_back(j1);
     }
 }
-
-// I'm stealing these from JunctionsAnnotator - so there's some code redundancy - YYF
-//Get the reference sequence at a particular coordinate
-string JunctionsExtractor::get_reference_sequence(string position) {
-    int len;
-    faidx_t *fai = fai_load(ref_.c_str());
-    char *s = fai_fetch(fai, position.c_str(), &len);
-    cerr << "position = " << position << endl;
-    if(s == NULL)
-        throw runtime_error("Unable to extract FASTA sequence "
-                             "for position " + position + "\n\n");
-    std::string seq(s);
-    free(s);
-    fai_destroy(fai);
-    return seq;
-}
-
-//Get the splice_site bases
-// note this was basically just taken from junctions annotator but now line is a Junction not an AnnotatedJunction
-//  so the end is off by 1 and I'm returning a string since i will just be checking it and then tossing/not saving as a member
-string JunctionsExtractor::get_splice_site(Junction & line) {
-    string position1 = line.chrom + ":" +
-                      common::num_to_str(line.start + 1) + "-" + common::num_to_str(line.start + 2);
-    string position2 = line.chrom + ":" +
-                      common::num_to_str(line.end + 1 - 2 ) + "-" + common::num_to_str(line.end + 1 - 1);
-    string seq1, seq2, splice_site;
-    try {
-        seq1 = get_reference_sequence(position1);
-        seq2 = get_reference_sequence(position2);
-    } catch (const runtime_error& e) {
-        throw e;
-    }
-    if(line.strand == "-") {
-        seq1 = common::rev_comp(seq1);
-        seq2 = common::rev_comp(seq2);
-        splice_site = seq2 + "-" + seq1;
-    } else {
-        splice_site = seq1 + "-" + seq2;
-    }
-    return splice_site;
