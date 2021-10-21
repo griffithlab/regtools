@@ -95,7 +95,6 @@ struct Junction : BED {
             "\t" << start - thick_start << "," << thick_end - end <<
             "\t" << "0," << end - thick_start << endl;
     }
-
     void print_barcodes(ostream& out) const {
         // map - I'm not sure why .begin() is giving me a const_iterator (suggesting barcodes is const-qualified)
         //  but see map<string, Junction> :: iterator it = junctions_.begin() in JunctionsExtractor::create_junctions_vector()

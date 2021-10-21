@@ -309,15 +309,21 @@ void JunctionsExtractor::set_junction_strand_flag(bam1_t *aln, Junction& j1) {
 }
 
 //Get strand based on splice-site/intron motif
-void JunctionsExtractor::set_junction_strand_intron_motif(string intron_motif, Junction& j1) {
+void JunctionsExtractor::set_junction_strand_intron_motif(char *intron_motif, Junction& j1) {
     unordered_set<string> plus_motifs = {"GTAG","GCAG","ATAC"};
     unordered_set<string> minus_motifs = {"CTAC","CTGC","GTAT"};
-    // compare intron_motif and set string like:
-    // j1.strand = string(1, '?');
+    string intron_motif_str(intron_motif);
+    if (plus_motifs.find(intron_motif_str) != plus_motifs.end()){
+        j1.strand = string(1, '+');
+    } else if (minus_motifs.find(intron_motif_str) != minus_motifs.end()){
+        j1.strand = string(1, '-');
+    } else {
+        j1.strand = string(1, '?');
+    }
 }
 
 //Get the strand
-void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1, string intron_motif) {
+void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1, char *intron_motif) {
     // if unstranded data
     if (strandness_ == 0){
         return set_junction_strand_XS(aln, j1);
@@ -358,7 +364,7 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
     j1.chrom = chr;
     j1.start = read_pos; //maintain start pos of junction
     j1.thick_start = read_pos;
-    string intron_motif;
+    char intron_motif[4];
     
     if (output_barcodes_file_ != "NA"){
         set_junction_barcode(aln, j1);
@@ -377,7 +383,10 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                     //Start the first one and remains started
                     started_junction = true;
                     // YYF get intron_motif
-                    // j1.start, j1.start + 1, j1.end - 2 , j1.end - 1
+                    intron_motif[0] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.start)];
+                    intron_motif[1] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.start + 1)];
+                    intron_motif[2] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.end - 2)];
+                    intron_motif[3] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.end - 1)];
                 } else {
                     //Add the previous junction
                     try {
@@ -392,7 +401,7 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                     j1.thick_end = j1.end;
                     //For clarity - the next junction is now open
                     started_junction = true;
-                    // YYF reset intron_motif?
+                    // YYF reset intron_motif? I guess theoretically it doesn't matter since N is the only case where it will/must be changed
                 }
                 break;
             case '=':
