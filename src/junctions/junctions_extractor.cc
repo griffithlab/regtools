@@ -393,21 +393,6 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                     j1.thick_end = j1.end;
                     //Start the first one and remains started
                     started_junction = true;
-                    // YYF get intron_motif
-                    intron_motif[0] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.start - read_pos)];
-                    intron_motif[1] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.start + 1 - read_pos)];
-                    intron_motif[2] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.end - 2 - read_pos)];
-                    intron_motif[3] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.end - 1 - read_pos)];
-                    cout << "j1.start: " << j1.start << "; j1.end: " << j1.end << endl;
-                    cout << intron_motif[0] << " = " << bam_seqi(bam_get_seq(aln),j1.start - read_pos) << endl;
-                    cout << intron_motif[1] << " = " << bam_seqi(bam_get_seq(aln),j1.start + 1 - read_pos) << endl;
-                    cout << intron_motif[2] << " = " << bam_seqi(bam_get_seq(aln),j1.end - 2 - read_pos) << endl;
-                    cout << intron_motif[3] << " = " << bam_seqi(bam_get_seq(aln),j1.end - 1 - read_pos) << endl;
-                    for (int i=0; i<9; i++){
-                        cout << " hello " << bam_seqi(bam_get_seq(aln),j1.end - 4 + i - read_pos) << endl;
-                    }
-                    cout << "intron_motif: " << intron_motif << endl;
-                    cout << "seq_nt16_str: " << seq_nt16_str << endl;
                 } else {
                     //Add the previous junction
                     try {
@@ -532,3 +517,43 @@ void JunctionsExtractor::create_junctions_vector() {
         junctions_vector_.push_back(j1);
     }
 }
+
+// I'm stealing these from JunctionsAnnotator - so there's some code redundancy - YYF
+//Get the reference sequence at a particular coordinate
+string JunctionsExtractor::get_reference_sequence(string position) {
+    int len;
+    faidx_t *fai = fai_load(ref_.c_str());
+    char *s = fai_fetch(fai, position.c_str(), &len);
+    cerr << "position = " << position << endl;
+    if(s == NULL)
+        throw runtime_error("Unable to extract FASTA sequence "
+                             "for position " + position + "\n\n");
+    std::string seq(s);
+    free(s);
+    fai_destroy(fai);
+    return seq;
+}
+
+//Get the splice_site bases
+// note this was basically just taken from junctions annotator but now line is a Junction not an AnnotatedJunction
+//  so the end is off by 1 and I'm returning a string since i will just be checking it and then tossing/not saving as a member
+string JunctionsExtractor::get_splice_site(Junction & line) {
+    string position1 = line.chrom + ":" +
+                      common::num_to_str(line.start + 1) + "-" + common::num_to_str(line.start + 2);
+    string position2 = line.chrom + ":" +
+                      common::num_to_str(line.end + 1 - 2 ) + "-" + common::num_to_str(line.end + 1 - 1);
+    string seq1, seq2, splice_site;
+    try {
+        seq1 = get_reference_sequence(position1);
+        seq2 = get_reference_sequence(position2);
+    } catch (const runtime_error& e) {
+        throw e;
+    }
+    if(line.strand == "-") {
+        seq1 = common::rev_comp(seq1);
+        seq2 = common::rev_comp(seq2);
+        splice_site = seq2 + "-" + seq1;
+    } else {
+        splice_site = seq1 + "-" + seq2;
+    }
+    return splice_site;

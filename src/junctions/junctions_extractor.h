@@ -238,6 +238,12 @@ class JunctionsExtractor {
         void set_junction_strand(bam1_t *aln, Junction& j1, char *intron_motif);
         //Get the barcode
         void set_junction_barcode(bam1_t *aln, Junction& j1);
+        //Get the reference bases at a position
+        string get_reference_sequence(string position);
+        //Get a single line from the junctions file
+        bool get_single_junction(BED & line);
+        //Get the anchor bases
+        void get_splice_site(Junction & line);
 };
 
 #endif
