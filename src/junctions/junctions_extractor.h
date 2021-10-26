@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include "bedFile.h"
 #include "htslib/sam.h"
 #include <unordered_map>
+#include <unordered_set>
 
 using namespace std;
 
@@ -231,8 +232,10 @@ class JunctionsExtractor {
         void set_junction_strand_XS(bam1_t *aln, Junction& j1);
         //Get the strand from bitwise flag
         void set_junction_strand_flag(bam1_t *aln, Junction& j1);
+        //Infer strand from canonical-motifs
+        void set_junction_strand_intron_motif(char *intron_motif, Junction& j1);
         //Get the strand
-        void set_junction_strand(bam1_t *aln, Junction& j1);
+        void set_junction_strand(bam1_t *aln, Junction& j1, char *intron_motif);
         //Get the barcode
         void set_junction_barcode(bam1_t *aln, Junction& j1);
 };

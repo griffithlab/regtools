@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.  */
 #include "htslib/faidx.h"
 #include "htslib/kstring.h"
 #include <unordered_map>
+#include <unordered_set>
 
 using namespace std;
 
@@ -66,16 +67,17 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
                 strand_tag_ = string(optarg);
                 break;
             case 's':
-                switch(string(optarg)){
-                    case 'XS':
+                    if (string(optarg).compare("XS") != 0){
                         strandness_ = 0;
-                    case 'RF':
+                    } else if (string(optarg).compare("RF") != 0) {
                         strandness_ = 1;
-                    case 'FR':
+                    } else if (string(optarg).compare("FR") != 0) {
                         strandness_ = 2;
-                    case 'intron-motif':
+                    } else if (string(optarg).compare("intron-motif") != 0) {
                         strandness_ = 3;
-                }
+                    } else {
+                        throw runtime_error("Unrecognized strandness argument!\n\n");
+                    }
                 break;
             case 'b':
                 output_barcodes_file_ = string(optarg);
@@ -310,8 +312,15 @@ void JunctionsExtractor::set_junction_strand_flag(bam1_t *aln, Junction& j1) {
 
 //Get strand based on splice-site/intron motif
 void JunctionsExtractor::set_junction_strand_intron_motif(char *intron_motif, Junction& j1) {
-    unordered_set<string> plus_motifs = {"GTAG","GCAG","ATAC"};
-    unordered_set<string> minus_motifs = {"CTAC","CTGC","GTAT"};
+    unordered_set<string> plus_motifs;
+    plus_motifs.insert("GTAG");
+    plus_motifs.insert("GCAG");
+    plus_motifs.insert("ATAC");
+    unordered_set<string> minus_motifs;
+    plus_motifs.insert("CTAC");
+    plus_motifs.insert("CTGC");
+    plus_motifs.insert("GTAT");
+    
     string intron_motif_str(intron_motif);
     if (plus_motifs.find(intron_motif_str) != plus_motifs.end()){
         j1.strand = string(1, '+');
