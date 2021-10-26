@@ -83,5 +83,5 @@ WORKDIR /scripts/
 
 
 # add regtools executable to path
-ENV PATH="/regtools/build:/scripts/:/usr/local/bin/R-${r_version}:${PATH}"
+ENV PATH="/regtools/build:/scripts:/usr/local/bin/R-${r_version}:${PATH}"
 # ENV PATH="/build:/usr/local/bin/R-${r_version}:${PATH}"
