@@ -67,13 +67,13 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
                 strand_tag_ = string(optarg);
                 break;
             case 's':
-                    if (string(optarg).compare("XS") != 0){
+                    if (string(optarg).compare("XS") == 0){
                         strandness_ = 0;
-                    } else if (string(optarg).compare("RF") != 0) {
+                    } else if (string(optarg).compare("RF") == 0) {
                         strandness_ = 1;
-                    } else if (string(optarg).compare("FR") != 0) {
+                    } else if (string(optarg).compare("FR") == 0) {
                         strandness_ = 2;
-                    } else if (string(optarg).compare("intron-motif") != 0) {
+                    } else if (string(optarg).compare("intron-motif") == 0) {
                         strandness_ = 3;
                     } else {
                         throw runtime_error("Unrecognized strandness argument!\n\n");
@@ -320,8 +320,10 @@ void JunctionsExtractor::set_junction_strand_intron_motif(char *intron_motif, Ju
     plus_motifs.insert("CTAC");
     plus_motifs.insert("CTGC");
     plus_motifs.insert("GTAT");
-    
+
     string intron_motif_str(intron_motif);
+    // cout << "intron_motif: " << intron_motif << endl;
+    // cout << "intron_motif_str: " << intron_motif_str << endl;
     if (plus_motifs.find(intron_motif_str) != plus_motifs.end()){
         j1.strand = string(1, '+');
     } else if (minus_motifs.find(intron_motif_str) != minus_motifs.end()){
@@ -392,10 +394,20 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                     //Start the first one and remains started
                     started_junction = true;
                     // YYF get intron_motif
-                    intron_motif[0] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.start)];
-                    intron_motif[1] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.start + 1)];
-                    intron_motif[2] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.end - 2)];
-                    intron_motif[3] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.end - 1)];
+                    intron_motif[0] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.start - read_pos)];
+                    intron_motif[1] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.start + 1 - read_pos)];
+                    intron_motif[2] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.end - 2 - read_pos)];
+                    intron_motif[3] = seq_nt16_str[bam_seqi(bam_get_seq(aln),j1.end - 1 - read_pos)];
+                    cout << "j1.start: " << j1.start << "; j1.end: " << j1.end << endl;
+                    cout << intron_motif[0] << " = " << bam_seqi(bam_get_seq(aln),j1.start - read_pos) << endl;
+                    cout << intron_motif[1] << " = " << bam_seqi(bam_get_seq(aln),j1.start + 1 - read_pos) << endl;
+                    cout << intron_motif[2] << " = " << bam_seqi(bam_get_seq(aln),j1.end - 2 - read_pos) << endl;
+                    cout << intron_motif[3] << " = " << bam_seqi(bam_get_seq(aln),j1.end - 1 - read_pos) << endl;
+                    for (int i=0; i<9; i++){
+                        cout << " hello " << bam_seqi(bam_get_seq(aln),j1.end - 4 + i - read_pos) << endl;
+                    }
+                    cout << "intron_motif: " << intron_motif << endl;
+                    cout << "seq_nt16_str: " << seq_nt16_str << endl;
                 } else {
                     //Add the previous junction
                     try {
