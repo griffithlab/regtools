@@ -150,6 +150,8 @@ class JunctionsExtractor {
     private:
         //Alignment file
         string bam_;
+        //Reference FASTA file
+        string ref_;
         //Minimum anchor length for junctions
         //Junctions need atleast this many bp overlap
         // on both ends.
@@ -192,6 +194,7 @@ class JunctionsExtractor {
             output_file_ = "NA";
             output_barcodes_file_ = "NA";
             region_ = ".";
+            ref_ = "NA";
         }
         JunctionsExtractor(string bam1, string region1, int strandness1, string strand_tag1, uint32_t min_anchor_length1, uint32_t min_intron_length1, uint32_t max_intron_length1) : 
             bam_(bam1), region_(region1), strandness_(strandness1), strand_tag_(strand_tag1), min_anchor_length_(min_anchor_length1), min_intron_length_(min_anchor_length1), max_intron_length_(max_intron_length1) {
@@ -199,6 +202,7 @@ class JunctionsExtractor {
             output_file_ = "NA";
             output_barcodes_file_ = "NA";
             barcode_tag_ = "CB";
+            ref_ = "NA";
         }
         //Name the junction based on the number of junctions
         // in the map.
@@ -240,10 +244,8 @@ class JunctionsExtractor {
         void set_junction_barcode(bam1_t *aln, Junction& j1);
         //Get the reference bases at a position
         string get_reference_sequence(string position);
-        //Get a single line from the junctions file
-        bool get_single_junction(BED & line);
         //Get the anchor bases
-        void get_splice_site(Junction & line);
+        string get_splice_site(Junction & line);
 };
 
 #endif

@@ -314,22 +314,21 @@ void JunctionsExtractor::set_junction_strand_flag(bam1_t *aln, Junction& j1) {
 }
 
 //Get strand based on splice-site/intron motif
-void JunctionsExtractor::set_junction_strand_intron_motif(char *intron_motif, Junction& j1) {
+void JunctionsExtractor::set_junction_strand_intron_motif(string intron_motif, Junction& j1) {
     unordered_set<string> plus_motifs;
-    plus_motifs.insert("GTAG");
-    plus_motifs.insert("GCAG");
-    plus_motifs.insert("ATAC");
+    plus_motifs.insert("GT-AG");
+    plus_motifs.insert("GC-AG");
+    plus_motifs.insert("AT-AC");
     unordered_set<string> minus_motifs;
-    plus_motifs.insert("CTAC");
-    plus_motifs.insert("CTGC");
-    plus_motifs.insert("GTAT");
+    plus_motifs.insert("CT-AC");
+    plus_motifs.insert("CT-GC");
+    plus_motifs.insert("GT-AT");
 
-    string intron_motif_str(intron_motif);
     // cout << "intron_motif: " << intron_motif << endl;
     // cout << "intron_motif_str: " << intron_motif_str << endl;
-    if (plus_motifs.find(intron_motif_str) != plus_motifs.end()){
+    if (plus_motifs.find(intron_motif) != plus_motifs.end()){
         j1.strand = string(1, '+');
-    } else if (minus_motifs.find(intron_motif_str) != minus_motifs.end()){
+    } else if (minus_motifs.find(intron_motif) != minus_motifs.end()){
         j1.strand = string(1, '-');
     } else {
         j1.strand = string(1, '?');
@@ -337,7 +336,7 @@ void JunctionsExtractor::set_junction_strand_intron_motif(char *intron_motif, Ju
 }
 
 //Get the strand
-void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1, char *intron_motif) {
+void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1, string intron_motif) {
     // if unstranded data
     if (strandness_ == 0){
         return set_junction_strand_XS(aln, j1);
@@ -469,6 +468,7 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
     if(started_junction) {
         try {
             intron_motif = get_splice_site(j1);
+            cout << intron_motif << endl;
             set_junction_strand(aln, j1, intron_motif);
             add_junction(j1);
         } catch (const std::logic_error& e) {
@@ -564,3 +564,4 @@ string JunctionsExtractor::get_splice_site(Junction & line) {
         splice_site = seq1 + "-" + seq2;
     }
     return splice_site;
+}
