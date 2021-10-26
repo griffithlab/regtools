@@ -7,26 +7,26 @@ library(data.table)
 library(plyr)
 library(tidyverse)
 
-# debug = F
-# 
-# system.time({
-#   if (debug){
-#     tag = paste("_", "default", sep="")
-#   } else {
-#     # get options tag
-#     args = commandArgs(trailingOnly = TRUE)
-#     tag = args[1]
-#     input_file = args[2]
-#     if ( substr(tag, 2, 3) == "--"){
-#       stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
-#     }
-#   }
-  
-  setwd('/Users/kcotto/Projects/regtools/scrna/regtools_cse_per_cell')
 
-  # tag = 'E'
-  sample_names = '/Users/kcotto/Projects/regtools/scrna/Rep1_aCD4_sample_names.tsv'
-  input_file = '/Users/kcotto/Projects/regtools/scrna/samples_w_variant/per_rep_condition_pair/Rep1_aCD4_tumor_splice_variants.bed'
+  if (debug){
+    tag = paste("_", "default", sep="")
+  } else {
+    # get options tag
+    args = commandArgs(trailingOnly = TRUE)
+    wd = args[1]
+    samples = args[2]
+    splice_variants_file = args[3]
+    if ( substr(tag, 2, 3) == "--"){
+      stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
+    }}
+  
+  # setwd('/storage1/fs1/mgriffit/Active/regtools/scrna/regtools_cse_per_cell')
+  setwd(wd)
+  
+  # sample_names = '/storage1/fs1/mgriffit/Active/regtools/scrna/sample_paths/Rep1_samples.txt'
+  # input_file = '/storage1/fs1/mgriffit/Active/regtools/scrna/samples_w_variant/per_rep/Rep1_tumor_splice_variants.bed'
+  sample_names = samples
+  input_file = splice_variants_file
   
   # All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
   all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE)
