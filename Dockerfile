@@ -79,9 +79,9 @@ RUN mkdir build && cd build && cmake .. && make
 ###################### set environment path    #################################
 
 # switch to scripts dir
-WORKDIR /scripts/
+# WORKDIR /scripts/
 
 
 # add regtools executable to path
-ENV PATH="/regtools/build:/scripts:/usr/local/bin/R-${r_version}:${PATH}"
+ENV PATH="/regtools/build:/regtool/scripts:/usr/local/bin/R-${r_version}:${PATH}"
 # ENV PATH="/build:/usr/local/bin/R-${r_version}:${PATH}"
