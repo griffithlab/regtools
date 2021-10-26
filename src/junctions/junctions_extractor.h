@@ -233,9 +233,9 @@ class JunctionsExtractor {
         //Get the strand from bitwise flag
         void set_junction_strand_flag(bam1_t *aln, Junction& j1);
         //Infer strand from canonical-motifs
-        void set_junction_strand_intron_motif(char *intron_motif, Junction& j1);
+        void set_junction_strand_intron_motif(string intron_motif, Junction& j1);
         //Get the strand
-        void set_junction_strand(bam1_t *aln, Junction& j1, char *intron_motif);
+        void set_junction_strand(bam1_t *aln, Junction& j1, string intron_motif);
         //Get the barcode
         void set_junction_barcode(bam1_t *aln, Junction& j1);
         //Get the reference bases at a position

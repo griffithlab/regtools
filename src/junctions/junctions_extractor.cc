@@ -91,6 +91,9 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
     if(argc - optind >= 1) {
         bam_ = string(argv[optind++]);
     }
+    if(argc - optind >= 1) {
+        ref_ = string(argv[optind++]);
+    }
     if(optind < argc || bam_ == "NA") {
         usage();
         throw runtime_error("Error parsing inputs!(2)\n\n");
@@ -375,7 +378,7 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
     j1.chrom = chr;
     j1.start = read_pos; //maintain start pos of junction
     j1.thick_start = read_pos;
-    char intron_motif[4];
+    string intron_motif;
     
     if (output_barcodes_file_ != "NA"){
         set_junction_barcode(aln, j1);
@@ -396,6 +399,7 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                 } else {
                     //Add the previous junction
                     try {
+                        intron_motif = get_splice_site(j1);
                         set_junction_strand(aln, j1, intron_motif);
                         add_junction(j1);
                     } catch (const std::logic_error& e) {
@@ -425,6 +429,7 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                     j1.thick_start = j1.start;
                 } else {
                     try {
+                        intron_motif = get_splice_site(j1);
                         set_junction_strand(aln, j1, intron_motif);
                         add_junction(j1);
                     } catch (const std::logic_error& e) {
@@ -442,6 +447,7 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                     j1.thick_start = j1.start;
                 else {
                     try {
+                        intron_motif = get_splice_site(j1);
                         set_junction_strand(aln, j1, intron_motif);
                         add_junction(j1);
                     } catch (const std::logic_error& e) {
@@ -462,6 +468,7 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
     }
     if(started_junction) {
         try {
+            intron_motif = get_splice_site(j1);
             set_junction_strand(aln, j1, intron_motif);
             add_junction(j1);
         } catch (const std::logic_error& e) {
@@ -539,7 +546,7 @@ string JunctionsExtractor::get_reference_sequence(string position) {
 //  so the end is off by 1 and I'm returning a string since i will just be checking it and then tossing/not saving as a member
 string JunctionsExtractor::get_splice_site(Junction & line) {
     string position1 = line.chrom + ":" +
-                      common::num_to_str(line.start + 1) + "-" + common::num_to_str(line.start + 2);
+                      common::num_to_str(line.start + 1) + "-" + common::num_to_str(line.start + 1 + 1);
     string position2 = line.chrom + ":" +
                       common::num_to_str(line.end + 1 - 2 ) + "-" + common::num_to_str(line.end + 1 - 1);
     string seq1, seq2, splice_site;
