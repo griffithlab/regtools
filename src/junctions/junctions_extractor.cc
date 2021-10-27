@@ -320,12 +320,10 @@ void JunctionsExtractor::set_junction_strand_intron_motif(string intron_motif, J
     plus_motifs.insert("GC-AG");
     plus_motifs.insert("AT-AC");
     unordered_set<string> minus_motifs;
-    plus_motifs.insert("CT-AC");
-    plus_motifs.insert("CT-GC");
-    plus_motifs.insert("GT-AT");
+    minus_motifs.insert("CT-AC");
+    minus_motifs.insert("CT-GC");
+    minus_motifs.insert("GT-AT");
 
-    // cout << "intron_motif: " << intron_motif << endl;
-    // cout << "intron_motif_str: " << intron_motif_str << endl;
     if (plus_motifs.find(intron_motif) != plus_motifs.end()){
         j1.strand = string(1, '+');
     } else if (minus_motifs.find(intron_motif) != minus_motifs.end()){
@@ -468,7 +466,6 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
     if(started_junction) {
         try {
             intron_motif = get_splice_site(j1);
-            cout << intron_motif << endl;
             set_junction_strand(aln, j1, intron_motif);
             add_junction(j1);
         } catch (const std::logic_error& e) {
