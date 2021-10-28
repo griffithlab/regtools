@@ -155,6 +155,9 @@ a <- function(x, y){
 }
 x <- mapply(a, regtools_data$norm_scores_non, length(all_samples))
 
+print(regtools_data$norm_scores_non)
+print(length(all_samples))
+
 get_num_zeros_to_rm <- function(z){
   num_zeroes_to_rm = str_count(z, ',') 
   return(num_zeroes_to_rm)
@@ -169,6 +172,8 @@ regtools_data$zeroes_to_rm = num_zeroes_to_rm
 rm_zeroes <- function(x,y){
   new_length <- length(x) - y
   x <- sort(x,decreasing = TRUE)
+  print(x)
+  print(y)
   print(new_length)
   x <- x[1:new_length]
   return(x)
