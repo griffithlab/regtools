@@ -67,17 +67,17 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
                 strand_tag_ = string(optarg);
                 break;
             case 's':
-                    if (string(optarg).compare("XS") == 0){
-                        strandness_ = 0;
-                    } else if (string(optarg).compare("RF") == 0) {
-                        strandness_ = 1;
-                    } else if (string(optarg).compare("FR") == 0) {
-                        strandness_ = 2;
-                    } else if (string(optarg).compare("intron-motif") == 0) {
-                        strandness_ = 3;
-                    } else {
-                        throw runtime_error("Unrecognized strandness argument!\n\n");
-                    }
+                if (string(optarg).compare("XS") == 0){
+                    strandness_ = 0;
+                } else if (string(optarg).compare("RF") == 0) {
+                    strandness_ = 1;
+                } else if (string(optarg).compare("FR") == 0) {
+                    strandness_ = 2;
+                } else if (string(optarg).compare("intron-motif") == 0) {
+                    strandness_ = 3;
+                } else {
+                    throw runtime_error("Unrecognized strandness argument!\n\n");
+                }
                 break;
             case 'b':
                 output_barcodes_file_ = string(optarg);
@@ -347,7 +347,7 @@ void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1, string i
         set_junction_strand_intron_motif(intron_motif, j1);
     }
     // if you supplied extra strand information, try to override ?
-    if (strandness_ != 3 && j1.strand.compare("?") == 0){
+    if (ref_ == "NA" || j1.strand.compare("?") == 0){
         if (strandness_ == 0){
             set_junction_strand_XS(aln, j1);
         } else {
@@ -548,7 +548,6 @@ string JunctionsExtractor::get_reference_sequence(string position) {
     int len;
     faidx_t *fai = fai_load(ref_.c_str());
     char *s = fai_fetch(fai, position.c_str(), &len);
-    cerr << "position = " << position << endl;
     if(s == NULL)
         throw runtime_error("Unable to extract FASTA sequence "
                              "for position " + position + "\n\n");

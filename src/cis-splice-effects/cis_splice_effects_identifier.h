@@ -94,6 +94,8 @@ class CisSpliceEffectsIdentifier {
         uint32_t min_intron_length_;
         //Maximum length of an intron, i.e max junction width
         uint32_t max_intron_length_;
+        //whether to override strand of extracted junctions using intron-motif method
+        bool override_strand_with_canonical_intron_motif_;
     public:
         //Constructor
         CisSpliceEffectsIdentifier() : vcf_("NA"), output_file_("NA"),
@@ -111,7 +113,8 @@ class CisSpliceEffectsIdentifier {
                                        strand_tag_("XS"),
                                        min_anchor_length_(8),
                                        min_intron_length_(70),
-                                       max_intron_length_(500000) {}
+                                       max_intron_length_(500000),
+                                       override_strand_with_canonical_intron_motif_(false) {}
         //Destructor
         ~CisSpliceEffectsIdentifier() {
             if(ofs_.is_open()) {
