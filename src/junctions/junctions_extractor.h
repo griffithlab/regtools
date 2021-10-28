@@ -174,7 +174,7 @@ class JunctionsExtractor {
         string output_barcodes_file_;
         //Region to identify junctions, in "chr:start-end" format
         string region_;
-        //strandness of data; 0 = unstranded, 1 = RF, 2 = FR
+        //strandness of data; 0 = unstranded, 1 = RF, 2 = FR, 3 = intron-motif
         int strandness_;
         //tag used in BAM to denote strand, default "XS"
         string strand_tag_;

@@ -170,8 +170,10 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
                 break;
             case 'b':
                 output_barcodes_file_ = string(optarg);
+                break;
             case 'C':
                 override_strand_with_canonical_intron_motif_ = true;
+                break;
             default:
                 usage(std::cerr);
                 throw runtime_error("Error parsing inputs!(1)\n\n");
