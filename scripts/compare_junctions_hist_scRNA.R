@@ -169,6 +169,7 @@ regtools_data$zeroes_to_rm = num_zeroes_to_rm
 rm_zeroes <- function(x,y){
   new_length <- length(x) - y
   x <- sort(x,decreasing = TRUE)
+  print(new_length)
   x <- x[1:new_length]
   return(x)
 }
