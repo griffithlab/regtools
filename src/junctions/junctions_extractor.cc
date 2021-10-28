@@ -337,12 +337,17 @@ void JunctionsExtractor::set_junction_strand_intron_motif(string intron_motif, J
 void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1, string intron_motif) {
     // if unstranded data
     if (strandness_ == 0){
-        return set_junction_strand_XS(aln, j1);
+        set_junction_strand_XS(aln, j1);
     } else if (strandness_ == 3){
-        return set_junction_strand_intron_motif(intron_motif, j1);
+        set_junction_strand_intron_motif(intron_motif, j1);
     } else {
-        return set_junction_strand_flag(aln, j1);
+        set_junction_strand_flag(aln, j1);
     }
+    // if fasta was supplied, override with 
+    if (ref_ != "NA" && strandness_ != 3 && j1.strand.compare("?") == 0){
+        set_junction_strand_intron_motif(intron_motif, j1);
+    }
+    return;
 }
 
 //Get the the barcode
@@ -396,7 +401,9 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                 } else {
                     //Add the previous junction
                     try {
-                        intron_motif = get_splice_site(j1);
+                        if (ref_ != "NA"){
+                            intron_motif = get_splice_site(j1);
+                        }
                         set_junction_strand(aln, j1, intron_motif);
                         add_junction(j1);
                     } catch (const std::logic_error& e) {
@@ -426,7 +433,9 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                     j1.thick_start = j1.start;
                 } else {
                     try {
-                        intron_motif = get_splice_site(j1);
+                        if (ref_ != "NA"){
+                            intron_motif = get_splice_site(j1);
+                        }
                         set_junction_strand(aln, j1, intron_motif);
                         add_junction(j1);
                     } catch (const std::logic_error& e) {
@@ -444,7 +453,9 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
                     j1.thick_start = j1.start;
                 else {
                     try {
-                        intron_motif = get_splice_site(j1);
+                        if (ref_ != "NA"){
+                            intron_motif = get_splice_site(j1);
+                        }
                         set_junction_strand(aln, j1, intron_motif);
                         add_junction(j1);
                     } catch (const std::logic_error& e) {
@@ -465,7 +476,9 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
     }
     if(started_junction) {
         try {
-            intron_motif = get_splice_site(j1);
+            if (ref_ != "NA"){
+                intron_motif = get_splice_site(j1);
+            }
             set_junction_strand(aln, j1, intron_motif);
             add_junction(j1);
         } catch (const std::logic_error& e) {
