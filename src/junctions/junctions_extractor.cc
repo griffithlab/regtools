@@ -100,8 +100,15 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
     }
     if(strandness_ == -1){
         usage();
-        throw runtime_error("Please supply strand specificity with '-s' option!\n\n");
+        throw runtime_error("Please supply strandness mode with '-s' option!\n\n");
     }
+    if(strandness_ == 3){
+        if (ref_ == "NA"){
+            usage();
+            throw runtime_error("Strandness mode 'intron-motif' requires a fasta file!\n\n");
+        }
+    }
+
     cerr << "Minimum junction anchor length: " << min_anchor_length_ << endl;
     cerr << "Minimum intron length: " << min_intron_length_ << endl;
     cerr << "Maximum intron length: " << max_intron_length_ << endl;
@@ -126,8 +133,8 @@ int JunctionsExtractor::usage(ostream& out) {
     out << "\t\t" << "-o FILE\tThe file to write output to. [STDOUT]" << endl;
     out << "\t\t" << "-r STR\tThe region to identify junctions \n"
         << "\t\t\t " << "in \"chr:start-end\" format. Entire BAM by default." << endl;
-    out << "\t\t" << "-s INT\tStrand specificity of RNA library preparation \n"
-        << "\t\t\t " << "(0 = unstranded, 1 = first-strand/RF, 2, = second-strand/FR). REQUIRED" << endl;
+    out << "\t\t" << "-s INT\tStrandness mode \n"
+        << "\t\t\t " << "XS, use XS tags provided by aligner; RF, first-strand; FR, second-strand. REQUIRED" << endl;
     out << "\t\t" << "-t STR\tTag used in bam to label strand. [XS]" << endl;
         
     out << endl;
@@ -335,17 +342,17 @@ void JunctionsExtractor::set_junction_strand_intron_motif(string intron_motif, J
 
 //Get the strand
 void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1, string intron_motif) {
-    // if unstranded data
-    if (strandness_ == 0){
-        set_junction_strand_XS(aln, j1);
-    } else if (strandness_ == 3){
+    // if fasta was supplied
+    if (ref_ != "NA"){
         set_junction_strand_intron_motif(intron_motif, j1);
-    } else {
-        set_junction_strand_flag(aln, j1);
     }
-    // if fasta was supplied, override with 
-    if (ref_ != "NA" && strandness_ != 3 && j1.strand.compare("?") == 0){
-        set_junction_strand_intron_motif(intron_motif, j1);
+    // if you supplied extra strand information, try to override ?
+    if (strandness_ != 3 && j1.strand.compare("?") == 0){
+        if (strandness_ == 0){
+            set_junction_strand_XS(aln, j1);
+        } else {
+            set_junction_strand_flag(aln, j1);
+        }
     }
     return;
 }
