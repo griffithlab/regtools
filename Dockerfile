@@ -67,21 +67,22 @@ RUN pip3 install keras==2.4.3
 # removed this due to docker build pulling the correct branch already and the below command actually overwriting the desired branch to master
 # clone git repository
 ADD . /regtools
-# RUN cd / && git clone -b singlecell https://github.com/griffithlab/regtools.git
 
-# make a build directory for regtools
+# change to regtools to build it 
 WORKDIR /regtools
 
 # compile from source
 RUN mkdir build && cd build && cmake .. && make
 
 ################################################################################
+################### Make scripts executable ####################################
+
+WORKDIR /regtools/scripts
+
+RUN chmod ugo+x *
+
+################################################################################
 ###################### set environment path    #################################
 
-# switch to scripts dir
-# WORKDIR /scripts/
-
-
 # add regtools executable to path
-ENV PATH="/regtools/build:/regtool/scripts:/usr/local/bin/R-${r_version}:${PATH}"
-# ENV PATH="/build:/usr/local/bin/R-${r_version}:${PATH}"
+ENV PATH="/regtools/build:/usr/local/bin:/usr/local/bin/R-${r_version}:${PATH}"
