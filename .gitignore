@@ -5,3 +5,4 @@ site/
 *.pdf
 *Rdata
 *Rhistory
+.DS_Store
