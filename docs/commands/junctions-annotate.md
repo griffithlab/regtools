@@ -17,7 +17,7 @@ Gene Annotation databases such as Ensembl/RefSeq/UCSC etc. The goal of the annot
 | ------          | ----------- |
 | junctions.bed   | The BED file with the junctions that have be annotated. This file has to be in the BED12 format. One recommended way of obtaining this file is by running `regtools junctions extract`. See [here](junctions-extract.md) for more details.|
 | ref.fa          | The reference FASTA file. The donor and acceptor sequences used in the "splice-site" column are extracted from the FASTA file. |
-| annotations.gtf | The GTF file specifies the transcriptome that is used to annotate the junctions. For examples, the Ensembl GTFs for release78 are [here](ftp://ftp.ensembl.org/pub/release-78/gtf/)|
+| annotations.gtf | The GTF file specifies the transcriptome that is used to annotate the junctions. For examples, the Ensembl GTFs for release 106 are [here](http://ftp.ensembl.org/pub/release-106/gtf/).||
 
 ## Options
 
