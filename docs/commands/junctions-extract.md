@@ -1,6 +1,6 @@
 # Overview of `junctions extract` command
 
-The `junctions extract` command can be used to extract exon-exon junctions from an RNAseq BAM file. The output is a BED file in the BED12 format. We have tested this command with alignments from TopHat and by comparing the exon-exon junctions with the `junctions.bed` file produced from TopHat.
+The `junctions extract` command can be used to extract exon-exon junctions from an RNAseq BAM file. The output is a BED file in the BED12 format. We have tested this command with alignments from HISAT2, TopHat2, STAR, kallisto, and minimap2 and by comparing the exon-exon junctions with the `junctions.bed` file produced from TopHat.
 
 
 ## Usage
