@@ -13,8 +13,6 @@ library(tidyverse)
 # samples = args[2]
 # splice_variants_file = args[3]
 
-setwd('wd')
-# setwd(wd)
 
 sample_names = 'all_samples.txt'
 input_file = 'all_tumor_splice_variants.bed'
