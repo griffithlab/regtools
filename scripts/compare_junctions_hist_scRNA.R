@@ -13,13 +13,11 @@ library(tidyverse)
 # samples = args[2]
 # splice_variants_file = args[3]
 
-setwd('/Users/kcotto/Projects/regtools/scrna/scrna/regtools_cse_per_cell')
-# setwd(wd)
 
-sample_names = '/Users/kcotto/Projects/regtools/scrna/scrna/sample_paths/Rep1_aCD4_sample_names.tsv'
-input_file = '/Users/kcotto/Projects/regtools/scrna/scrna/samples_w_variant/per_rep_condition_pair/Rep1_aCD4_tumor_splice_variants.bed'
-# sample_names = samples
-# input_file = splice_variants_file
+sample_names = 'all_samples.txt'
+input_file = 'all_tumor_splice_variants.bed'
+tumor_sample_barcodes = Sys.glob('starting_barcode_files/*tumor*.txt')
+normal_sample_barcodes = Sys.glob('starting_barcode_files/*normal*.txt')
 
 # All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
 all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE)
@@ -29,7 +27,25 @@ colnames(all_splicing_variants) <- c("chrom", "start", "end", "samples")
 all_splicing_variants$key <- paste0(all_splicing_variants$chrom, ":", all_splicing_variants$start, "-", all_splicing_variants$end) #this key is just a 1bp-long chrom:start-stop designed to match the regtools output variant_info column
 
 ## Get all of the samples
-all_samples = strsplit(scan(sample_names, what="", sep="\n"), "[[:space:]]+")
+samples_w_data = strsplit(scan(sample_names, what="", sep="\n"), "[[:space:]]+")
+
+## Get metrics
+tumor_samples <- 
+  tumor_sample_barcodes %>%
+  map_df(~fread(.,header=F))
+normal_samples <- 
+  normal_sample_barcodes %>%
+  map_df(~fread(.,header=F))
+number_of_starting_tumor_cells = dim(tumor_samples)[1]
+number_of_starting_normal_cells = dim(normal_samples)[1]
+number_of_tumor_cells_w_data = sum(str_count(samples_w_data, pattern = 'tumor'))
+number_of_normal_cells_w_data = sum(str_count(samples_w_data, pattern = 'normal'))
+
+print(paste("Number of starting tumor cells:", number_of_starting_tumor_cells))
+print(paste("Number of tumor cells with data:", number_of_tumor_cells_w_data))
+print(paste("Number of starting normal cells:", number_of_starting_normal_cells))
+print(paste("Number of normal cells with data:", number_of_normal_cells_w_data))
+
 
 ################################################################################
 ##### Helper functions #########################################################
@@ -53,7 +69,7 @@ get_sample_data <- function(sample, all_splicing_variants){
 ################################################################################
 
 # this is regtools compare output across samples (so it contains variant-junction lines even from samples without variant)
-dt <- rbindlist(lapply(all_samples, get_sample_data, all_splicing_variants=all_splicing_variants))
+dt <- rbindlist(lapply(samples_w_data, get_sample_data, all_splicing_variants=all_splicing_variants))
 
 dt[,info := paste(chrom, start, end, anchor, variant_info, sep="_")]
 
@@ -74,7 +90,7 @@ print("yy")
 ######### aggregate scores for variant/samples identified in cse_identify ######
 
 # key files with variant and sample keys
-all_splicing_variants$key2 <- paste0(all_splicing_variants$key, "_",all_splicing_variants$samples)
+all_splicing_variants$key2 <- paste0(all_splicing_variants$key, "_", all_splicing_variants$samples)
 
 # work on variants which have a sample to go with them first
 cse_identify_v1 <- cse_identify_v1[key %chin% all_splicing_variants$key2]
@@ -100,7 +116,7 @@ colnames(cse_identify_v1) <- c("sample", "key", "chrom", "start", "end", "strand
                                "info", "gene_names", "names", "mean_norm_score_variant", "sd_norm_score_variant",
                                "norm_scores_variant", "total_score_variant")
 
-################ aggrregate variants with no sample ############################
+################ agrregate samples with no variant of interest ############################
 
 # second, we just want entries where the variant is not in the sample we care about
 cse_identify_v2 <- cse_identify_v2[!key %chin% all_splicing_variants$key2]
@@ -144,43 +160,19 @@ columns_to_keep = c('samples', 'variant_info.x', 'sample', "info", "chrom.x", "s
                     'total_score_non')
 regtools_data = subset(regtools_data, select=columns_to_keep)
 
+print('this works')
 
 # zeroes need to be added in for some samples
 a <- function(x, y){
-  toAdd <- y - length(x) - 1
+  toAdd <- y - length(x)
   # browser()
   toAdd <- rep(0.0000000, toAdd)
   x <- c(x, toAdd)
   return(x)
 }
-x <- mapply(a, regtools_data$norm_scores_non, length(all_samples))
 
-print(regtools_data$norm_scores_non)
-print(length(all_samples))
-
-get_num_zeros_to_rm <- function(z){
-  num_zeroes_to_rm = str_count(z, ',') 
-  return(num_zeroes_to_rm)
-}
-
-num_zeroes_to_rm <- mapply(get_num_zeros_to_rm, regtools_data$samples)
-
-x = split(x, rep(1:ncol(x), each = nrow(x)))
-regtools_data$norm_scores_non = x
-regtools_data$zeroes_to_rm = num_zeroes_to_rm
-
-rm_zeroes <- function(x,y){
-  new_length <- length(x) - y
-  x <- sort(x,decreasing = TRUE)
-  print(new_length)
-  x <- x[1:new_length]
-  return(x)
-}
-
-if (max(num_zeroes_to_rm > 0)) {
-  x <- mapply(rm_zeroes, regtools_data$norm_scores_non, regtools_data$zeroes_to_rm)
-  regtools_data$norm_scores_non = x
-}
+#this needs to be thought about
+x <- mapply(a, regtools_data$norm_scores_non, number_of_starting_normal_cells)
 
 get_mean <- function(x){
   x <- mean(as.numeric(x))
@@ -202,18 +194,18 @@ a <- function(x, y){
   # if(y == "TCGA-ZH-A8Y2-01A,TCGA-ZH-A8Y5-01A"){
   #    browser()
   # }
-  toAdd <- (str_count(y, ',') + 1) - (str_count(x, ',') + 1) 
+  x <- unlist(strsplit(x, ","))
+  toAdd <- y - length(x) 
   # browser()
   if (toAdd > 0) {
     toAdd <- rep(0.0000000, toAdd)
     x <- c(x, toAdd)
-  } else {
-    x <- unlist(strsplit(x, ","))
   }
   x <- list(x)
   return(x)
 }
-x <- mapply(a, regtools_data$norm_scores_variant, regtools_data$samples)
+
+x <- mapply(a, regtools_data$norm_scores_variant, number_of_starting_tumor_cells)
 regtools_data$norm_scores_variant = x
 
 x <- mapply(get_mean, regtools_data$norm_scores_variant) 
@@ -307,4 +299,4 @@ all_splicing_variants <- as.data.table(all_splicing_variants)
 regtools_data = regtools_data %>% distinct()
 
 
-write.table(regtools_data, file=paste(input_file, "_out.tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
+write.table(regtools_data, file='output.tsv', quote = FALSE, sep = '\t', row.names = F)
