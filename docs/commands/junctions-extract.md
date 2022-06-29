@@ -23,7 +23,7 @@ The `junctions extract` command can be used to extract exon-exon junctions from 
 | -o      | File to write output to. STDOUT by default.|
 | -r      | Region to extract junctions in. This is specified in the format "chr:start-end". If not specified, junctions are extracted from the entire BAM file.|
 | -h      | Display help message for this command.|
-| -s      | Strand specificity of RNA library preparation, where 0 = unstranded/XS, 1 = first-strand/RF, 2 = second-strand/FR. This option is required. If your alignments contain XS tags, these will be used in the "unstranded" mode. If you are unsure, we have created this [table](https://rnabio.org/module-09-appendix/0009/12/01/StrandSettings/) to help.
+| -s      | Strand specificity of RNA library preparation, where the options XS, use XS tags provided by aligner; RF, first-strand; FR, second-strand. This option is required. If your alignments contain XS tags, these will be used in the "unstranded" mode. If you are unsure, we have created this [table](https://rnabio.org/module-09-appendix/0009/12/01/StrandSettings/) to help.
 
 ## Output
 
