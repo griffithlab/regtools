@@ -4,7 +4,7 @@ RegTools is a set of tools that integrate DNA-seq and RNA-seq data to help inter
 
 ## Features
 
-- Extract exon-exon junctions from a RNAseq BAM file.
+- Extract exon-exon junctions from a RNAseq BAM/CRAM file.
 - Annotate exon-exon junctions with information from a known transcriptome.
 - Annotate variants with splice-region(the definition of this region is configurable) annotations.
 
