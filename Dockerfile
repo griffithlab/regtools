@@ -64,11 +64,13 @@ RUN pip3 install keras==2.4.3
 ################################################################################
 ##################### Install Regtools #########################################
 
+
 # removed this due to docker build pulling the correct branch already and the below command actually overwriting the desired branch to master
 # clone git repository
 ADD . /regtools
 
 # change to regtools to build it 
+
 WORKDIR /regtools
 
 # compile from source
@@ -86,3 +88,4 @@ RUN chmod ugo+x *
 
 # add regtools executable to path
 ENV PATH="/regtools/build:/usr/local/bin:/usr/local/bin/R-${r_version}:${PATH}"
+

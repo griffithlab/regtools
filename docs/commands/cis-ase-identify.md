@@ -1,10 +1,13 @@
-###Synopsis
+# Overview of `cis-ase identify` command
+
 The `cis-ase identify` command is used to identify allele-specific expression events. This command takes in a list of germline variants and somatic variants in the VCF format. The module also needs RNAseq alignments produced with a splice-aware aligner in the BAM format and an alignment of the DNA reads in the BAM format. The tool then proceeds to identify polymorphisms that show allele specific expression near the somatic variant sites.
 
-###Usage
+## Usage
+
 `regtools cis-ase identify [options] somatic_variants.vcf polymorphism.vcf dna_alignments.bam rna_alignments.bam ref.fa annotations.gtf`
 
-###Input
+## Input
+
 | Input                  | Description |
 | ------                 | ----------- |
 | somatic-variants.vcf   | Somatic variant calls in VCF format. The tool looks for allele specific expression at polymorphic loci near the somatic variants|
@@ -16,7 +19,8 @@ The `cis-ase identify` command is used to identify allele-specific expression ev
 
 **Note** - Please make sure that the version of the annotation GTF that you use corresponds with the version of the assembly build (ref.fa) and that the co-ordinates in the VCF file are also from the same build.
 
-###Options
+## Options
+
 | Option  | Description |
 | ------  | ----------- |
 | -o      | Output file containing the variants that show evidence for allele specific expression. [STDOUT] |
@@ -25,7 +29,8 @@ The `cis-ase identify` command is used to identify allele-specific expression ev
 | -E      | Flag to look at all neighboring polymorphisms for ASE, not just the exonic polymorphisms. |
 | -B      | Flag to use the binomial model and not the default beta model. This feature is under test. |
 
-###Output
+## Output
+
 The output is in the VCF format and contains a list of polymorphic sites that show evidence for allele specific expression.
 
 TODO - add details about the model parameters here.

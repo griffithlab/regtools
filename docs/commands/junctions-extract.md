@@ -1,15 +1,20 @@
-###Synopsis
+# Overview of `junctions extract` command
+
 The `junctions extract` command can be used to extract exon-exon junctions from an RNAseq BAM file. The output is a BED file in the BED12 format. We have tested this command with alignments from TopHat and by comparing the exon-exon junctions with the `junctions.bed` file produced from TopHat.
 
-###Usage
+
+## Usage
+
 `regtools junctions extract [options] indexed_alignments.bam`
 
-###Input
+## Input
+
 | Input                  | Description |
 | ------                 | ----------- |
-| indexed_alignments.bam | Aligned RNAseq BAM which has been indexed for example with `samtools index`. We have tested this command with alignments from TopHat.|
+| indexed_alignments.bam | Aligned RNAseq BAM/CRAM which has been indexed for example with `samtools index`. We have tested this command with alignments from TopHat.|
 
-###Options
+## Options
+
 | Option  | Description |
 | ------  | ----------- |
 | -a      | Minimum anchor length. 8bp by default. Junctions having a minimum overlap of this much on both ends are reported. Note - the required overlap can be observed amongst separate reads, for example one read might have sufficient left overlap and another read might have sufficient right overlap, this is sufficient for the junction to be reported. No mismatches are allowed in the anchor regions.|
@@ -18,9 +23,10 @@ The `junctions extract` command can be used to extract exon-exon junctions from 
 | -o      | File to write output to. STDOUT by default.|
 | -r      | Region to extract junctions in. This is specified in the format "chr:start-end". If not specified, junctions are extracted from the entire BAM file.|
 | -h      | Display help message for this command.|
-| -s      | Strand specificity of RNA library preparation, where 0 = unstranded/XS, 1 = first-strand/RF, 2 = second-strand/FR. This option is required. If your alignments contain XS tags, these will be used in the "unstranded" mode. 
+| -s      | Strand specificity of RNA library preparation, where 0 = unstranded/XS, 1 = first-strand/RF, 2 = second-strand/FR. This option is required. If your alignments contain XS tags, these will be used in the "unstranded" mode. If you are unsure, we have created this [table](https://rnabio.org/module-09-appendix/0009/12/01/StrandSettings/) to help.
 
-###Output
+## Output
+
 The output is in the BED12 format which is described in detail [here.](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) Each line is an exon-exon junction as explained below.
 
 | Column-name       | Description |

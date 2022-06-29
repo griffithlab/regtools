@@ -24,17 +24,21 @@ regtools_data_filtered = regtools_data[(regtools_data$p_value_mean >= 0 &
 												regtools_data$anchor == "A" | 
 												regtools_data$anchor == "NDA"))]
 
+
 p = regtools_data_filtered$p_value_mean
 adjusted_p = p.adjust(p, method = "BH")
 regtools_data_filtered$adjusted_p = adjusted_p
 regtools_data_filtered_sorted = regtools_data_filtered[order(adjusted_p)]
 
-write_file = '/Volumes/mgriffit/Active/regtools/scrna/all_cells_3rd_variant_samples_rm_w_cellcounts_zeros_rm_filtered_D_A_NDA.tsv'
+
+write_file = paste("compare_junctions/hist/", "junction_pvalues_filtered_BH_DA_junctions", tag, ".tsv", sep="")
+
 write.table(regtools_data_filtered_sorted, file=write_file, quote=FALSE, sep='\t', row.names = FALSE)
 
 threshold = 0.05
 is_significant = regtools_data_filtered_sorted$adjusted_p < threshold
 regtools_data_significant_filtered_sorted = regtools_data_filtered_sorted[is_significant] 
 
-write_file = '/Volumes/mgriffit/Active/regtools/scrna/all_cells_3rd_variant_samples_rm_w_cellcounts_zeros_rm_filtered_sig_D_A_NDA.tsv'
+
+write_file = paste("compare_junctions/hist/", "junction_pvalues_significant_",threshold,"_filtered_BH_DA_junctions", tag, ".tsv", sep="")
 write.table(regtools_data_significant_filtered_sorted, file=write_file, quote=FALSE, sep='\t', row.names = FALSE)

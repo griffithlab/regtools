@@ -1,30 +1,34 @@
 [junction_annotation]: ../images/junction_annotation_examples.png
 [anchor_annotation]: ../images/anchor_examples.png
 
-###Synopsis
+# Overview of `regtools junctions annotate` command
+
 The `regtools junctions annotate` command is a tool to annotate the observed junctions with respect to a known
 transcript structure. The known transcript structure is in the form of a GTF file obtained from one of the standard
 Gene Annotation databases such as Ensembl/RefSeq/UCSC etc. The goal of the annotation step is to help identify novel/unusual junctions.
 
-###Usage
+## Usage
+
 `regtools junctions annotate [options] junctions.bed ref.fa annotations.gtf`
 
-###Input
+## Input
+
 | Input           | Description |
 | ------          | ----------- |
 | junctions.bed   | The BED file with the junctions that have be annotated. This file has to be in the BED12 format. One recommended way of obtaining this file is by running `regtools junctions extract`. See [here](junctions-extract.md) for more details.|
 | ref.fa          | The reference FASTA file. The donor and acceptor sequences used in the "splice-site" column are extracted from the FASTA file. |
 | annotations.gtf | The GTF file specifies the transcriptome that is used to annotate the junctions. For examples, the Ensembl GTFs for release78 are [here](ftp://ftp.ensembl.org/pub/release-78/gtf/)|
 
+## Options
 
-###Options
 | Option  | Description |
 | ------  | ----------- |
 | -S      | Do not skip single exon genes. The default is to skip the single exon genes while annotating junctions.|
 | -o      | File to write output to. STDOUT by default. The output format is described [here](#output)|
 | -h      | Display help message for this command.|
 
-###Output
+## Output
+
 | Column name       | Description |
 | -----------       | ----------- |
 | chrom             | Chromosome of the junction.|
@@ -34,9 +38,9 @@ Gene Annotation databases such as Ensembl/RefSeq/UCSC etc. The goal of the annot
 | score             | The number of reads supporting the junction. [integer]|
 | strand            | The strand the junction is identified. Same as the input file. [+/-]|
 | splice_site       | The two basepairs at the donor and acceptor sites separated by a hyphen. [e.g CT-AG]|
-| acceptors_skipped | Number of known acceptors skipped by this junction according to the GTF. See[Notes](#notes) below for explanation. [integer]|
-| exons_skipped     | Number of known exons skipped by this junction according to the GTF. See[Notes](#notes) below for explanation. [integer]|
-| donors_skipped    | Number of known donors skipped by this junction according to the GTF. See[Notes](#notes) below for explanation. [integer]|
+| acceptors_skipped | Number of known acceptors skipped by this junction according to the GTF. See [Notes](#notes) below for explanation. [integer]|
+| exons_skipped     | Number of known exons skipped by this junction according to the GTF. See [Notes](#notes) below for explanation. [integer]|
+| donors_skipped    | Number of known donors skipped by this junction according to the GTF. See [Notes](#notes) below for explanation. [integer]|
 | anchor            | Field that specifies the donor, acceptor configuration. See [Notes](#notes) below for explanation. [D/A/DA/NDA/N]|
 | known_donor       | Is the junction-donor a known donor in the GTF file? [0/1]|
 | known_acceptor    | Is junction-donor a known acceptor in the GTF file? [0/1]|
@@ -44,34 +48,36 @@ Gene Annotation databases such as Ensembl/RefSeq/UCSC etc. The goal of the annot
 | transcripts       | The transcripts that overlap the junction according to the input GTF file. |
 | genes             | The genes that overlap the junction according to the input GTF file. |
 
-###Notes
-####Annotating observed junctions with known donor/acceptor/junction information
+## Notes
+
+### Annotating observed junctions with known donor/acceptor/junction information
+
 It is useful to annotate the ends of junction with respect to known acceptors,
 donors and junctions in the transcriptome. The known acceptor, donor and junction
 information is computed from the GTF file and this information is then used to annotate the observed
 junctions.
 
-The junctions are annotated using the following nomenclature(and as shown in the figure below.)
+The junctions are annotated using the following nomenclature (and as shown in the figure below.)
 
-1. DA - This exon-exon junction is present in the transcriptome provided by the user(GTF)
-The ends of this junction are hence known donor and known acceptor sites according to the GTF file.
+1. DA - The ends of this junction are known donor and known acceptor sites according to "annotations.gtf".
+This junction is known to the transcriptome.
 
-2. NDA - This exon-exon junction is not present(novel) in the transcriptome provided by the user(GTF)
-The ends of this junction are known donor and known acceptor sites according to the GTF file.
+2. NDA - The ends of this junction are known donor and known acceptor sites, according to "annotations.gtf".
+This junction is not known to the transcriptome (novel).
 
-3. D - This exon-exon junction is not present(novel) in the transcriptome provided by the user(GTF)
-The donor of this junction is a known donor but the acceptor is novel.
+3. D - The ends of this junction are a known donor site and a novel acceptor site, according to "annotations.gtf".
+This junction is not known to the transcriptome (novel).
 
-4. A - This exon-exon junction is not present(novel) in the transcriptome provided by the user(GTF)
-The acceptor of this junction is a known acceptor but the donor is novel.
+4. A - The ends of this junction are a novel donor site and a known acceptor site, according to "annotations.gtf".
+This junction is not known to the transcriptome (novel).
 
-5. N - This exon-exon junction is not present(novel) in the transcriptome provided by the user(GTF)
-The ends of this junction are hence not known donor/acceptor sites according to the GTF file.
-
+5. N - The ends of this junction are a novel donor site and a novel acceptor site, according to "annotations.gtf".
+This junction is not known to the transcriptome (novel).
 
 ![Anchor-annotation example][anchor_annotation]
 
-####Annotating a junction with number of donors/acceptors/exons skipped
+### Annotating a junction with number of donors/acceptors/exons skipped
+
 Exon skipping is a form of RNA splicing that can be identified using RNAseq data. It is hence useful
 to compute for every observed putative exon-exon junction, the number of exons skipped, the number of
 known donor sites skipped and the number of known acceptor sites skipped. The known exons, donors and
@@ -84,5 +90,4 @@ considered to be different the number of exons skipped is 3. We try and provide 
 
 ![Junction-annotation example][junction_annotation]
 
-If any of the examples are not clear or if you would like more information please feel free to open an issue on GitHub [here](https://github.com/griffithlab/regtools)
-or post on the discussion page [here.](https://groups.google.com/d/forum/regtools)
+If any of the examples are not clear or if you would like more information please feel free to open an issue on GitHub [here](https://github.com/griffithlab/regtools) or post on the discussion page [here](https://groups.google.com/d/forum/regtools).
