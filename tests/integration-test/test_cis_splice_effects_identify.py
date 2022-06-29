@@ -135,8 +135,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         exonic_distance = "-E"
         intronic_distance = ""
         dont_skip_single_exon_transcripts = ""
-        params = ["cis
-                  plice-effects", "identify", 
+        params = ["cis-plice-effects", "identify", 
                   exonic_distance, 
                   intronic_distance, 
                   dont_skip_single_exon_transcripts, 
