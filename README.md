@@ -2,7 +2,7 @@
 [![Documentation Status](https://readthedocs.org/projects/regtools/badge/?version=latest)](https://readthedocs.org/projects/regtools/?badge=latest)
 [![Coverage Status](https://coveralls.io/repos/griffithlab/regtools/badge.svg?branch=master&service=github)](https://coveralls.io/github/griffithlab/regtools?branch=master)
 
-# regtools
+# RegTools
 
 Tools that integrate DNA-seq and RNA-seq data to help interpret mutations
 in a regulatory and splicing context.
