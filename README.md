@@ -14,6 +14,16 @@ in a regulatory and splicing context.
 - Annotate exon-exon junctions with information from a known transcriptome.
 - Annotate variants with splice-region(the definition of this region is configurable) annotations.
 
+## Hardware requirements
+RegTools  requires only a standard computer with enough RAM to support the in-memory operations.
+
+## Software requirements
+OS Requirements
+This package is supported for macOS and Linux. The package has been tested on the following systems:
+
+macOS: macOS 10.12 (Sierra), macOS 10.13 (High Sierra), macOS 10.14 (Mojave), macOS 10.15 (Catalina), macOS 11 (Big Sur), macOS 12 (Monterey)
+Linux: Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04
+
 ## Installation
 
 Clone and install regtools by running the following:
