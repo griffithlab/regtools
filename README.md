@@ -22,6 +22,7 @@ OS Requirements
 This package is supported for macOS and Linux. The package has been tested on the following systems:
 
 macOS: macOS 10.12 (Sierra), macOS 10.13 (High Sierra), macOS 10.14 (Mojave), macOS 10.15 (Catalina), macOS 11 (Big Sur), macOS 12 (Monterey)
+
 Linux: Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04
 
 ## Installation
