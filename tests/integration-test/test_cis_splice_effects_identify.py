@@ -42,7 +42,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         expected_annotatedjunctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-stranded-annotatedjunctions.out")[0]
         expected_annotatedvariants = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-stranded-annotatedvariants.out")[0]
         expected_junctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-stranded-junctions.out")[0]
-        params = ["cis-splice-effects", "identify", "-s 1",
+        params = ["cis-splice-effects", "identify", "-s RF",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -65,7 +65,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         expected_annotatedjunctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-annotatedjunctions.out")[0]
         expected_annotatedvariants = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-annotatedvariants.out")[0]
         expected_junctions = self.inputFiles("cis-splice-effects-identify/expected-cis-splice-effects-identify-default-junctions.out")[0]
-        params = ["cis-splice-effects", "identify", "-s 0",
+        params = ["cis-splice-effects", "identify", "-s XS",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -112,7 +112,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
                   exonic_distance, 
                   intronic_distance, 
                   dont_skip_single_exon_transcripts, 
-                  "-s 0",
+                  "-s XS",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -135,11 +135,11 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         exonic_distance = "-E"
         intronic_distance = ""
         dont_skip_single_exon_transcripts = ""
-        params = ["cis-splice-effects", "identify", 
+        params = ["cis-plice-effects", "identify", 
                   exonic_distance, 
                   intronic_distance, 
                   dont_skip_single_exon_transcripts, 
-                  "-s 0",
+                  "-s XS",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -166,7 +166,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
                   exonic_distance, 
                   intronic_distance, 
                   dont_skip_single_exon_transcripts, 
-                  "-s 0",
+                  "-s XS",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -193,7 +193,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
                   exonic_distance, 
                   intronic_distance, 
                   dont_skip_single_exon_transcripts, 
-                  "-s 0",
+                  "-s XS",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -220,7 +220,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
                   exonic_distance, 
                   intronic_distance, 
                   dont_skip_single_exon_transcripts, 
-                  "-s 0",
+                  "-s XS",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -247,7 +247,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
                 anchor = "-a " + anchor
             params = ["cis-splice-effects", "identify", 
                   anchor,
-                  "-s 0",
+                  "-s XS",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -273,7 +273,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
                 anchor = "-a " + anchor
             params = ["cis-splice-effects", "identify", 
                   anchor,
-                  "-s 0",
+                  "-s XS",
                   "-o ", output_annotatedjunctions,
                   "-v ", output_annotatedvariants,
                   "-j ", output_junctions,
@@ -297,7 +297,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         max_intron = "8039"
         params = ["cis-splice-effects", "identify", 
                   "-m", min_intron, "-M", max_intron,
-                  "-s 0",
+                  "-s XS",
                   variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 0)
@@ -313,7 +313,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("extract.out")
         params = ["cis-splice-effects", "identify",
-                  "-s 0",
+                  "-s XS",
                   variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
         self.assertEqual(rv, 1)
@@ -326,7 +326,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         fasta = self.inputFiles("fa/test_chr22.fa")[0]
         output_file = self.tempFile("extract.out")
         params = ["cis-splice-effects", "identify",
-                  "-s 0",
+                  "-s XS",
                   variants, bam1, fasta]
         rv, err = self.execute(params)
         self.assertEqual(rv, 1)
@@ -341,7 +341,7 @@ class TestCisSpliceEffectsIdentify(IntegrationTest, unittest.TestCase):
         gtf = self.inputFiles("gtf/test_ensemble_chr22.2.gtf")[0]
         output_file = self.tempFile("extract.out")
         params = ["cis-splice-effects", "identify",
-                  "-s 0",
+                  "-s XS",
                   "-w 5",
                   variants, bam1, fasta, gtf]
         rv, err = self.execute(params)
