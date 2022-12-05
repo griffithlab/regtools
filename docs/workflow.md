@@ -83,19 +83,31 @@ for i in samples/*/; do bsub -oo $i/logs/regtools_compare_$tag.lsf regtools cis-
 
 ## Statistical analysis
 
-**Make directory to store comparison results**
+### Make directory to store comparison results
 
 ```bash
 mkdir -p compare_junctions/hist
 ```
 
-**Run `stats_wrapper.py` on sample data**
+### Run `compare_junctions_hist.py` on sample data
+
+This script compares RegTools associations across all samples in a defined cohort to determine significance. By default, this script divides the input data into chunks of 50,000 variants in order to not max out memory for large cohorts. We provide three options for how to group case vs control groups with respect to a particular event (i.e. which samples do you consider to have the variant of interest vs. those that do not). The options are as follows:
+
+1) only samples with exactly the same variant will be included in the case group, all others samples (even potentially those with very similar variants) will be included with the control group (`--variant-grouping=strict`)
+2) similar variants will be excluded from both the case and control groups (`--variant-grouping=exclude`)
+3) similar variants will be included in the case group (`--variant-grouping=include`)
+
+*NOTE: "similar" is defined as associated with the same junction*
+
+We recommend using `--variant-grouping=exclude` since determining whether nearby variants have a similar effect in terms of splicing consequence is often difficult.
 
 ```bash
-python3 stats_wrapper.py <tag>
+python3 compare_junctions_hist.py --tag <tag> --variant-grouping <parameter> 
 ```
 
-**Run `filter_and_BH.R` to adjust p values and filter results**
+### Run `filter_and_BH.R` to adjust p values and filter results
+
+This script filters significant results on junction support and junction type and then performs the Benjamini-Hochberg Procedure to apply multiple test correction to the data.
 
 ```bash
 Rscript --vanilla filter_and_BH.R <tag>
