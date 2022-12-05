@@ -153,7 +153,7 @@ else:
     samples_w_variant_df.columns = ['sample_x', 'sample_y', 'variant_info', 'chrom', 'start', 'end', 'strand', 'anchor',
                                     'info', 'genes', 'names', 'mean_norm_score_variant', 'sd_norm_score_variant',
                                     'norm_scores_variant', 'scores', 'junction', 'total_score_variant']
-    tmp_df = samples_w_variant_df.groupby('variant_info')[['sample_x']].aggregate(lambda x: set(x.tolist())).reset_index()
+    tmp_df = samples_w_variant_df.groupby('variant_info')[['sample_x']].aggregate(lambda x: list(set(x.tolist()))).reset_index()
     samples_w_variant_df = pd.merge(samples_w_variant_df, tmp_df, on='variant_info')
     samples_w_variant_df = samples_w_variant_df[['sample_y', 'variant_info', 'chrom', 'start', 'end', 'strand', 'anchor',
                                                  'info', 'genes', 'names', 'mean_norm_score_variant', 'sd_norm_score_variant',
@@ -227,12 +227,13 @@ tmp_df = tmp_df.fillna(0)
 def add_zeros(row):
     norm_scores = row[1]
     if norm_scores == 0:
-        norm_scores = ['0']
+        norm_scores = [0]
     samples_wout_variant = row[2]
     samples_w_variant = row[3]    
     num_of_zeros_toadd = num_of_samples - samples_wout_variant - samples_w_variant
     zeros = np.repeat(0, num_of_zeros_toadd).tolist()
     norm_scores = norm_scores + zeros
+    norm_scores.sort(reverse=True)
     new_norm_score_value = (',').join(map(str, norm_scores))
     return new_norm_score_value
 
@@ -241,7 +242,7 @@ master_df = pd.merge(master_df, tmp_df, how='left' ,on='info')
 del(tmp_df)
 
 def get_mean(row):
-    values = row[-1].split(',')
+    values = row[33].split(',')
     values = [float(i) for i in values]
     mean = np.mean(values)
     return mean
@@ -249,7 +250,7 @@ def get_mean(row):
 master_df['mean_norm_score_non'] = master_df.apply(lambda row: get_mean(row), axis=1)
 
 def get_sd(row):
-    values = row[-2].split(',')
+    values = row[33].split(',')
     values = [float(i) for i in values]
     std = np.std(values)
     return std
@@ -265,23 +266,42 @@ def get_min(row):
 master_df['min_norm_score_variant'] = master_df.apply(lambda row: get_min(row), axis=1)
 
 def get_pvalue_mean(row):
-    values = row[32].split(',')
+    values = row[33].split(',')
     values = [float(i) for i in values]
     mean_value = row[10]
     pvalue = stats.percentileofscore(values, mean_value)
     pvalue = 1 - (pvalue/100.0)
+    pvalue = re.sub('[\[\]]', '', np.array_str(pvalue))
     return pvalue
 
 master_df['p_value_mean'] = master_df.apply(lambda row: get_pvalue_mean(row), axis=1)
 
 def get_pvalue_min(row):
-    values = row[32].split(',')
+    values = row[33].split(',')
     values = [float(i) for i in values]
-    mean_value = row[35]
-    pvalue = stats.percentileofscore(values, mean_value)
+    min_value = row[36]
+    pvalue = stats.percentileofscore(values, min_value)
     pvalue = 1 - (pvalue/100.0)
+    pvalue = re.sub('[\[\]]', '', np.array_str(pvalue))
     return pvalue
     
 master_df['p_value_min'] = master_df.apply(lambda row: get_pvalue_mean(row), axis=1)
 
+master_df = master_df[['variant_samples', 'variant_info_x', 'genes_x', 'junction_samples', 
+                       'chrom_x', 'start_x', 'end_x', 'strand_x', 'anchor_x', 'info', 
+                       'names', 'mean_norm_score_variant', 'sd_norm_score_variant', 
+                       'norm_scores_variant', 'total_score_variant', 'mean_norm_score_non',
+                       'sd_norm_score_non', 'new_norm_scores', 'total_score_non', 'p_value_mean','p_value_min']]
+master_df.columns = ['variant_samples', 'variant_info', 'genes', 'junction_samples', 
+                       'chrom', 'start', 'end', 'strand', 'anchor', 'variant_junction_info', 
+                       'names', 'mean_norm_score_variant', 'sd_norm_score_variant', 
+                       'norm_scores_variant', 'total_score_variant', 'mean_norm_score_non',
+                       'sd_norm_score_non', 'norm_scores_non', 'total_score_non', 'p_value_mean','p_value_min']
+
+master_df = master_df.applymap(lambda x: x[0] if isinstance(x, list) else x)
+master_df = master_df.fillna(0)
+
+master_df.to_csv('test_results.tsv', sep='\t', index=False)
+print(master_df.info())
 # master_df = master_df[['samples', 'variant_info_x', ']]
+#why are variant_samples >1 missing?
