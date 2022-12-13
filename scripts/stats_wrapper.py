@@ -8,22 +8,42 @@ input_parser = argparse.ArgumentParser(
     description="Run RegTools stats script",
 )
 input_parser.add_argument(
-    'tag',
+    '-t',
+    '--tag',
     help="Variant tag parameter used to run RegTools.",
+)
+input_parser.add_argument(
+    '-i',
+    '--variants_file',
+    help="File containing variants to be considered as splicing relevant."
+)
+input_parser.add_argument(
+    '-d',
+    '--dir_names',
+    help="File containing directory names corresponding to each sample that is to be processed."
+)
+input_parser.add_argument(
+    '-v',
+    '--variant-grouping',
+    help="",
+    choices=['strict', 'exclude', 'include']
 )
 
 args = input_parser.parse_args()
 
 tag = args.tag
+input_variant_file = args.variants_file
+input_sample_names = args.dir_names
+variant_grouping_mode = args.variant_grouping
 cwd = os.getcwd()
 
 target_lines_per_file = 25000
 lines_per_file = 0
-input_file = f'all_splicing_variants_{tag}.bed'
+input_file = input_variant_file
 lines = open(input_file).readlines()
 count = len(lines)
 if count <= lines_per_file:
-    subprocess.run(f'Rscript --vanilla /home/ec2-user/workspace/regtools/scripts/compare_junctions_hist_v2.R {tag} {input_file}')
+    subprocess.run(f'python3 /scripts/compare_junctions_hist.py -t {tag} -i {input_file} -d {input_sample_names} -v {variant_grouping_mode}', shell=True, check=True)
 else:
     header = lines[0]
     lines.pop(0)
@@ -52,7 +72,7 @@ files = glob.glob('small_file_*')
 files.sort()
 number_of_in_files = len(files)
 for file in files:
-    subprocess.run(f'Rscript --vanilla /home/ec2-user/workspace/regtools/scripts/compare_junctions_hist_v2.R {tag} {file}', shell=True, check=True)
+    subprocess.run(f'python3 /scripts/compare_junctions_hist.py -t {tag} -i {input_file} -d {input_sample_names} -v {variant_grouping_mode}', shell=True, check=True)
 output_files = glob.glob("*_out.tsv")
 output_files.sort()# glob lacks reliable ordering, so impose your own if output order matters
 number_of_out_files = len(output_files)
