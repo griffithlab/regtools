@@ -89,9 +89,9 @@ for i in samples/*/; do bsub -oo $i/logs/regtools_compare_$tag.lsf regtools cis-
 mkdir -p compare_junctions/hist
 ```
 
-**Run `compare_junctions_hist.py` on sample data**
+**Run `stats_wrapper.py` on sample data**
 
-This script compares RegTools associations across all samples in a defined cohort to determine significance. By default, this script divides the input data into chunks of 50,000 variants in order to not max out memory for large cohorts. We provide three options for how to group case vs control groups with respect to a particular event (i.e. which samples do you consider to have the variant of interest vs. those that do not). The options are as follows:
+This wrapper script runs `compare_junctions_hist.py` to compare RegTools associations across all samples in a defined cohort to determine significance. By default, this script divides the input data into chunks of 25,000 variants in order to not max out memory for large cohorts. We provide three options for how to group case vs control groups with respect to a particular event (i.e. which samples do you consider to have the variant of interest vs. those that do not). The options are as follows:
 
 1) only samples with exactly the same variant will be included in the case group, all others samples (even potentially those with very similar variants) will be included with the control group (`--variant-grouping=strict`)
 2) similar variants will be excluded from both the case and control groups (`--variant-grouping=exclude`)
@@ -102,7 +102,7 @@ This script compares RegTools associations across all samples in a defined cohor
 We recommend using `--variant-grouping=exclude` since determining whether nearby variants have a similar effect in terms of splicing consequence is often difficult.
 
 ```bash
-python3 compare_junctions_hist.py --tag <tag> --variant-grouping <parameter> 
+python3 stats_wrapper.py -t <tag> -i <input variant file> -d <directory names corresponding to samples> -v <variant grouping parameter> 
 ```
 
 **Run `filter_and_BH.R` to adjust p values and filter results**
