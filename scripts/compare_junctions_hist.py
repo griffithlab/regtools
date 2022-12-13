@@ -6,11 +6,40 @@ from dfply import *
 import numpy as np
 from scipy import stats
 import os
+import argparse
 
-tag = 'E'
+input_parser = argparse.ArgumentParser(
+    description="Run RegTools stats script",
+)
+input_parser.add_argument(
+    '-t',
+    '--tag',
+    help="Variant tag parameter used to run RegTools.",
+)
+input_parser.add_argument(
+    '-i',
+    '--variants_file',
+    help="File containing variants to be considered as splicing relevant."
+)
+input_parser.add_argument(
+    '-d',
+    '--dir_names',
+    help="File containing directory names corresponding to each sample that is to be processed."
+)
+input_parser.add_argument(
+    '-v',
+    '--variant-grouping',
+    help="",
+    choices=['strict', 'exclude', 'include']
+)
+
+args = input_parser.parse_args()
+
+tag = args.tag
+splicing_variants_inputfile = args.variants_file
+samples_inputfile = args.dir_names
+variant_grouping_mode = args.variant_grouping
 os.chdir('/Users/kcotto/Desktop/CHOL/')
-splicing_variants_inputfile = '/Users/kcotto/Desktop/CHOL/all_splicing_variants_E.bed'
-samples_inputfile = '/Users/kcotto/Desktop/CHOL/dir_names.tsv'
 
 # read in all splicing variants
 all_splicing_variants = pd.read_csv(
@@ -22,7 +51,6 @@ all_splicing_variants = pd.read_csv(
 def createkey(row):
     key = row[0] + ':' + str(row[1]) + '-' + str(row[2])
     return key
-
 
 all_splicing_variants['key'] = all_splicing_variants.apply(
     lambda row: createkey(row), axis=1)
@@ -104,8 +132,8 @@ samples_w_variant_df = master_df.loc[master_df['key'].isin(
 
 # start performing the calculations for this subset of data
 print('Calculating normalized scores for samples with variants of interest')
-mode = 'strict'
-if mode == 'group':
+# variant_grouping_mode = 'strict'
+if variant_grouping_mode == 'group':
     samples_w_variant_df = (samples_w_variant_df >>
                             group_by(X.key) >>
                             summarize(score_tmp=X.score.sum()) >>
@@ -186,7 +214,7 @@ tmp_df = samples_wout_variant_df.groupby(
 samples_wout_variant_df = pd.merge(samples_wout_variant_df, tmp_df, on='info')
 samples_wout_variant_df['samples_wout_variant_count'] = samples_wout_variant_df['norm_score_y'].astype(
     str).str.count(',') + 1
-if mode == 'group' or mode == 'exclude':
+if variant_grouping_mode == 'group' or variant_grouping_mode == 'exclude':
     samples_wout_variant_df = samples_wout_variant_df[~samples_wout_variant_df['junction'].isin(
         samples_w_variant_df['junction'])]
     tmp_df = samples_wout_variant_df.groupby(
@@ -301,7 +329,7 @@ master_df.columns = ['variant_samples', 'variant_info', 'genes', 'junction_sampl
 master_df = master_df.applymap(lambda x: x[0] if isinstance(x, list) else x)
 master_df = master_df.fillna(0)
 
-master_df.to_csv('test_results.tsv', sep='\t', index=False)
+master_df.to_csv(f'junction_pvalues_{tag}_out.tsv', sep='\t', index=False)
 print(master_df.info())
 # master_df = master_df[['samples', 'variant_info_x', ']]
 #why are variant_samples >1 missing?
