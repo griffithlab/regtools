@@ -52,7 +52,7 @@ RUN make
 RUN make install
 
 # install R packages
-RUN R --vanilla -e 'install.packages(c("data.table", "plyr", "tidyverse"), repos = "http://cran.us.r-project.org")'
+RUN R --vanilla -e 'install.packages(c("data.table", "plyr", "tidyverse", "optparse"), repos = "http://cran.us.r-project.org")'
 
 ################################################################################
 ##################### Install SpliceAI #########################################
@@ -60,6 +60,15 @@ RUN R --vanilla -e 'install.packages(c("data.table", "plyr", "tidyverse"), repos
 RUN pip3 install spliceai
 RUN pip3 install --upgrade tensorflow
 RUN pip3 install keras==2.4.3
+
+################################################################################
+##################### Install other python libraries ###########################
+
+RUN pip3 install dfply
+RUN pip3 install pandas
+RUN pip3 install numpy
+RUN pip3 install scipy
+RUN pip3 install argparse
 
 ################################################################################
 ##################### Install Regtools #########################################
@@ -74,6 +83,7 @@ ADD . /regtools
 WORKDIR /regtools
 
 # compile from source
+RUN ls
 RUN mkdir build && cd build && cmake .. && make
 
 ################################################################################
@@ -87,5 +97,5 @@ RUN chmod ugo+x *
 ###################### set environment path    #################################
 
 # add regtools executable to path
-ENV PATH="/regtools/build:/usr/local/bin:/usr/local/bin/R-${r_version}:${PATH}"
+ENV PATH="/regtools/build:/regtools/scripts:/usr/local/bin:/usr/local/bin/R-${r_version}:${PATH}"
 
