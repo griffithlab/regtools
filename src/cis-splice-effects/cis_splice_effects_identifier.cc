@@ -58,6 +58,7 @@ void CisSpliceEffectsIdentifier::usage(ostream& out) {
     out << "\t\t" << "-I\tAnnotate variants in intronic space within a transcript(not to be used with -i)." << endl;
     out << "\t\t" << "-E\tAnnotate variants in exonic space within a transcript(not to be used with -e)." << endl;
     out << "\t\t" << "-S\tDon't skip single exon transcripts." << endl;
+    out << "\t\t" << "-b STR\tThe file containing the barcodes of interest for single cell data." << endl;
     out << endl;
 }
 
