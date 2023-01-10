@@ -27,7 +27,7 @@ make
 regtools --help
 ```
 
-If one wishes to test their installation, we include test data under `test_data`. 
+If one wishes to test their installation, we include test data under `test_data`.
 
 Here's an example command using that data along with the example output.
 

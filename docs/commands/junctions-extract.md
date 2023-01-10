@@ -2,7 +2,6 @@
 
 The `junctions extract` command can be used to extract exon-exon junctions from an RNAseq BAM file. The output is a BED file in the BED12 format. We have tested this command with alignments from HISAT2, TopHat2, STAR, kallisto, and minimap2 and by comparing the exon-exon junctions with the `junctions.bed` file produced from TopHat.
 
-
 ## Usage
 
 `regtools junctions extract [options] indexed_alignments.bam`
@@ -24,6 +23,9 @@ The `junctions extract` command can be used to extract exon-exon junctions from 
 | -r      | Region to extract junctions in. This is specified in the format "chr:start-end". If not specified, junctions are extracted from the entire BAM file.|
 | -h      | Display help message for this command.|
 | -s      | Strand specificity of RNA library preparation, where the options XS, use XS tags provided by aligner; RF, first-strand; FR, second-strand. This option is required. If your alignments contain XS tags, these will be used in the "unstranded" mode. If you are unsure, we have created this [table](https://rnabio.org/module-09-appendix/0009/12/01/StrandSettings/) to help.
+| -b    |    The file containing the barcodes of interest for single cell data.    |
+
+**Note** Both junctions extract and cis-splice-effects identify have an intron-motif method that can be used to determine strandedness of junctions extracted from alignment files. Using this method supercedes any strandedness information that might be encoded in the alignment file. To use this method with junctions extract, you can add a fasta file at the end of your junctions extract command which will tell RegTools that you want the intron-motif method to take priority when assigning strandedness. e.g. `regtools junctions extract [options] indexed_alignments.bam fasta.fa`
 
 ## Output
 

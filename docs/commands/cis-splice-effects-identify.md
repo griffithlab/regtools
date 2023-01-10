@@ -1,8 +1,6 @@
 [csei]: ../images/csei_examples.png
 
-
 The `cis-splice-effects identify` command is used to identify splicing misregulation events. This command takes in a list of variants in the VCF format and RNAseq alignments produced with a splice-aware aligner in the BAM format. The tool then proceeds to identify non-canonical splicing junctions near the variant sites.
-
 
 ## Usage
 
@@ -33,6 +31,10 @@ The `cis-splice-effects identify` command is used to identify splicing misregula
 | -I    |    Annotate variants in intronic space within a transcript(not to be used with -i).    |
 | -E    |    Annotate variants in exonic space within a transcript(not to be used with -e).    |
 | -S    |    Don't skip single exon transcripts.    |
+| -b    |    The file containing the barcodes of interest for single cell data.    |
+| -C    |    Tells cis-splice-effects identify that you want intron-motif method to take priority when assigning strand. i.e. decide strandedness based on the fasta rather than what is encoded in the alignment file.    |
+
+**Note** Both junctions extract and cis-splice-effects identify have an intron-motif method that can be used to determine strandedness of junctions extracted from alignment files. Using this method supercedes any strandedness information that might be encoded in the alignment file. To use this method with cis-splice-effects identify, you can the -C option to tell RegTools that you want the intron-motif method to take priority when assigning strandedness.
 
 ## Output
 
