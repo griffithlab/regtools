@@ -9,21 +9,22 @@ library(tidyverse)
 
 debug = F
 
-system.time({
-if (debug){
-  tag = paste("_", "default", sep="")
-} else {
-  # get options tag
-  args = commandArgs(trailingOnly = TRUE)
-  tag = args[1]
-  input_file = args[2]
-  if ( substr(tag, 2, 3) == "--"){
-    stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
-  }
-}
+# system.time({
+# if (debug){
+#   tag = paste("_", "default", sep="")
+# } else {
+#   # get options tag
+#   args = commandArgs(trailingOnly = TRUE)
+#   tag = args[1]
+#   input_file = args[2]
+#   if ( substr(tag, 2, 3) == "--"){
+#     stop("Please specify an option tag (e.g. \"default\", \"i20e5\")")
+#   }
+# }
 
-# tag = 'E'
-# input_file = '/Users/kcotto/Desktop/CHOL/all_splicing_variants_E.bed'
+setwd('~/Desktop/CHOL')
+tag = 'E'
+input_file = '/Users/kcotto/Desktop/CHOL/all_splicing_variants_E.bed'
 
 # All splicing relevant variants (union of rows from variants.bed files; add column with comma-separated list of sample names)
 all_splicing_variants = unique(data.table::fread(input_file), sep = '\t', header = T, stringsAsFactors = FALSE)
@@ -33,7 +34,7 @@ colnames(all_splicing_variants) <- c("chrom", "start", "end", "samples")
 all_splicing_variants$key <- paste0(all_splicing_variants$chrom, ":", all_splicing_variants$start, "-", all_splicing_variants$end) #this key is just a 1bp-long chrom:start-stop designed to match the regtools output variant_info column
 
 ## Get all of the samples
-all_samples = strsplit(scan("dir_names.tsv", what="", sep="\n"), "[[:space:]]+")
+all_samples = strsplit(scan("/Users/kcotto/Desktop/CHOL/dir_names.tsv", what="", sep="\n"), "[[:space:]]+")
 
 ################################################################################
 ##### Helper functions #########################################################
@@ -65,6 +66,7 @@ dt[,info := paste(chrom, start, end, anchor, variant_info, sep="_")]
 
 # make a sample/variant_info key
 dt[,key := paste0(variant_info, "_", sample)]
+dt[,junction := paste0(chrom, ":", start, "-", end, "_", sample)]
 
 print("zl")
 cse_identify_v1 <- dt
@@ -99,12 +101,12 @@ print("test4")
 # subset and rename columns to match the original output
 cse_identify_v1 <- cse_identify_v1[,c("sample.y", "variant_info", "chrom", "start", "end", "strand", "anchor",
                                       "variant_info", "info", "genes","name.y", "mean_norm_score_variant.y",
-                                      "sd_norm_score_variant", "norm_scores_variant", "total_score_variant")]
+                                      "sd_norm_score_variant", "norm_scores_variant", "total_score_variant", "junction")]
 colnames(cse_identify_v1) <- c("sample", "key", "chrom", "start", "end", "strand", "anchor", "variant_info",
                                "info", "genes", "names", "mean_norm_score_variant", "sd_norm_score_variant",
-                               "norm_scores_variant", "total_score_variant")
+                               "norm_scores_variant", "total_score_variant", "junction_key")
 
-################ aggrregate variants with no sample ############################
+################ aggregate variants with no sample ############################
 
 # second, we just want entries where the variant is not in the sample we care about
 cse_identify_v2 <- cse_identify_v2[!key %chin% all_splicing_variants$key2]
@@ -129,6 +131,7 @@ a <- function(x){
 }
 cse_identify_v2 <- split(cse_identify_v2, cse_identify_v2$variant_info)
 cse_identify_v2 <- lapply(cse_identify_v2, a)
+#this is where non-variant samples are aggregated
 cse_identify_v2 <- rbindlist(cse_identify_v2)
 
 print("test6")
@@ -309,4 +312,4 @@ regtools_data = regtools_data %>% distinct()
 
 write.table(regtools_data, file=paste(input_file, "_out.tsv", sep=""), quote=FALSE, sep='\t', row.names = F)
 
-})
+# })
