@@ -136,6 +136,7 @@ int JunctionsExtractor::usage(ostream& out) {
     out << "\t\t" << "-s INT\tStrandness mode \n"
         << "\t\t\t " << "XS, use XS tags provided by aligner; RF, first-strand; FR, second-strand. REQUIRED" << endl;
     out << "\t\t" << "-t STR\tTag used in bam to label strand. [XS]" << endl;
+    out << "\t\t" << "-b STR\tThe file containing the barcodes of interest for single cell data." << endl;
         
     out << endl;
     return 0;
