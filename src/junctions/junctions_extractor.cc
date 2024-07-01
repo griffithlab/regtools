@@ -202,7 +202,8 @@ bool JunctionsExtractor::junction_qc(Junction &j1) {
 }
 
 //Add a junction to the junctions map
-//The read_count field is the number of reads supporting the junction.
+//The read_count field is the number of reads supporting the junction,
+// and reads is a set of the read names supporting the junction
 int JunctionsExtractor::add_junction(Junction j1) {
     //Check junction_qc
     if(!junction_qc(j1)) {
@@ -225,44 +226,46 @@ int JunctionsExtractor::add_junction(Junction j1) {
     }
     string key = j1.chrom + string(":") + start + "-" + end + ":" + strand_proxy;
 
-    //Check if new junction
+    //add new junction
     if(!junctions_.count(key)) {
         j1.name = get_new_junction_name();
         j1.read_count = 1;
         j1.score = common::num_to_str(j1.read_count);
-    } else { //existing junction
-        Junction j0 = junctions_[key];
-        
+        junctions_[key] = j1;
+
+    } else { //update existing junction
+
         if (output_barcodes_file_ != "NA"){
-            unordered_map<string, int>::const_iterator it = j0.barcodes.find(j1.barcodes.begin()->first);
-            
-            if (it != j0.barcodes.end()) {// barcode exists already
-                j1.barcodes = j0.barcodes;
-                j1.barcodes[it->first]++;
+            // NOTE: Junction j1 will always have exactly one barcode, 
+            // that of the current alignment; i.e. j1.barcodes = {<barcode>: 1}
+            auto it = junctions_[key].barcodes.find(j1.barcodes.begin()->first);
+            if (it != junctions_[key].barcodes.end()) {// barcode exists already
+                junctions_[key].barcodes[it->first]++;
             } else {
-                // this block is where the slowness happens - not sure if it's the instantiation or the insertion
-                //  well, tried to get around instantion by just inserting into j0 but that made it like another 2x slower so I don't think it's that
-                pair<string, int> tmp_barcode = *j1.barcodes.begin();
-                j1.barcodes = j0.barcodes;
-                j1.barcodes.insert(tmp_barcode);
+                junctions_[key].barcodes[it->first] = 1;
             }
         }
-        //increment read count
-        j1.read_count = j0.read_count + 1;
-        j1.score = common::num_to_str(j1.read_count);
-        //Keep the same name
-        j1.name = j0.name;
+        // following barcodes convention, Junction j1 has one read,
+        // that of the current alignment; i.e. j1.reads = {<read_name>}
+        string read_name = *j1.reads.begin();
+        //avoid counting the same paired-end read twice 
+        //if both segments overlap junction
+        if (!junctions_[key].reads.count(read_name)) {
+            junctions_[key].reads.insert(read_name);
+            junctions_[key].read_count++;
+            junctions_[key].score = common::num_to_str(junctions_[key].read_count);
+        }
         //Check if thick starts are any better
-        if(j0.thick_start < j1.thick_start)
-            j1.thick_start = j0.thick_start;
-        if(j0.thick_end > j1.thick_end)
-            j1.thick_end = j0.thick_end;
-        //preserve min anchor information
-        j1.has_left_min_anchor = j1.has_left_min_anchor || j0.has_left_min_anchor;
-        j1.has_right_min_anchor = j1.has_right_min_anchor || j0.has_right_min_anchor;
+        if(j1.thick_start < junctions_[key].thick_start)
+            junctions_[key].thick_start = j1.thick_start;
+        if(j1.thick_end > junctions_[key].thick_end)
+            junctions_[key].thick_end = j1.thick_end;
+        //update min anchor information
+        junctions_[key].has_left_min_anchor = 
+                junctions_[key].has_left_min_anchor || j1.has_left_min_anchor;
+        junctions_[key].has_right_min_anchor = 
+                junctions_[key].has_right_min_anchor || j1.has_right_min_anchor;
     }
-    //Add junction and check anchor while printing.
-    junctions_[key] = j1;
     return 0;
 }
 
@@ -426,8 +429,9 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
 
     Junction j1;
     j1.chrom = chr;
+    j1.thick_start = read_pos; // start pos of read
     j1.start = read_pos; //maintain start pos of junction
-    j1.thick_start = read_pos;
+    j1.reads.insert(bam_get_qname(aln));
     string intron_motif;
     
     if (output_barcodes_file_ != "NA"){

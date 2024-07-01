@@ -39,6 +39,8 @@ using namespace std;
 struct Junction : BED {
     //Number of reads supporting the junction
     unsigned int read_count;
+    //Reads supporting the junction
+    unordered_set<string> reads;
     //This is the start - max overhang
     CHRPOS thick_start;
     //This is the end + max overhang
