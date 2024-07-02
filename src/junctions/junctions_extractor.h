@@ -196,8 +196,23 @@ class JunctionsExtractor {
             region_ = ".";
             ref_ = "NA";
         }
-        JunctionsExtractor(string bam1, string region1, int strandness1, string strand_tag1, uint32_t min_anchor_length1, uint32_t min_intron_length1, uint32_t max_intron_length1, string ref1) : 
-            bam_(bam1), region_(region1), strandness_(strandness1), strand_tag_(strand_tag1), min_anchor_length_(min_anchor_length1), min_intron_length_(min_anchor_length1), max_intron_length_(max_intron_length1), ref_(ref1){
+        JunctionsExtractor(
+                string bam1, 
+                string region1, 
+                int strandness1, 
+                string strand_tag1, 
+                uint32_t min_anchor_length1, 
+                uint32_t min_intron_length1, 
+                uint32_t max_intron_length1, 
+                string ref1) : 
+            bam_(bam1), 
+            region_(region1), 
+            strandness_(strandness1), 
+            strand_tag_(strand_tag1), 
+            min_anchor_length_(min_anchor_length1), 
+            min_intron_length_(min_intron_length1), 
+            max_intron_length_(max_intron_length1), 
+            ref_(ref1) {
             junctions_sorted_ = false;
             output_file_ = "NA";
             output_barcodes_file_ = "NA";
