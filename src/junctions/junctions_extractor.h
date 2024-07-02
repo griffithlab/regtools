@@ -153,9 +153,10 @@ class JunctionsExtractor {
         //Reference FASTA file
         string ref_;
         //Minimum anchor length for junctions
-        //Junctions need atleast this many bp overlap
-        // on both ends.
+        //Junctions need at least this many bp overlap on both ends.
         uint32_t min_anchor_length_;
+        //Reads need at least this many bp overlap to support a junction
+        uint32_t min_read_anchor_length_;
         //Minimum length of an intron, i.e min junction width
         uint32_t min_intron_length_;
         //Maximum length of an intron, i.e max junction width
@@ -190,6 +191,7 @@ class JunctionsExtractor {
         //Default constructor
         JunctionsExtractor() {
             min_anchor_length_ = 8;
+            min_read_anchor_length_ = 0;
             min_intron_length_ = 70;
             max_intron_length_ = 500000;
             filter_flags_ = 0;
@@ -211,6 +213,7 @@ class JunctionsExtractor {
                 int strandness1, 
                 string strand_tag1, 
                 uint32_t min_anchor_length1, 
+                uint32_t min_read_anchor_length1, 
                 uint32_t min_intron_length1, 
                 uint32_t max_intron_length1, 
                 uint16_t filter_flags, 
@@ -222,7 +225,8 @@ class JunctionsExtractor {
             strandness_(strandness1), 
             strand_tag_(strand_tag1), 
             min_anchor_length_(min_anchor_length1), 
-            min_intron_length_(min_anchor_length1), 
+            min_read_anchor_length_(min_read_anchor_length1), 
+            min_intron_length_(min_intron_length1), 
             max_intron_length_(max_intron_length1), 
             filter_flags_(filter_flags), 
             require_flags_(require_flags), 

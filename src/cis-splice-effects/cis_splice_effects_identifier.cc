@@ -44,6 +44,8 @@ void CisSpliceEffectsIdentifier::usage(ostream& out) {
     out << "\t\t" << "-t STR\tTag used in bam to label strand. [XS]" << endl;
     out << "\t\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum \n"
         << "\t\t\t " << "anchor length on both sides are reported. [8]" << endl;
+    out << "\t\t" << "-A INT\tMinimum read anchor length. Reads which satisfy a minimum \n"
+        << "\t\t\t " << "anchor length on both sides 'support' a junction. [0]" << endl;
     out << "\t\t" << "-m INT\tMinimum intron length. [70]" << endl;
     out << "\t\t" << "-M INT\tMaximum intron length. [500000]" << endl;
     out << "\t\t" << "-f INT\tOnly use alignments where all flag bits set here are set. [0]" << endl;
@@ -116,7 +118,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     stringstream help_ss;
     char c;
-    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:ISht:s:a:m:M:f:F:q:b:C")) != -1) {
+    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:ISht:s:a:A:m:M:f:F:q:b:C")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
@@ -166,6 +168,9 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
                 break;
             case 'a':
                 min_anchor_length_ = atoi(optarg);
+                break;
+            case 'A':
+                min_read_anchor_length_ = atoi(optarg);
                 break;
             case 'm':
                 min_intron_length_ = atoi(optarg);
@@ -298,7 +303,8 @@ void CisSpliceEffectsIdentifier::identify() {
                 ref_to_pass = "NA";
             }
             JunctionsExtractor je1(bam_, variant_region, strandness_, 
-                    strand_tag_, min_anchor_length_, min_intron_length_, max_intron_length_, 
+                    strand_tag_, min_anchor_length_, min_read_anchor_length_, 
+                    min_intron_length_, max_intron_length_, 
                     filter_flags_, require_flags_, min_map_qual_, ref_to_pass);
             je1.identify_junctions_from_BAM();
             vector<Junction> junctions = je1.get_all_junctions();

@@ -43,13 +43,16 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int c;
     stringstream help_ss;
-    while((c = getopt(argc, argv, "ha:m:M:f:F:q:o:r:t:s:b:")) != -1) {
+    while((c = getopt(argc, argv, "ha:A:m:M:f:F:q:o:r:t:s:b:")) != -1) {
         switch(c) {
             case 'h':
                 usage(help_ss);
                 throw common::cmdline_help_exception(help_ss.str());
             case 'a':
                 min_anchor_length_ = atoi(optarg);
+                break;
+            case 'A':
+                min_read_anchor_length_ = atoi(optarg);
                 break;
             case 'm':
                 min_intron_length_ = atoi(optarg);
@@ -123,6 +126,7 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
     }
 
     cerr << "Minimum junction anchor length: " << min_anchor_length_ << endl;
+    cerr << "Minimum read anchor length: " << min_read_anchor_length_ << endl;
     cerr << "Minimum intron length: " << min_intron_length_ << endl;
     cerr << "Maximum intron length: " << max_intron_length_ << endl;
     cerr << "Require alignment flags: " << require_flags_ << endl;
@@ -144,6 +148,8 @@ int JunctionsExtractor::usage(ostream& out) {
     out << "Options:" << endl;
     out << "\t\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum \n"
         << "\t\t\t " << "anchor length on both sides are reported. [8]" << endl;
+    out << "\t\t" << "-A INT\tMinimum read anchor length. Reads which satisfy a minimum \n"
+        << "\t\t\t " << "anchor length on both sides 'support' a junction. [0]" << endl;
     out << "\t\t" << "-m INT\tMinimum intron length. [70]" << endl;
     out << "\t\t" << "-M INT\tMaximum intron length. [500000]" << endl;
     out << "\t\t" << "-f INT\tOnly use alignments where all flag bits set here are set. [0]" << endl;
@@ -175,12 +181,19 @@ string JunctionsExtractor::get_new_junction_name() {
     return name_ss.str();
 }
 
-//Do some basic qc on the junction
+//Update if junction passes QC based on current read alignment
 bool JunctionsExtractor::junction_qc(Junction &j1) {
+    // don't add support for junction if intron is wrong size
     if(j1.end - j1.start < min_intron_length_ ||
        j1.end - j1.start > max_intron_length_) {
         return false;
     }
+
+    // don't add support for junction if read isn't sufficiently anchored
+    if(j1.start - j1.thick_start < min_read_anchor_length_) return false;
+    if(j1.thick_end - j1.end < min_read_anchor_length_) return false;
+
+    // add support, update if this junction is sufficiently anchored
     if(j1.start - j1.thick_start >= min_anchor_length_)
         j1.has_left_min_anchor = true;
     if(j1.thick_end - j1.end >= min_anchor_length_)

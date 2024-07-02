@@ -87,9 +87,10 @@ class CisSpliceEffectsIdentifier {
         //tag used in BAM to denote strand, default "XS"
         string strand_tag_;
         //Minimum anchor length for junctions
-        //Junctions need at least this many bp overlap
-        // on both ends.
+        //Junctions need at least this many bp overlap on both ends.
         uint32_t min_anchor_length_;
+        //Reads need at least this many bp overlap on both ends to support junction.
+        uint32_t min_read_anchor_length_;
         //Minimum length of an intron, i.e min junction width
         uint32_t min_intron_length_;
         //Maximum length of an intron, i.e max junction width
@@ -118,6 +119,7 @@ class CisSpliceEffectsIdentifier {
                                        strandness_(-1),
                                        strand_tag_("XS"),
                                        min_anchor_length_(8),
+                                       min_read_anchor_length_(0),
                                        min_intron_length_(70),
                                        max_intron_length_(500000),
                                        filter_flags_(0),
