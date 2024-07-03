@@ -180,12 +180,21 @@ class JunctionsExtractor {
         string strand_tag_;
         //tag used in BAM to denote single cell barcode
         string barcode_tag_;
+        //filter reads containing any of these flags
+        uint16_t filter_flags_;
+        // filter reads not containing all of these flags
+        uint16_t require_flags_;
+        // filter reads below the minimum mapping quality
+        uint8_t min_map_qual_;
     public:
         //Default constructor
         JunctionsExtractor() {
             min_anchor_length_ = 8;
             min_intron_length_ = 70;
             max_intron_length_ = 500000;
+            filter_flags_ = 0;
+            require_flags_ = 0;
+            min_map_qual_ = 0;
             junctions_sorted_ = false;
             strandness_ = -1;
             strand_tag_ = "XS";
@@ -204,14 +213,20 @@ class JunctionsExtractor {
                 uint32_t min_anchor_length1, 
                 uint32_t min_intron_length1, 
                 uint32_t max_intron_length1, 
+                uint16_t filter_flags, 
+                uint16_t require_flags, 
+                uint8_t min_map_qual, 
                 string ref1) : 
             bam_(bam1), 
             region_(region1), 
             strandness_(strandness1), 
             strand_tag_(strand_tag1), 
             min_anchor_length_(min_anchor_length1), 
-            min_intron_length_(min_intron_length1), 
+            min_intron_length_(min_anchor_length1), 
             max_intron_length_(max_intron_length1), 
+            filter_flags_(filter_flags), 
+            require_flags_(require_flags), 
+            min_map_qual_(min_map_qual), 
             ref_(ref1) {
             junctions_sorted_ = false;
             output_file_ = "NA";
@@ -241,6 +256,8 @@ class JunctionsExtractor {
         void create_junctions_vector();
         //Pull out the cigar string from the read
         int parse_read(bam_hdr_t *header, bam1_t *aln);
+        //Returns whether alignment should be filtered from junction analysis
+        bool filter_alignment(bam_hdr_t *header, bam1_t *aln);
         //Parse junctions from the read and store in junction map
         int parse_cigar_into_junctions(string chr, int read_pos,
                                        uint32_t *cigar, int n_cigar);
