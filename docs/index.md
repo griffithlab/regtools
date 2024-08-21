@@ -47,7 +47,8 @@ For information about the individual RegTools commands, please see [the Commands
 
 ## Citation
 
-You can find a bioRxiv preprint describing our intial validation of RegTools [here](https://www.biorxiv.org/content/10.1101/436634v2)
+Cotto KC*, Feng YY*, Ramu A, Richters M, Freshour SL, Skidmore ZL, Xia H, McMichael JF, Kunisaki J, Campbell KM, Chen TH, Rozycki EB, Adkins D, Devarakonda S, Sankararaman S, Lin Y, Chapman WC, Maher CA, Arora V, Dunn GP, Uppaluri R, Govindan R, Griffith OL, Griffith M. **Integrated analysis of genomic and transcriptomic data for the discovery of splice-associated variants in cancer.** Nature Communications. 2023 Mar.
+pmid: [36949070](https://pubmed.ncbi.nlm.nih.gov/36949070/); doi: [10.1038/s41467-023-37266-6](https://www.nature.com/articles/s41467-023-37266-6)
 
 ## Support
 
@@ -56,8 +57,7 @@ We have a mailing list located at: [regtools@googlegroups.com](mailto:regtools@g
 
 ## Acknowledgements
 
-RegTools uses several open-source libraries. We would like to thank the
-developers of htslib and bedtools. We would also like to thank Travis Abbott for useful comments and code.
+RegTools uses several open-source libraries. We would like to thank the developers of htslib and bedtools. We would also like to thank Travis Abbott for useful comments and code.
 
 ## License
 
