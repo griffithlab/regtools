@@ -46,6 +46,9 @@ void CisSpliceEffectsIdentifier::usage(ostream& out) {
         << "\t\t\t " << "anchor length on both sides are reported. [8]" << endl;
     out << "\t\t" << "-m INT\tMinimum intron length. [70]" << endl;
     out << "\t\t" << "-M INT\tMaximum intron length. [500000]" << endl;
+    out << "\t\t" << "-f INT\tOnly use alignments where all flag bits set here are set. [0]" << endl;
+    out << "\t\t" << "-F INT\tOnly use alignments where no flag bits set here are set. [0]" << endl;
+    out << "\t\t" << "-q INT\tOnly use alignments with this mapping quality or above. [0]" << endl;
     out << "\t\t" << "-w INT\tWindow size in b.p to identify splicing events in.\n" 
         << "\t\t\t " << "The tool identifies events in variant.start +/- w basepairs.\n"
         << "\t\t\t " << "Default behaviour is to look at the window between previous and next exons." << endl;
@@ -113,7 +116,7 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
     optind = 1; //Reset before parsing again.
     stringstream help_ss;
     char c;
-    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:ISht:s:a:m:M:b:C")) != -1) {
+    while((c = getopt(argc, argv, "o:w:v:j:e:Ei:ISht:s:a:m:M:f:F:q:b:C")) != -1) {
         switch(c) {
             case 'o':
                 output_file_ = string(optarg);
@@ -169,6 +172,15 @@ void CisSpliceEffectsIdentifier::parse_options(int argc, char* argv[]) {
                 break;
             case 'M':
                 max_intron_length_ = atoi(optarg);
+                break;
+            case 'f':
+                require_flags_ = atoi(optarg);
+                break;
+            case 'F':
+                filter_flags_ = atoi(optarg);
+                break;
+            case 'q':
+                min_map_qual_ = atoi(optarg);
                 break;
             case 'b':
                 output_barcodes_file_ = string(optarg);
@@ -285,7 +297,9 @@ void CisSpliceEffectsIdentifier::identify() {
             } else {
                 ref_to_pass = "NA";
             }
-            JunctionsExtractor je1(bam_, variant_region, strandness_, strand_tag_, min_anchor_length_, min_intron_length_, max_intron_length_, ref_to_pass);
+            JunctionsExtractor je1(bam_, variant_region, strandness_, 
+                    strand_tag_, min_anchor_length_, min_intron_length_, max_intron_length_, 
+                    filter_flags_, require_flags_, min_map_qual_, ref_to_pass);
             je1.identify_junctions_from_BAM();
             vector<Junction> junctions = je1.get_all_junctions();
             //Add all the junctions to the unique set
