@@ -1,5 +1,5 @@
 site_name: RegTools
-pages:
+nav:
 - Home: 'index.md'
 - Commands:
     - 'Index of commands': 'commands/commands.md'
