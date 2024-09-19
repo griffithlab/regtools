@@ -43,7 +43,7 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
     optind = 1; //Reset before parsing again.
     int c;
     stringstream help_ss;
-    while((c = getopt(argc, argv, "ha:m:M:o:r:t:s:b:")) != -1) {
+    while((c = getopt(argc, argv, "ha:A:m:M:f:F:q:o:r:t:s:b:")) != -1) {
         switch(c) {
             case 'h':
                 usage(help_ss);
@@ -51,11 +51,23 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
             case 'a':
                 min_anchor_length_ = atoi(optarg);
                 break;
+            case 'A':
+                min_read_anchor_length_ = atoi(optarg);
+                break;
             case 'm':
                 min_intron_length_ = atoi(optarg);
                 break;
             case 'M':
                 max_intron_length_ = atoi(optarg);
+                break;
+            case 'f':
+                require_flags_ = atoi(optarg);
+                break;
+            case 'F':
+                filter_flags_ = atoi(optarg);
+                break;
+            case 'q':
+                min_map_qual_ = atoi(optarg);
                 break;
             case 'o':
                 output_file_ = string(optarg);
@@ -108,10 +120,18 @@ int JunctionsExtractor::parse_options(int argc, char *argv[]) {
             throw runtime_error("Strandness mode 'intron-motif' requires a fasta file!\n\n");
         }
     }
+    if ( (require_flags_ & filter_flags_) != 0) {
+        usage();
+        throw runtime_error("No overlap allowed between '-f' and '-F' options (same flag filtered and required)!\n\n");
+    }
 
     cerr << "Minimum junction anchor length: " << min_anchor_length_ << endl;
+    cerr << "Minimum read anchor length: " << min_read_anchor_length_ << endl;
     cerr << "Minimum intron length: " << min_intron_length_ << endl;
     cerr << "Maximum intron length: " << max_intron_length_ << endl;
+    cerr << "Require alignment flags: " << require_flags_ << endl;
+    cerr << "Filter alignment flags: " << filter_flags_ << endl;
+    cerr << "Minimum alignment mapping quality: " << int(min_map_qual_) << endl;
     cerr << "Alignment: " << bam_ << endl;
     cerr << "Output file: " << output_file_ << endl;
     if (output_barcodes_file_ != "NA"){
@@ -128,8 +148,13 @@ int JunctionsExtractor::usage(ostream& out) {
     out << "Options:" << endl;
     out << "\t\t" << "-a INT\tMinimum anchor length. Junctions which satisfy a minimum \n"
         << "\t\t\t " << "anchor length on both sides are reported. [8]" << endl;
+    out << "\t\t" << "-A INT\tMinimum read anchor length. Reads which satisfy a minimum \n"
+        << "\t\t\t " << "anchor length on both sides 'support' a junction. [0]" << endl;
     out << "\t\t" << "-m INT\tMinimum intron length. [70]" << endl;
     out << "\t\t" << "-M INT\tMaximum intron length. [500000]" << endl;
+    out << "\t\t" << "-f INT\tOnly use alignments where all flag bits set here are set. [0]" << endl;
+    out << "\t\t" << "-F INT\tOnly use alignments where no flag bits set here are set. [0]" << endl;
+    out << "\t\t" << "-q INT\tOnly use alignments with this mapping quality or above. [0]" << endl;
     out << "\t\t" << "-o FILE\tThe file to write output to. [STDOUT]" << endl;
     out << "\t\t" << "-r STR\tThe region to identify junctions \n"
         << "\t\t\t " << "in \"chr:start-end\" format. Entire BAM by default." << endl;
@@ -156,12 +181,19 @@ string JunctionsExtractor::get_new_junction_name() {
     return name_ss.str();
 }
 
-//Do some basic qc on the junction
+//Update if junction passes QC based on current read alignment
 bool JunctionsExtractor::junction_qc(Junction &j1) {
+    // don't add support for junction if intron is wrong size
     if(j1.end - j1.start < min_intron_length_ ||
        j1.end - j1.start > max_intron_length_) {
         return false;
     }
+
+    // don't add support for junction if read isn't sufficiently anchored
+    if(j1.start - j1.thick_start < min_read_anchor_length_) return false;
+    if(j1.thick_end - j1.end < min_read_anchor_length_) return false;
+
+    // add support, update if this junction is sufficiently anchored
     if(j1.start - j1.thick_start >= min_anchor_length_)
         j1.has_left_min_anchor = true;
     if(j1.thick_end - j1.end >= min_anchor_length_)
@@ -170,7 +202,8 @@ bool JunctionsExtractor::junction_qc(Junction &j1) {
 }
 
 //Add a junction to the junctions map
-//The read_count field is the number of reads supporting the junction.
+//The read_count field is the number of reads supporting the junction,
+// and reads is a set of the read names supporting the junction
 int JunctionsExtractor::add_junction(Junction j1) {
     //Check junction_qc
     if(!junction_qc(j1)) {
@@ -193,44 +226,46 @@ int JunctionsExtractor::add_junction(Junction j1) {
     }
     string key = j1.chrom + string(":") + start + "-" + end + ":" + strand_proxy;
 
-    //Check if new junction
+    //add new junction
     if(!junctions_.count(key)) {
         j1.name = get_new_junction_name();
         j1.read_count = 1;
         j1.score = common::num_to_str(j1.read_count);
-    } else { //existing junction
-        Junction j0 = junctions_[key];
-        
+        junctions_[key] = j1;
+
+    } else { //update existing junction
+
         if (output_barcodes_file_ != "NA"){
-            unordered_map<string, int>::const_iterator it = j0.barcodes.find(j1.barcodes.begin()->first);
-            
-            if (it != j0.barcodes.end()) {// barcode exists already
-                j1.barcodes = j0.barcodes;
-                j1.barcodes[it->first]++;
+            // NOTE: Junction j1 will always have exactly one barcode, 
+            // that of the current alignment; i.e. j1.barcodes = {<barcode>: 1}
+            auto it = junctions_[key].barcodes.find(j1.barcodes.begin()->first);
+            if (it != junctions_[key].barcodes.end()) {// barcode exists already
+                junctions_[key].barcodes[it->first]++;
             } else {
-                // this block is where the slowness happens - not sure if it's the instantiation or the insertion
-                //  well, tried to get around instantion by just inserting into j0 but that made it like another 2x slower so I don't think it's that
-                pair<string, int> tmp_barcode = *j1.barcodes.begin();
-                j1.barcodes = j0.barcodes;
-                j1.barcodes.insert(tmp_barcode);
+                junctions_[key].barcodes[it->first] = 1;
             }
         }
-        //increment read count
-        j1.read_count = j0.read_count + 1;
-        j1.score = common::num_to_str(j1.read_count);
-        //Keep the same name
-        j1.name = j0.name;
+        // following barcodes convention, Junction j1 has one read,
+        // that of the current alignment; i.e. j1.reads = {<read_name>}
+        string read_name = *j1.reads.begin();
+        //avoid counting the same paired-end read twice 
+        //if both segments overlap junction
+        if (!junctions_[key].reads.count(read_name)) {
+            junctions_[key].reads.insert(read_name);
+            junctions_[key].read_count++;
+            junctions_[key].score = common::num_to_str(junctions_[key].read_count);
+        }
         //Check if thick starts are any better
-        if(j0.thick_start < j1.thick_start)
-            j1.thick_start = j0.thick_start;
-        if(j0.thick_end > j1.thick_end)
-            j1.thick_end = j0.thick_end;
-        //preserve min anchor information
-        j1.has_left_min_anchor = j1.has_left_min_anchor || j0.has_left_min_anchor;
-        j1.has_right_min_anchor = j1.has_right_min_anchor || j0.has_right_min_anchor;
+        if(j1.thick_start < junctions_[key].thick_start)
+            junctions_[key].thick_start = j1.thick_start;
+        if(j1.thick_end > junctions_[key].thick_end)
+            junctions_[key].thick_end = j1.thick_end;
+        //update min anchor information
+        junctions_[key].has_left_min_anchor = 
+                junctions_[key].has_left_min_anchor || j1.has_left_min_anchor;
+        junctions_[key].has_right_min_anchor = 
+                junctions_[key].has_right_min_anchor || j1.has_right_min_anchor;
     }
-    //Add junction and check anchor while printing.
-    junctions_[key] = j1;
     return 0;
 }
 
@@ -358,7 +393,7 @@ void JunctionsExtractor::set_junction_strand(bam1_t *aln, Junction& j1, string i
     return;
 }
 
-//Get the the barcode
+//Get the barcode
 void JunctionsExtractor::set_junction_barcode(bam1_t *aln, Junction& j1) {
     uint8_t *p = bam_aux_get(aln, barcode_tag_.c_str());
     if(p != NULL) {
@@ -371,6 +406,14 @@ void JunctionsExtractor::set_junction_barcode(bam1_t *aln, Junction& j1) {
         cerr << "WARNING: No CB tag found for alignment (id = " << to_string(aln->id) << ")" << endl;
         return;
     }
+}
+
+//Filters alignments based on filtering flags and mapping quality
+bool JunctionsExtractor::filter_alignment(bam_hdr_t *header, bam1_t *aln) {
+    if ((aln->core.flag & filter_flags_) != 0) return true;
+    if ((aln->core.flag | require_flags_) != aln->core.flag) return true;
+    if (aln->core.qual < min_map_qual_) return true;
+    return false;
 }
 
 //Parse junctions from the read and store in junction map
@@ -386,8 +429,9 @@ int JunctionsExtractor::parse_alignment_into_junctions(bam_hdr_t *header, bam1_t
 
     Junction j1;
     j1.chrom = chr;
+    j1.thick_start = read_pos; // start pos of read
     j1.start = read_pos; //maintain start pos of junction
-    j1.thick_start = read_pos;
+    j1.reads.insert(bam_get_qname(aln));
     string intron_motif;
     
     if (output_barcodes_file_ != "NA"){
@@ -523,6 +567,7 @@ int JunctionsExtractor::identify_junctions_from_BAM() {
         //Initiate the alignment record
         bam1_t *aln = bam_init1();
         while(sam_itr_next(in, iter, aln) >= 0) {
+            if (filter_alignment(header, aln)) continue;
             parse_alignment_into_junctions(header, aln);
         }
         hts_itr_destroy(iter);
