@@ -87,13 +87,19 @@ class CisSpliceEffectsIdentifier {
         //tag used in BAM to denote strand, default "XS"
         string strand_tag_;
         //Minimum anchor length for junctions
-        //Junctions need atleast this many bp overlap
+        //Junctions need at least this many bp overlap
         // on both ends.
         uint32_t min_anchor_length_;
         //Minimum length of an intron, i.e min junction width
         uint32_t min_intron_length_;
         //Maximum length of an intron, i.e max junction width
         uint32_t max_intron_length_;
+        //filter reads containing any of these flags
+        uint16_t filter_flags_;
+        // filter reads not containing all of these flags
+        uint16_t require_flags_;
+        // filter reads below the minimum mapping quality
+        uint8_t min_map_qual_;
         //whether to override strand of extracted junctions using intron-motif method
         bool override_strand_with_canonical_intron_motif_;
     public:
@@ -114,6 +120,9 @@ class CisSpliceEffectsIdentifier {
                                        min_anchor_length_(8),
                                        min_intron_length_(70),
                                        max_intron_length_(500000),
+                                       filter_flags_(0),
+                                       require_flags_(0),
+                                       min_map_qual_(0),
                                        override_strand_with_canonical_intron_motif_(false) {}
         //Destructor
         ~CisSpliceEffectsIdentifier() {
